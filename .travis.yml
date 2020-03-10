@@ -1,0 +1,51 @@
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - ant-optional
+
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    # try to run against nightly - will fail until we support php 8
+    # - php: nightly
+    # minimum requirement test
+    - php: 7.4
+      env:
+        - COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
+    # latest requirement test
+    - php: 7.4
+      env:
+        - COMPOSER_FLAGS=""
+  # allow_failures:
+  #   - php: nightly
+
+before_install:
+  - echo "memory_limit = -1" > travis.php.ini && phpenv config-add travis.php.ini
+
+install:
+  - travis_retry composer self-update && composer --version
+  - >
+    if [ "x${TRAVIS_TAG}" != "x" ]; then
+      COMPOSER_ROOT_VERSION=${TRAVIS_TAG} travis_retry composer update --prefer-dist --no-interaction;
+    else
+      COMPOSER_ROOT_VERSION=$([[ ${TRAVIS_BRANCH} =~ (release|hotfix)/([0-9.]*(-(alpha|beta|rc)[0-9]+)?) ]] \
+        && echo ${BASH_REMATCH[2]} \
+        || echo dev-${TRAVIS_BRANCH}) \
+        travis_retry composer update $COMPOSER_FLAGS --prefer-dist --no-interaction;
+    fi
+  - ./phpcq update
+
+script:
+  - ./phpcq run
+
+# Hack to make things work again - we can not use a shallow repository.
+git:
+  depth: 2147483647
+
+cache:
+  directories:
+    - vendor

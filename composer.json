@@ -1,0 +1,55 @@
+{
+  "name": "phpcq/repository-builder",
+  "description": "Repository builder for phpcq.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Christian Schiffler",
+      "email": "c.schiffler@cyberspectrum.de",
+      "homepage": "http://cyberspectrum.de",
+      "role": "lead"
+    },
+    {
+      "name": "David Molineus",
+      "email": "david.molineus@netzmacht.de",
+      "homepage": "https://netzmacht.de",
+      "role": "lead"
+    },
+    {
+      "name": "Stefan Heimes",
+      "email": "stefan_heimes@hotmail.com",
+      "role": "lead"
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-dev-3.0": "3.x-dev"
+    }
+  },
+  "require": {
+    "php": "^7.4",
+    "ext-dom": "*",
+    "ext-json": "*",
+    "ext-xml": "*",
+    "composer/semver": "^1.5",
+    "psr/log": "^1.1.2",
+    "symfony/cache": "^5.0",
+    "symfony/console": "^5.0",
+    "symfony/config": "^5.0",
+    "symfony/http-kernel": "^5.0",
+    "symfony/finder": "^5.0",
+    "symfony/process": "^5.0",
+    "symfony/yaml": "^5.0",
+    "symfony/framework-bundle": "^5.0",
+    "symfony/dotenv": "^5.0",
+    "symfony/http-client": "^5.0"
+  },
+  "require-dev": {
+    "symfony/filesystem": "^5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Phpcq\\RepositoryBuilder\\": "src/"
+    }
+  }
+}

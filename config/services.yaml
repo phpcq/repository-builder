@@ -1,0 +1,72 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+
+services:
+    http.store:
+        class: Symfony\Component\HttpKernel\HttpCache\Store
+        arguments:
+            - '%kernel.project_dir%/var/http-cache'
+
+    http.client.internal:
+        class: Symfony\Contracts\HttpClient\HttpClientInterface
+        factory: ['Symfony\Component\HttpClient\HttpClient', 'create']
+
+    http.client:
+        class: Symfony\Component\HttpClient\CachingHttpClient
+        arguments:
+            - '@http.client.internal'
+            - '@http.store'
+
+    Phpcq\RepositoryBuilder\Api\GithubClient:
+        arguments:
+          - '@http.client'
+          - '%env(GITHUB_TOKEN)%'
+
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false
+
+    Phpcq\RepositoryBuilder\Command\:
+        resource: '../src/Command'
+        tags: ['console.command']
+
+    Phpcq\RepositoryBuilder\Command\RebuildCommand:
+        arguments: [!tagged_locator { tag: 'repository.factory', index_by: 'key' }]
+        tags: ['console.command']
+
+    Phpcq\RepositoryBuilder\SourceProvider\PharIoRepositoryFactory:
+        arguments:
+            - '@http.client'
+            - '%kernel.project_dir%/var/repositories/phar.io'
+        tags:
+            - { name: 'repository.factory', key: 'phar.io' }
+
+    Phpcq\RepositoryBuilder\SourceProvider\GithubTagRequirementProviderRepositoryFactory:
+        arguments:
+            - '@Phpcq\RepositoryBuilder\Api\GithubClient'
+        tags:
+            - { name: 'repository.factory', key: 'github' }
+
+    Phpcq\RepositoryBuilder\SourceProvider\BootstrapProviderFactory:
+        tags:
+            - { name: 'repository.factory', key: 'bootstrap' }
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    # Phpcq\RepositoryBuilder\Controller\:
+    #     resource: '../src/Controller'
+    #     tags: ['controller.service_arguments']
+
+    # event subscribers are imported separately to add the tag.
+    # Phpcq\RepositoryBuilder\EventSubscriber\:
+    #     resource: '../src/EventSubscriber'
+    #     tags: ['kernel.event_subscriber']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
