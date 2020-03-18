@@ -69,7 +69,7 @@ final class RebuildCommand extends Command
         if (!is_dir($outdir)) {
             mkdir($outdir, 0775, true);
         }
-        $tools = [];
+
         /** @var VersionProvidingRepositoryInterface[] $versionProviders */
         /** @var EnrichingRepositoryInterface[] $enrichingProviders */
         [$versionProviders, $enrichingProviders] = $this->loadProviders($config['repositories']);

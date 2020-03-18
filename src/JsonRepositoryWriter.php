@@ -74,9 +74,14 @@ class JsonRepositoryWriter
                 if (!isset($data['phars'][$name = $tool->getName()])) {
                     $data['phars'][$name] = [];
                 }
+                // no phar url, nothing to download.
+                if (null === $pharUrl = $version->getPharUrl()) {
+                    continue;
+                }
+
                 $data['phars'][$name][] = [
                     'version'      => $version->getVersion(),
-                    'phar-url'     => $version->getPharUrl(),
+                    'phar-url'     => $pharUrl,
                     'bootstrap'    => $bootstrapName,
                     'requirements' => $this->encodeRequirements($version->getRequirements()),
                     'hash'         => $this->encodeHash($version->getHash()),

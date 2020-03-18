@@ -6,22 +6,28 @@ namespace Phpcq\RepositoryBuilder;
 
 use Phpcq\RepositoryBuilder\Repository\Tool;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
+use Phpcq\RepositoryBuilder\SourceProvider\EnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\VersionProvidingRepositoryInterface;
 
 class RepositoryBuilder
 {
+    /**
+     * @var VersionProvidingRepositoryInterface[]
+     */
     private array $versionProviders;
 
+    /**
+     * @var EnrichingRepositoryInterface[]
+     */
     private array $enrichingProviders;
 
     private JsonRepositoryWriter $writer;
 
-    private array $tools;
-
     /**
      * Create a new instance.
      *
-     * @param array                $versionProviders
-     * @param array                $enrichingProviders
+     * @param VersionProvidingRepositoryInterface[] $versionProviders
+     * @param EnrichingRepositoryInterface[]        $enrichingProviders
      * @param JsonRepositoryWriter $writer
      */
     public function __construct(array $versionProviders, array $enrichingProviders, JsonRepositoryWriter $writer)
@@ -33,19 +39,34 @@ class RepositoryBuilder
 
     public function build(): void
     {
-        $this->tools = [];
-        foreach ($this->versionProviders as $versionProvider) {
-            foreach ($versionProvider->getIterator() as $version) {
-                $toolName = $version->getName();
-                if (!isset($this->tools[$toolName])) {
-                    $this->tools[$toolName] = new Tool($toolName);
-                }
-                $this->enrichVersion($version);
-                $this->tools[$version->getName()]->addVersion($version);
+        foreach ($this->enrichingProviders as $enrichingProvider) {
+            if (!$enrichingProvider->isFresh()) {
+                $enrichingProvider->refresh();
             }
         }
 
-        foreach ($this->tools as $tool) {
+        /** @var Tool[] $tools */
+        $tools = [];
+        foreach ($this->versionProviders as $versionProvider) {
+            foreach ($versionProvider->getIterator() as $version) {
+                $toolName = $version->getName();
+                if (!isset($tools[$toolName])) {
+                    $tools[$toolName] = new Tool($toolName);
+                }
+                $tool = $tools[$version->getName()];
+
+                if ($tool->has($version->getVersion())) {
+                    $other = $tool->getVersion($version->getVersion());
+                    $other->merge($version);
+                    continue;
+                }
+
+                $this->enrichVersion($version);
+                $tool->addVersion($version);
+            }
+        }
+
+        foreach ($tools as $tool) {
             $this->writer->write($tool);
         }
 

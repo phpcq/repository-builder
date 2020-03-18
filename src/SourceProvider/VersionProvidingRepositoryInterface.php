@@ -16,7 +16,7 @@ interface VersionProvidingRepositoryInterface extends IteratorAggregate, SourceR
     /**
      * Iterate over all versions.
      *
-     * @return Generator|ToolVersion
+     * @return Generator|ToolVersion[]
      */
     public function getIterator(): Generator;
 }

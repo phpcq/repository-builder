@@ -106,7 +106,7 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
             // Walk the assets and try to determine the phar-url.
             yield new ToolVersion(
                 $this->toolName,
-                $tag['version'],
+                $tag['tag_name'],
                 $pharUrl,
                 [],
                 null,
