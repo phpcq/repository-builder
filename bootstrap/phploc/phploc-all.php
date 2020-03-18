@@ -13,7 +13,6 @@ return new class implements ConfigurationPluginInterface {
     }
 
     /**
-     * exclude         [array]  List of excluded files and folders.
      * output          [array]  List of outputs to use.
      *
      * custom_flags    [string] Any custom flags to pass to phploc. For valid flags refer to the phploc documentation.
@@ -23,7 +22,6 @@ return new class implements ConfigurationPluginInterface {
      * @var string[]
      */
     private static $knownConfigKeys = [
-        'exclude'         => 'exclude',
         'output'          => 'output',
         'custom_flags'    => 'custom_flags',
         'directories'     => 'directories',
@@ -40,8 +38,9 @@ return new class implements ConfigurationPluginInterface {
 
     public function processConfig(array $config, BuildConfigInterface $buildConfig) : iterable
     {
+        [$should, $excluded] = $this->processDirectories($config['directories']);
         $args = [];
-        if ([] !== ($excluded = (array) ($config['exclude'] ?? []))) {
+        if ([] !== $excluded) {
             foreach ($excluded as $path) {
                 if ('' === ($path = trim($path))) {
                     continue;
@@ -56,9 +55,33 @@ return new class implements ConfigurationPluginInterface {
 
         yield $buildConfig
             ->getTaskFactory()
-            ->buildRunPhar('phploc', array_merge($args, $config['directories']))
+            ->buildRunPhar('phploc', array_merge($args, $should))
             ->withWorkingDirectory($buildConfig->getProjectConfiguration()->getProjectRootPath())
             ->build();
+    }
+
+    /**
+     * Process the directory list.
+     *
+     * @param array $directories The directory list.
+     *
+     * @return array
+     */
+    private function processDirectories(array $directories): array
+    {
+        $should  = [];
+        $exclude = [];
+        foreach ($directories as $directory => $dirConfig) {
+            $should[] = $directory;
+            if (null !== $dirConfig) {
+                if (isset($dirConfig['excluded'])) {
+                    foreach ($dirConfig['excluded'] as $excl) {
+                        $exclude[] = $directory . '/' . $excl;
+                    }
+                }
+            }
+        }
+        return [$should, $exclude];
     }
 
     private function commaValues(array $config, string $key): string
