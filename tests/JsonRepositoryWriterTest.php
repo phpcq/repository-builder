@@ -57,7 +57,7 @@ final class JsonRepositoryWriterTest extends TestCase
             ],
             new ToolHash(ToolHash::SHA_512, 'hash3'),
             'https://example.org/another-1.0.0.phar.sig',
-            $bootstrap2 = new InlineBootstrap('1.0.0', 'bootstrap 2'),
+            new InlineBootstrap('1.0.0', 'bootstrap 2'),
         ));
         $tool2->addVersion(new ToolVersion(
             'tool2',
@@ -69,7 +69,7 @@ final class JsonRepositoryWriterTest extends TestCase
             ],
             new ToolHash(ToolHash::SHA_512, 'hash4'),
             'https://example.org/another-2.0.0.phar.sig',
-            $bootstrap3 = new InlineBootstrap('1.0.0', 'bootstrap 3'),
+            new InlineBootstrap('1.0.0', 'bootstrap 3'),
         ));
 
         $tempDir = sys_get_temp_dir() . '/' . uniqid();

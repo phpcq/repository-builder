@@ -89,7 +89,7 @@ class JsonRepositoryWriter
                 ];
             }
         }
-        foreach ($bootstraps as $hash => $bootstrap) {
+        foreach ($bootstraps as $bootstrap) {
             $data['bootstraps'][$bootstrap['name']] = [
                 'plugin-version' => $bootstrap['instance']->getPluginVersion(),
                 'type'           => 'inline',

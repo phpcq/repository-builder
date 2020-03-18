@@ -13,8 +13,9 @@ return new class implements ConfigurationPluginInterface {
     }
 
     /**
+     * format          [string] Output format to use (ansi, html, json, text, xml).
+     * ruleset         [array]  List of rulesets (cleancode, codesize, controversial, design, naming, unusedcode).
      * exclude         [array]  List of excluded files and folders.
-     * output          [array]  List of outputs to use.
      *
      * custom_flags    [string] Any custom flags to pass to phploc. For valid flags refer to the phploc documentation.
      *
@@ -23,8 +24,9 @@ return new class implements ConfigurationPluginInterface {
      * @var string[]
      */
     private static $knownConfigKeys = [
+        'format'          => 'format',
+        'ruleset'         => 'ruleset',
         'exclude'         => 'exclude',
-        'output'          => 'output',
         'custom_flags'    => 'custom_flags',
         'directories'     => 'directories',
     ];
@@ -40,23 +42,40 @@ return new class implements ConfigurationPluginInterface {
 
     public function processConfig(array $config, BuildConfigInterface $buildConfig) : iterable
     {
-        $args = [];
+        $flags = [
+            'format' => 'text',
+            'ruleset' => 'naming,unusedcode',
+        ];
+
+        foreach ($flags as $key => $value) {
+            if ('' !== ($value = $this->commaValues($config, $key))) {
+                $flags[$key] = $value;
+            }
+        }
+
+        $args = [
+            implode(',', $config['directories']),
+            $flags['format'],
+            $flags['ruleset'],
+        ];
+
         if ([] !== ($excluded = (array) ($config['exclude'] ?? []))) {
+            $exclude = [];
             foreach ($excluded as $path) {
                 if ('' === ($path = trim($path))) {
                     continue;
                 }
-                $args[] = '--exclude=' . $path;
-
+                $exclude[] = $path;
             }
+            $args[] = '--exclude=' . implode(',', $exclude);
         }
         if ('' !== ($values = $config['custom_flags'] ?? '')) {
-            $args[] = 'custom_flags';
+            $args[] = $values;
         }
 
         yield $buildConfig
             ->getTaskFactory()
-            ->buildRunPhar('phpmd', array_merge($args, $config['directories']))
+            ->buildRunPhar('phpmd', $args)
             ->withWorkingDirectory($buildConfig->getProjectConfiguration()->getProjectRootPath())
             ->build();
     }
