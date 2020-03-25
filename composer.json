@@ -45,7 +45,8 @@
     "symfony/http-client": "^5.0"
   },
   "require-dev": {
-    "symfony/filesystem": "^5.0"
+    "symfony/filesystem": "^5.0",
+    "phpcq/phpcq": "dev-feature/describe-config-options"
   },
   "autoload": {
     "psr-4": {

@@ -1,6 +1,7 @@
 <?php
 
 use Phpcq\Config\BuildConfigInterface;
+use Phpcq\Plugin\Config\ConfigOptionsBuilderInterface;
 use Phpcq\Plugin\ConfigurationPluginInterface;
 
 /**
@@ -12,31 +13,31 @@ return new class implements ConfigurationPluginInterface {
         return 'phpmd';
     }
 
-    /**
-     * format          [string] Output format to use (ansi, html, json, text, xml).
-     * ruleset         [array]  List of rulesets (cleancode, codesize, controversial, design, naming, unusedcode).
-     *
-     * custom_flags    [string] Any custom flags to pass to phploc. For valid flags refer to the phploc documentation.
-     *
-     * directories     [array]  source directories to be analyzed with phploc.
-     *
-     * @var string[]
-     */
-    private static $knownConfigKeys = [
-        'format'          => 'format',
-        'ruleset'         => 'ruleset',
-        'custom_flags'    => 'custom_flags',
-        'directories'     => 'directories',
-    ];
-
-    public function validateConfig(array $config) : void
+    public function describeOptions(ConfigOptionsBuilderInterface $configOptionsBuilder) : void
     {
-        if ($diff = array_diff_key($config, self::$knownConfigKeys)) {
-            throw new \Phpcq\Exception\RuntimeException(
-                'Unknown config keys encountered: ' . implode(', ', array_keys($diff))
-            );
-        }
+        $configOptionsBuilder->describeStringOption(
+            'format',
+            'Output format to use (ansi, html, json, text, xml).',
+            'text'
+        );
+
+        $configOptionsBuilder->describeStringOption(
+            'ruleset',
+            'List of rulesets (cleancode, codesize, controversial, design, naming, unusedcode).',
+            'naming,unusedcode'
+        );
+
+        $configOptionsBuilder->describeStringOption(
+            'custom_flags',
+            'Any custom flags to pass to phpmd.'
+        );
+
+        $configOptionsBuilder->describeArrayOption(
+            'directories',
+            'Source directories to be analyzed with phpmd.'
+        );
     }
+
 
     public function processConfig(array $config, BuildConfigInterface $buildConfig) : iterable
     {
