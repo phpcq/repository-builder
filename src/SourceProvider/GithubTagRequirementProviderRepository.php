@@ -11,6 +11,7 @@ use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use UnexpectedValueException;
+use function substr;
 
 /**
  * This reads the composer.json file from the tags on github and produces the platform requirements.
@@ -102,11 +103,18 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
                 throw $exception;
             }
             $pharUrl = null;
+            $signatureUrl = null;
             foreach ($data['assets'] as $asset) {
-                if ('.phar' !== substr($asset['name'], -5)) {
+                // Fixme: We assume that only one phar and signature is provided
+                if ('.phar' === substr($asset['name'], -5)) {
+                    $pharUrl = $asset['browser_download_url'];
                     continue;
                 }
-                $pharUrl = $asset['browser_download_url'];
+
+                if ('.asc' === substr($asset['name'], -4)) {
+                    $signatureUrl = $asset['browser_download_url'];
+                    continue;
+                }
             }
 
             // Walk the assets and try to determine the phar-url.
@@ -116,7 +124,7 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
                 $pharUrl,
                 [],
                 null,
-                null,
+                $signatureUrl,
                 null
             );
         }
