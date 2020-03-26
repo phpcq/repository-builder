@@ -22,3 +22,8 @@ repositories:
     type: github
     repository: vimeo/psalm
     tool_name: psalm
+
+  composer-require-checker-github:
+    type: github
+    repository: maglnet/ComposerRequireChecker
+    tool_name: composer-require-checker
