@@ -46,7 +46,7 @@
   },
   "require-dev": {
     "symfony/filesystem": "^5.0",
-    "phpcq/phpcq": "dev-feature/describe-config-options"
+    "phpcq/phpcq": "^3.0@dev"
   },
   "autoload": {
     "psr-4": {

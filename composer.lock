@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "637e43cfc8fe30955183c82c86ac9892",
+    "content-hash": "e98e52fc93143efa2de6309f872bc1b0",
     "packages": [
         {
             "name": "composer/semver",
@@ -2135,16 +2135,16 @@
         },
         {
             "name": "phpcq/phpcq",
-            "version": "dev-feature/describe-config-options",
+            "version": "dev-dev-3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcq/phpcq.git",
-                "reference": "fe28db9bff18fd5ee379434ddbb7365bc07ac1db"
+                "reference": "72a6911ff65f993f556d8afbf2fca866e32af5c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcq/phpcq/zipball/fe28db9bff18fd5ee379434ddbb7365bc07ac1db",
-                "reference": "fe28db9bff18fd5ee379434ddbb7365bc07ac1db",
+                "url": "https://api.github.com/repos/phpcq/phpcq/zipball/72a6911ff65f993f556d8afbf2fca866e32af5c5",
+                "reference": "72a6911ff65f993f556d8afbf2fca866e32af5c5",
                 "shasum": ""
             },
             "require": {
@@ -2194,7 +2194,7 @@
                 }
             ],
             "description": "PHP code quality project.",
-            "time": "2020-03-25T13:18:19+00:00"
+            "time": "2020-03-26T06:43:33+00:00"
         }
     ],
     "aliases": [],
