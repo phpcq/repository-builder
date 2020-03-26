@@ -17,3 +17,8 @@ repositories:
     type: github
     repository: phpmd/phpmd
     tool_name: phpmd
+
+  psalm-github:
+    type: github
+    repository: vimeo/psalm
+    tool_name: psalm
