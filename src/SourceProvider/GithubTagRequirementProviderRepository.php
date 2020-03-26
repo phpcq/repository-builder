@@ -10,6 +10,7 @@ use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use Symfony\Component\HttpClient\Exception\ClientException;
+use UnexpectedValueException;
 
 /**
  * This reads the composer.json file from the tags on github and produces the platform requirements.
@@ -72,11 +73,16 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
             if (0 !== strncmp($entry['ref'], 'refs/tags/', 10)) {
                 continue;
             }
-            $tagName              = substr($entry['ref'], 10);
-            $version              = $this->versionParser->normalize($tagName);
-            $entry['tag_name']    = $tagName;
-            $entry['version']     = $version;
-            $this->tags[$version] = $entry;
+
+            try {
+                $tagName              = substr($entry['ref'], 10);
+                $version              = $this->versionParser->normalize($tagName);
+                $entry['tag_name']    = $tagName;
+                $entry['version']     = $version;
+                $this->tags[$version] = $entry;
+            } catch (UnexpectedValueException $exception) {
+                // Ignore tags not matching semver
+            }
         }
     }
 
