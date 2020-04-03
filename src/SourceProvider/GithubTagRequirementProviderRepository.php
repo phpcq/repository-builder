@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\SourceProvider;
 
+use Composer\Semver\Constraint\ConstraintInterface;
 use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
@@ -24,18 +25,21 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
 
     private string $toolName;
 
+    private ConstraintInterface $allowedVersions;
+
     private GithubClient $githubClient;
 
     private VersionParser $versionParser;
 
     private array $tags = [];
 
-    public function __construct(string $repositoryName, string $toolName, GithubClient $githubClient)
+    public function __construct(string $repositoryName, string $toolName, string $allowedVersions, GithubClient $githubClient)
     {
-        $this->repositoryName = $repositoryName;
-        $this->toolName       = $toolName;
-        $this->githubClient   = $githubClient;
-        $this->versionParser  = new VersionParser();
+        $this->versionParser   = new VersionParser();
+        $this->repositoryName  = $repositoryName;
+        $this->toolName        = $toolName;
+        $this->allowedVersions = $this->versionParser->parseConstraints($allowedVersions);
+        $this->githubClient    = $githubClient;
     }
 
     public function supports(ToolVersion $version): bool
@@ -76,8 +80,11 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
             }
 
             try {
-                $tagName              = substr($entry['ref'], 10);
-                $version              = $this->versionParser->normalize($tagName);
+                $tagName = substr($entry['ref'], 10);
+                $version = $this->versionParser->normalize($tagName);
+                if (!$this->allowedVersions->matches($this->versionParser->parseConstraints($version))) {
+                    continue;
+                }
                 $entry['tag_name']    = $tagName;
                 $entry['version']     = $version;
                 $this->tags[$version] = $entry;

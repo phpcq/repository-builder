@@ -11,22 +11,26 @@ repositories:
     type: github
     repository: sebastianbergmann/phpcpd
     tool_name: phpcpd
+    allowed_versions: ^3.0 || ^4.0 || ^5.0
 
   phploc-github:
     type: github
     repository: sebastianbergmann/phploc
     tool_name: phploc
+    allowed_versions: ^3.0 || ^4.0 || ^5.0 || ^6.0
 
   # php mess detector https://phpmd.org
   phpmd-github:
     type: github
     repository: phpmd/phpmd
     tool_name: phpmd
+    allowed_versions: ^2.6.1
 
   phpunit-github:
     type: github
     repository: sebastianbergmann/phpunit
     tool_name: phpunit
+    allowed_versions: ^3.7 || ^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0
 
   psalm-github:
     type: github
