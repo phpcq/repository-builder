@@ -35,12 +35,21 @@ class VersionRequirementListTest extends TestCase
 
     public function testVersionRequirementListThrowsForDuplicateRequirement(): void
     {
-        $requirements = new VersionRequirementList([new VersionRequirement('test')]);
+        $requirements = new VersionRequirementList([new VersionRequirement('test', '^1.0.0')]);
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Requirement already added for test');
 
         $requirements->add(new VersionRequirement('test'));
+    }
+
+    public function testVersionRequirementListDoesNotThrowForDuplicateSameRequirement(): void
+    {
+        $requirements = new VersionRequirementList([new VersionRequirement('test', '1.0.0')]);
+
+        $requirements->add(new VersionRequirement('test', '1.0.0'));
+        // If we end up here, it was successful.
+        $this->assertTrue($requirements->has('test'));
     }
 
     public function testVersionRequirementListCanRetrieveRequirement(): void

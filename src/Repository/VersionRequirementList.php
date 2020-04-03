@@ -31,7 +31,7 @@ class VersionRequirementList implements IteratorAggregate
     public function add(VersionRequirement $requirement): void
     {
         $name = $requirement->getName();
-        if ($this->has($name)) {
+        if ($this->has($name) && $this->get($name)->getConstraint() !== $requirement->getConstraint()) {
             throw new LogicException('Requirement already added for ' . $name);
         }
 
