@@ -8,9 +8,9 @@ use Composer\Semver\Constraint\ConstraintInterface;
 use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
+use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
-use Symfony\Component\HttpClient\Exception\ClientException;
 use UnexpectedValueException;
 use function substr;
 
@@ -52,9 +52,7 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
         $tag               = $this->tags[$normalizedVersion];
-        $composerJson      = $this->githubClient->fetchJson(
-            'https://raw.githubusercontent.com/' . $this->repositoryName . '/' . $tag['tag_name'] . '/composer.json'
-        );
+        $composerJson      = $this->githubClient->fetchFile($this->repositoryName, $tag['tag_name'], 'composer.json');
 
         foreach ($composerJson['require'] as $requirement => $constraint) {
             if ('php' === $requirement || 0 === strncmp($requirement, 'ext-', 4)) {
@@ -72,13 +70,9 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
     {
         $this->tags = [];
         // Download all tags... then download all composer.json files.
-        $data = $this->githubClient->fetchJson('https://api.github.com/repos/' . $this->repositoryName . '/git/matching-refs/');
+        $data = $this->githubClient->fetchTags($this->repositoryName);
 
         foreach ($data as $entry) {
-            if (0 !== strncmp($entry['ref'], 'refs/tags/', 10)) {
-                continue;
-            }
-
             try {
                 $tagName = substr($entry['ref'], 10);
                 $version = $this->versionParser->normalize($tagName);
@@ -102,8 +96,8 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
         foreach ($this->tags as $tag) {
             // Obtain release by tag name.
             try {
-                $data = $this->githubClient->fetchJson('https://api.github.com/repos/' . $this->repositoryName . '/releases/tags/' . $tag['tag_name']);
-            } catch (ClientException $exception) {
+                $data = $this->githubClient->fetchTag($this->repositoryName, $tag['tag_name']);
+            } catch (DataNotAvailableException $exception) {
                 if ($exception->getCode() === 404) {
                     continue;
                 }

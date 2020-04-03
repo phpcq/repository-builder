@@ -24,7 +24,14 @@ services:
     Phpcq\RepositoryBuilder\Api\GithubClient:
         arguments:
           - '@http.client'
+          - '@github.cache'
           - '%env(GITHUB_TOKEN)%'
+
+    github.cache:
+        class: Symfony\Component\Cache\Adapter\PhpFilesAdapter
+        arguments:
+            $namespace: 'github-'
+            $directory: '%kernel.project_dir%/var/github-cache'
 
     # default configuration for services in *this* file
     _defaults:
