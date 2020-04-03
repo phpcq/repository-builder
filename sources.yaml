@@ -7,16 +7,26 @@ repositories:
     type: phar.io
     url: https://phar.phpunit.de/phive.xml
 
-  phpunit-github:
+  phpcpd-github:
     type: github
-    repository: sebastianbergmann/phpunit
-    tool_name: phpunit
+    repository: sebastianbergmann/phpcpd
+    tool_name: phpcpd
+
+  phploc-github:
+    type: github
+    repository: sebastianbergmann/phploc
+    tool_name: phploc
 
   # php mess detector https://phpmd.org
   phpmd-github:
     type: github
     repository: phpmd/phpmd
     tool_name: phpmd
+
+  phpunit-github:
+    type: github
+    repository: sebastianbergmann/phpunit
+    tool_name: phpunit
 
   psalm-github:
     type: github
