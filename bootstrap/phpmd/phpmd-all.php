@@ -21,10 +21,13 @@ return new class implements ConfigurationPluginInterface {
             'text'
         );
 
-        $configOptionsBuilder->describeStringOption(
+        $configOptionsBuilder->describeArrayOption(
             'ruleset',
             'List of rulesets (cleancode, codesize, controversial, design, naming, unusedcode).',
-            'naming,unusedcode'
+            [
+                'naming',
+                'unusedcode'
+            ]
         );
 
         $configOptionsBuilder->describeStringOption(
