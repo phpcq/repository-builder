@@ -32,6 +32,8 @@ phpcpd:
 phploc:
 
 phpmd:
+  directories:
+    tests: false
   ruleset:
     # - cleancode
     - codesize
