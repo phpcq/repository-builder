@@ -48,8 +48,7 @@
     "symfony/http-client": "^5.0.7"
   },
   "require-dev": {
-    "symfony/filesystem": "^5.0",
-    "phpcq/phpcq": "^3.0@dev"
+    "symfony/filesystem": "^5.0"
   },
   "replace": {
     "symfony/polyfill-ctype": "*",
