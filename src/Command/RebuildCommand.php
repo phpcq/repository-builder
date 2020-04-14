@@ -65,16 +65,16 @@ final class RebuildCommand extends Command
         $this->logger = new ConsoleLogger($output);
 
         $configFile = realpath($input->getOption('config'));
-        if (!is_readable($configFile)) {
+        if (false === $configFile || !is_readable($configFile)) {
             throw new \InvalidArgumentException('Config file not found: ' . $input->getOption('config'));
         }
-        $outdir = realpath($input->getOption('output-directory'));
+        $outdir = $input->getOption('output-directory');
 
         chdir(dirname($configFile));
 
         $config = Yaml::parse(file_get_contents($configFile));
-        if (!is_dir($outdir)) {
-            mkdir($outdir, 0775, true);
+        if (!is_dir($outdir) && !mkdir($outdir, 0775, true)) {
+            throw new \InvalidArgumentException('Could not create directory: ' . $outdir);
         }
 
         /** @var VersionProvidingRepositoryInterface[] $versionProviders */
