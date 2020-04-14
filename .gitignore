@@ -13,6 +13,6 @@ nbproject/
 
 # symfony related
 var
-.env.local
+.env*.local
 # composer related
 vendor/
