@@ -20,6 +20,7 @@ class GithubTagRequirementProviderRepositoryFactory
         return new GithubTagRequirementProviderRepository(
             $configuration['repository'],
             $configuration['tool_name'],
+            $configuration['file_pattern'] ?? ($configuration['tool_name'] . '.*'),
             $configuration['allowed_versions'] ?? '*',
             $this->githubClient
         );

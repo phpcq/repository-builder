@@ -12,6 +12,10 @@ use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use UnexpectedValueException;
+use function preg_match;
+use function preg_quote;
+use function str_replace;
+use function strpos;
 use function substr;
 
 /**
@@ -33,13 +37,16 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
 
     private array $tags = [];
 
-    public function __construct(string $repositoryName, string $toolName, string $allowedVersions, GithubClient $githubClient)
+    private string $fileNameRegex;
+
+    public function __construct(string $repositoryName, string $toolName, string $fileNamePattern, string $allowedVersions, GithubClient $githubClient)
     {
         $this->versionParser   = new VersionParser();
         $this->repositoryName  = $repositoryName;
         $this->toolName        = $toolName;
         $this->allowedVersions = $this->versionParser->parseConstraints($allowedVersions);
         $this->githubClient    = $githubClient;
+        $this->fileNameRegex   = '#' . str_replace('#', '\\#', $fileNamePattern) . '#i';
     }
 
     public function supports(ToolVersion $version): bool
@@ -106,7 +113,10 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
             $pharUrl = null;
             $signatureUrl = null;
             foreach ($data['assets'] as $asset) {
-                // Fixme: We assume that only one phar and signature is provided
+                if (! preg_match($this->fileNameRegex, $asset['name'])) {
+                    continue;
+                }
+
                 if ('.phar' === substr($asset['name'], -5)) {
                     $pharUrl = $asset['browser_download_url'];
                     continue;
