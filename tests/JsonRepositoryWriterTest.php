@@ -81,22 +81,16 @@ final class JsonRepositoryWriterTest extends TestCase
             $writer->write($tool2);
             $writer->save();
 
-            $this->assertSame([
+            $this->assertFileExists($tempDir . '/repository.json');
+            $this->assertFileExists($tempDir . '/tool1.json');
+            $this->assertFileExists($tempDir . '/tool2.json');
+
+            $this->assertRepositoryFileMatches([
                 'bootstraps' => [
                     'bootstrap-0' => [
                         'plugin-version' => '1.0.0',
                         'type'           => 'inline',
                         'code'           => 'bootstrap 1'
-                    ],
-                    'bootstrap-1' => [
-                        'plugin-version' => '1.0.0',
-                        'type'           => 'inline',
-                        'code'           => 'bootstrap 2'
-                    ],
-                    'bootstrap-2' => [
-                        'plugin-version' => '1.0.0',
-                        'type'           => 'inline',
-                        'code'           => 'bootstrap 3'
                     ],
                 ],
                 'phars' => [
@@ -124,11 +118,27 @@ final class JsonRepositoryWriterTest extends TestCase
                             'signature'    => 'https://example.org/some-2.0.0.phar.sig',
                         ],
                     ],
+                ],
+            ], $tempDir . '/tool1.json');
+            $this->assertRepositoryFileMatches([
+                'bootstraps' => [
+                    'bootstrap-0' => [
+                        'plugin-version' => '1.0.0',
+                        'type'           => 'inline',
+                        'code'           => 'bootstrap 2'
+                    ],
+                    'bootstrap-1' => [
+                        'plugin-version' => '1.0.0',
+                        'type'           => 'inline',
+                        'code'           => 'bootstrap 3'
+                    ],
+                ],
+                'phars' => [
                     'tool2' => [
                         [
                             'version'      => '1.0.0',
                             'phar-url'     => 'https://example.org/another-1.0.0.phar',
-                            'bootstrap'    => 'bootstrap-1',
+                            'bootstrap'    => 'bootstrap-0',
                             'requirements' => [
                                 'php'      => '7.1.1',
                                 'ext-foo'  => '*',
@@ -139,7 +149,7 @@ final class JsonRepositoryWriterTest extends TestCase
                         [
                             'version'      => '2.0.0',
                             'phar-url'     => 'https://example.org/another-2.0.0.phar',
-                            'bootstrap'    => 'bootstrap-2',
+                            'bootstrap'    => 'bootstrap-1',
                             'requirements' => [
                                 'php'      => '7.3.1',
                                 'ext-foo'  => '*',
@@ -149,9 +159,34 @@ final class JsonRepositoryWriterTest extends TestCase
                         ],
                     ],
                 ],
+            ], $tempDir . '/tool2.json');
+
+            $this->assertSame([
+                'bootstraps' => [],
+                'phars' => [
+                    'tool1' => [
+                        'url'      => './tool1.json',
+                        'checksum' => [
+                            'type'  => 'sha-512',
+                            'value' => hash_file('sha512', $tempDir . '/tool1.json'),
+                        ],
+                    ],
+                    'tool2' => [
+                        'url'      => './tool2.json',
+                        'checksum' => [
+                            'type'  => 'sha-512',
+                            'value' => hash_file('sha512', $tempDir . '/tool2.json'),
+                        ],
+                    ],
+                ],
             ], json_decode(file_get_contents($tempDir . '/repository.json'), true));
         } finally {
             $fileSystem->remove($tempDir);
         }
+    }
+
+    private function assertRepositoryFileMatches(array $data, string $filePath): void
+    {
+        $this->assertSame($data, json_decode(file_get_contents($filePath), true));
     }
 }

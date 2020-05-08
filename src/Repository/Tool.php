@@ -72,6 +72,11 @@ class Tool implements IteratorAggregate
         return isset($this->versions[$version]);
     }
 
+    public function isEmpty(): bool
+    {
+        return empty($this->versions);
+    }
+
     /**
      * Iterate over all versions.
      *
