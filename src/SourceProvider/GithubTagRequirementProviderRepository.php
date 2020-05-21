@@ -12,10 +12,9 @@ use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use UnexpectedValueException;
+
 use function preg_match;
-use function preg_quote;
 use function str_replace;
-use function strpos;
 use function substr;
 
 /**
@@ -23,7 +22,9 @@ use function substr;
  *
  * Additionally, this can produce versions from all tags.
  */
-class GithubTagRequirementProviderRepository implements EnrichingRepositoryInterface, VersionProvidingRepositoryInterface
+class GithubTagRequirementProviderRepository implements
+    EnrichingRepositoryInterface,
+    VersionProvidingRepositoryInterface
 {
     private string $repositoryName;
 
@@ -39,8 +40,13 @@ class GithubTagRequirementProviderRepository implements EnrichingRepositoryInter
 
     private string $fileNameRegex;
 
-    public function __construct(string $repositoryName, string $toolName, string $fileNamePattern, string $allowedVersions, GithubClient $githubClient)
-    {
+    public function __construct(
+        string $repositoryName,
+        string $toolName,
+        string $fileNamePattern,
+        string $allowedVersions,
+        GithubClient $githubClient
+    ) {
         $this->versionParser   = new VersionParser();
         $this->repositoryName  = $repositoryName;
         $this->toolName        = $toolName;

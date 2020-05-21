@@ -22,6 +22,8 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * This rebuilds the repository.
+ *
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 final class RebuildCommand extends Command
 {
@@ -40,7 +42,7 @@ final class RebuildCommand extends Command
         $this->repositoryFactories = $repositoryFactories;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
         $this->setName('phpcq:rebuild');
@@ -60,15 +62,18 @@ final class RebuildCommand extends Command
         );
     }
 
+    /**
+     * @psalm-suppress PossiblyInvalidCast
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->logger = new ConsoleLogger($output);
 
-        $configFile = realpath($input->getOption('config'));
+        $configFile = realpath((string) $input->getOption('config'));
         if (false === $configFile || !is_readable($configFile)) {
             throw new InvalidArgumentException('Config file not found: ' . $input->getOption('config'));
         }
-        $outdir = $input->getOption('output-directory');
+        $outdir = (string) $input->getOption('output-directory');
         if (!is_dir($outdir) && !mkdir($outdir, 0775, true)) {
             throw new InvalidArgumentException('Could not create directory: ' . $outdir);
         }

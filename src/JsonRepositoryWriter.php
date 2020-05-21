@@ -8,6 +8,7 @@ use Phpcq\RepositoryBuilder\Repository\Tool;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
 use stdClass;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Dumps a repository as json.
@@ -15,6 +16,8 @@ use stdClass;
 class JsonRepositoryWriter
 {
     private string $baseDir;
+
+    private Filesystem $filesystem;
 
     /**
      * @var Tool[]
@@ -28,7 +31,8 @@ class JsonRepositoryWriter
      */
     public function __construct(string $baseDir)
     {
-        $this->baseDir = $baseDir;
+        $this->baseDir    = $baseDir;
+        $this->filesystem = new Filesystem();
     }
 
     /**
@@ -97,7 +101,7 @@ class JsonRepositoryWriter
             ];
         }
 
-        file_put_contents(
+        $this->filesystem->dumpFile(
             $this->baseDir . '/repository.json',
             json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
@@ -112,7 +116,12 @@ class JsonRepositoryWriter
         return $requirements;
     }
 
-    private function encodeHash(?ToolHash $hash)
+    /**
+     * @return null|string[]
+     *
+     * @psalm-return array{type: string, value: string}|null
+     */
+    private function encodeHash(?ToolHash $hash): ?array
     {
         if (null === $hash) {
             return null;

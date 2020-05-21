@@ -12,6 +12,8 @@ use Traversable;
 
 /**
  * This holds all versions of a tool.
+ *
+ * @template-implements IteratorAggregate<int, ToolVersion>
  */
 class Tool implements IteratorAggregate
 {
@@ -45,7 +47,7 @@ class Tool implements IteratorAggregate
         return $this->name;
     }
 
-    public function addVersion(ToolVersion $version)
+    public function addVersion(ToolVersion $version): void
     {
         if ($version->getName() !== $this->name) {
             throw new InvalidArgumentException('Tool name mismatch: ' . $version->getName());
@@ -57,7 +59,7 @@ class Tool implements IteratorAggregate
         $this->versions[$version->getVersion()] = $version;
     }
 
-    public function getVersion(string $version)
+    public function getVersion(string $version): ToolVersion
     {
         if (!$this->has($version)) {
             throw new LogicException('Version not added: ' . $version);
@@ -74,6 +76,8 @@ class Tool implements IteratorAggregate
      * Iterate over all versions.
      *
      * @return Generator|Traversable|ToolVersion[]
+     *
+     * @psalm-return Generator<ToolVersion>
      */
     public function getIterator()
     {

@@ -26,8 +26,8 @@ class ToolTest extends TestCase
     {
         $tool = new Tool('supertool');
 
-        $tool->addVersion($version1 = new ToolVersion('supertool', '1.0.0', null, null, null, null, null,));
-        $tool->addVersion($version2 = new ToolVersion('supertool', '2.0.0', null, null, null, null, null,));
+        $tool->addVersion($version1 = new ToolVersion('supertool', '1.0.0', null, null, null, null, null));
+        $tool->addVersion($version2 = new ToolVersion('supertool', '2.0.0', null, null, null, null, null));
         $this->assertSame([$version1, $version2], iterator_to_array($tool->getIterator()));
     }
 
@@ -38,7 +38,7 @@ class ToolTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Tool name mismatch: anothertool');
 
-        $tool->addVersion(new ToolVersion('anothertool', '1.0.0', null, null, null, null, null,));
+        $tool->addVersion(new ToolVersion('anothertool', '1.0.0', null, null, null, null, null));
     }
 
     public function testToolThrowsWhenAddingAVersionTwice(): void
@@ -48,16 +48,16 @@ class ToolTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Version already added: 1.0.0');
 
-        $tool->addVersion(new ToolVersion('supertool', '1.0.0', null, null, null, null, null,));
-        $tool->addVersion(new ToolVersion('supertool', '1.0.0', null, null, null, null, null,));
+        $tool->addVersion(new ToolVersion('supertool', '1.0.0', null, null, null, null, null));
+        $tool->addVersion(new ToolVersion('supertool', '1.0.0', null, null, null, null, null));
     }
 
     public function testToolGetsVersion(): void
     {
         $tool = new Tool('supertool');
 
-        $tool->addVersion($version1 = new ToolVersion('supertool', '1.0.0', null, null, null, null, null,));
-        $tool->addVersion($version2 = new ToolVersion('supertool', '2.0.0', null, null, null, null, null,));
+        $tool->addVersion($version1 = new ToolVersion('supertool', '1.0.0', null, null, null, null, null));
+        $tool->addVersion($version2 = new ToolVersion('supertool', '2.0.0', null, null, null, null, null));
 
         $this->assertSame($version1, $tool->getVersion('1.0.0'));
         $this->assertSame($version2, $tool->getVersion('2.0.0'));

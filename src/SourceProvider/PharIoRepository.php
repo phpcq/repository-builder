@@ -45,6 +45,7 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
     public function isFresh(): bool
     {
         // TODO: Implement isFresh() method.
+        return false;
     }
 
     public function refresh(): void
@@ -52,13 +53,11 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
         // TODO: Implement refresh() method.
     }
 
-    /**
-     * @return Generator
-     */
     public function getIterator(): Generator
     {
         foreach ($this->downloadXml()->query('//rootNs:release') as $releaseNode) {
-            /** @var DOMElement $releaseNode */
+            assert($releaseNode instanceof DOMElement);
+            assert($releaseNode->parentNode instanceof DOMElement);
             yield new ToolVersion(
                 $releaseNode->parentNode->getAttribute('name'),
                 $releaseNode->getAttribute('version'),
@@ -84,7 +83,8 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
         return new XmlFile($fileName, 'https://phar.io/repository', 'repository');
     }
 
-    private function getSignatureUrl(DOMElement $releaseNode): string {
+    private function getSignatureUrl(DOMElement $releaseNode): string
+    {
         /** @var DOMElement $signatureNode */
         $signatureNode = $releaseNode->getElementsByTagName('signature')->item(0);
 
@@ -95,7 +95,8 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
         return $releaseNode->getAttribute('url') . '.asc';
     }
 
-    private function getHash(DOMElement $releaseNode): ToolHash {
+    private function getHash(DOMElement $releaseNode): ToolHash
+    {
         /** @var DOMElement $hashNode */
         $hashNode  = $releaseNode->getElementsByTagName('hash')->item(0);
         $type      = $hashNode->getAttribute('type');

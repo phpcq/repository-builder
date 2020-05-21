@@ -10,7 +10,11 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 
-class XmlFile {
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
+class XmlFile
+{
     private ?DOMDocument $dom = null;
 
     private DOMXPath $xPath;
@@ -52,6 +56,10 @@ class XmlFile {
         $this->getDom()->save($this->filename);
     }
 
+    /**
+     * @psalm-suppress InvalidNullableReturnType
+     * @psalm-suppress NullableReturnStatement
+     */
     public function getDom(): DOMDocument
     {
         $this->init();

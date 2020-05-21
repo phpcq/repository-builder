@@ -15,7 +15,7 @@ class StringUtil
         return preg_replace('#[^a-zA-Z0-9.]#', '-', $value);
     }
 
-    public static function makeAbsolutePath(string $path, string $baseDir)
+    public static function makeAbsolutePath(string $path, string $baseDir): string
     {
         if (null === self::$fileSystem) {
             self::$fileSystem = new Filesystem();

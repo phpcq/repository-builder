@@ -9,6 +9,9 @@ use IteratorAggregate;
 use LogicException;
 use Traversable;
 
+/**
+ * @template-implements IteratorAggregate<int, VersionRequirement>
+ */
 class VersionRequirementList implements IteratorAggregate
 {
     /**
@@ -21,7 +24,7 @@ class VersionRequirementList implements IteratorAggregate
      *
      * @param VersionRequirement[] $requirements
      */
-    public function __construct(?array $requirements = [])
+    public function __construct(array $requirements = [])
     {
         foreach ($requirements as $requirement) {
             $this->add($requirement);
@@ -54,6 +57,7 @@ class VersionRequirementList implements IteratorAggregate
 
     /**
      * @return Generator|Traversable|VersionRequirement[]
+     * @psalm-return Generator<VersionRequirement>
      */
     public function getIterator()
     {

@@ -8,6 +8,7 @@ use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -28,6 +29,7 @@ class GithubClient implements LoggerAwareInterface
         $this->httpClient = $httpClient;
         $this->cache      = $cache;
         $this->token      = $token;
+        $this->logger     = new NullLogger();
     }
 
     public function fetchTags(string $repository): array
@@ -39,7 +41,9 @@ class GithubClient implements LoggerAwareInterface
 
     public function fetchTag(string $repository, string $tagName): array
     {
-        // We handle exceptions differently here - we cache successful responses forever but exceptions only for an hour.
+        // We handle exceptions differently here:
+        // - we cache successful responses forever
+        // - but exceptions only for an hour.
         return $this->fetchJson(
             'https://api.github.com/repos/' . $repository . '/releases/tags/' . $tagName
         );
@@ -64,6 +68,9 @@ class GithubClient implements LoggerAwareInterface
         );
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     */
     private function fetchJson(string $url): array
     {
         $value    = $this->cache->get(
@@ -87,9 +94,7 @@ class GithubClient implements LoggerAwareInterface
 
     private function fetchHttp(string $url): array
     {
-        if ($this->logger) {
-            $this->logger->debug('Fetching: ' . $url);
-        }
+        $this->logger->debug('Fetching: ' . $url);
         try {
             return json_decode(
                 $this->httpClient->request(
@@ -102,7 +107,7 @@ class GithubClient implements LoggerAwareInterface
         } catch (ClientException $exception) {
             throw new DataNotAvailableException(
                 $exception->getResponse()->getContent(false),
-                $exception->getCode(),
+                (int) $exception->getCode(),
                 $exception
             );
         }

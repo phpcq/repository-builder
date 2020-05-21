@@ -21,11 +21,6 @@
       "role": "lead"
     }
   ],
-  "extra": {
-    "branch-alias": {
-      "dev-dev-3.0": "3.x-dev"
-    }
-  },
   "require": {
     "php": "^7.4",
     "ext-ctype": "*",
@@ -37,18 +32,19 @@
     "composer/semver": "^1.5",
     "psr/log": "^1.1.2",
     "symfony/cache": "^5.0.7",
-    "symfony/console": "^5.0.7",
+    "symfony/cache-contracts": "^2.0",
     "symfony/config": "^5.0.7",
-    "symfony/http-kernel": "^5.0.7",
-    "symfony/finder": "^5.0.7",
-    "symfony/process": "^5.0.7",
-    "symfony/yaml": "^5.0.7",
-    "symfony/framework-bundle": "^5.0.7",
+    "symfony/console": "^5.0.7",
+    "symfony/dependency-injection": "^5.0",
     "symfony/dotenv": "^5.0.7",
-    "symfony/http-client": "^5.0.7"
-  },
-  "require-dev": {
-    "symfony/filesystem": "^5.0"
+    "symfony/filesystem": "^5.0",
+    "symfony/finder": "^5.0.7",
+    "symfony/framework-bundle": "^5.0.7",
+    "symfony/http-client": "^5.0",
+    "symfony/http-client-contracts": "^2.1",
+    "symfony/http-kernel": "^5.0.7",
+    "symfony/process": "^5.0.7",
+    "symfony/yaml": "^5.0.7"
   },
   "replace": {
     "symfony/polyfill-ctype": "*",
@@ -56,6 +52,11 @@
     "symfony/polyfill-mbstring": "*",
     "symfony/polyfill-php72": "*",
     "symfony/polyfill-php73": "*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.x-dev"
+    }
   },
   "autoload": {
     "psr-4": {

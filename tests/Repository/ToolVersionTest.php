@@ -17,7 +17,7 @@ class ToolVersionTest extends TestCase
 {
     public function testInitializesWithEmptyValues(): void
     {
-        $version = new ToolVersion('supertool', '1.0.0', null, null, null, null, null,);
+        $version = new ToolVersion('supertool', '1.0.0', null, null, null, null, null);
         $this->assertSame('supertool', $version->getName());
         $this->assertSame('1.0.0', $version->getVersion());
         $this->assertSame(null, $version->getPharUrl());
@@ -61,7 +61,7 @@ class ToolVersionTest extends TestCase
      */
     public function testSetterWorks(string $propertyName, $value): void
     {
-        $version = new ToolVersion('supertool', '1.0.0', null, null, null, null, null,);
+        $version = new ToolVersion('supertool', '1.0.0', null, null, null, null, null);
         $this->assertSame($version, call_user_func([$version, 'set' . $propertyName], $value));
         $this->assertSame($value, call_user_func([$version, 'get' . $propertyName]));
     }

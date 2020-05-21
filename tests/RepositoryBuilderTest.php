@@ -37,15 +37,21 @@ final class RepositoryBuilderTest extends TestCase
         $version21->method('getVersion')->willReturn('1.0.0');
         $version22->method('getVersion')->willReturn('2.0.0');
 
-        $versionProvider1->expects($this->once())->method('getIterator')->willReturnCallback(function () use ($version11, $version12) {
-            yield $version11;
-            yield $version12;
-        });
+        $versionProvider1
+            ->expects($this->once())
+            ->method('getIterator')
+            ->willReturnCallback(function () use ($version11, $version12) {
+                yield $version11;
+                yield $version12;
+            });
 
-        $versionProvider2->expects($this->once())->method('getIterator')->willReturnCallback(function () use ($version21, $version22) {
-            yield $version21;
-            yield $version22;
-        });
+        $versionProvider2
+            ->expects($this->once())
+            ->method('getIterator')
+            ->willReturnCallback(function () use ($version21, $version22) {
+                yield $version21;
+                yield $version22;
+            });
 
         $enrichingProvider1 = $this->createMock(EnrichingRepositoryInterface::class);
         $enrichingProvider2 = $this->createMock(EnrichingRepositoryInterface::class);
@@ -92,9 +98,9 @@ final class RepositoryBuilderTest extends TestCase
             ->method('write')
             ->willReturnOnConsecutiveCalls()
             ->willReturnCallback(function (Tool $tool) use (&$names) {
-            $this->assertSame(current($names), $tool->getName());
-            next($names);
-        });
+                $this->assertSame(current($names), $tool->getName());
+                next($names);
+            });
 
         $builder->build();
     }

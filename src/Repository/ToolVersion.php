@@ -107,7 +107,11 @@ class ToolVersion
         return $this;
     }
 
-    public function merge(ToolVersion $other)
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
+    public function merge(ToolVersion $other): void
     {
         if (null !== ($data = $other->getPharUrl()) && $data !== $this->pharUrl) {
             $this->setPharUrl($data);
@@ -116,13 +120,20 @@ class ToolVersion
             $this->setSignatureUrl($data);
         }
         if (null !== ($data = $other->getHash()) && $data !== $this->hash) {
-            if (null === $this->hash || $data->getType() !== $this->hash->getType() || $data->getValue() !== $this->hash->getValue()) {
+            if (
+                null === $this->hash
+                || $data->getType() !== $this->hash->getType()
+                || $data->getValue() !== $this->hash->getValue()
+            ) {
                 $this->setHash(new ToolHash($data->getType(), $data->getValue()));
             }
         }
         foreach ($other->getRequirements() as $requirement) {
             if (!$this->requirements->has($requirement->getName())) {
-                $this->requirements->add(new VersionRequirement($requirement->getName(), $requirement->getConstraint()));
+                $this->requirements->add(new VersionRequirement(
+                    $requirement->getName(),
+                    $requirement->getConstraint()
+                ));
             }
         }
         if (null !== ($data = $other->getBootstrap()) && $data !== $this->bootstrap) {
