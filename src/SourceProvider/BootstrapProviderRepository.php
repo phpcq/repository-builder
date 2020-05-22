@@ -15,6 +15,9 @@ class BootstrapProviderRepository implements EnrichingRepositoryInterface
 {
     private string $sourceDir;
 
+    /**
+     * @psalm-suppress PropertyNotSetInConstructor
+     */
     private array $catalog;
 
     private VersionParser $versionParser;
