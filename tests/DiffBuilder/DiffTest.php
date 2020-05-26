@@ -112,6 +112,22 @@ final class DiffTest extends TestCase
         $this->assertNull(Diff::created([]));
     }
 
+    public function testProcessesEmptyDiff(): void
+    {
+        $testToolOld = new Tool('test-tool');
+        $testToolOld->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null, null));
+        $testToolOld->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null, null));
+
+        $testToolNew = new Tool('test-tool');
+        $testToolNew->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null, null));
+        $testToolNew->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null, null));
+
+        $this->assertNull(Diff::diff(
+            ['test-tool' => $testToolOld],
+            ['test-tool' => $testToolNew],
+        ));
+    }
+
     public function summaryProvider(): array
     {
         return [
