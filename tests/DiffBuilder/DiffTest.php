@@ -98,4 +98,14 @@ final class DiffTest extends TestCase
 
             EOF, (string) $diff);
     }
+
+    public function testProcessesEmptyDeletion(): void
+    {
+        $this->assertNull(Diff::diff([], null));
+    }
+
+    public function testProcessesEmptyAddition(): void
+    {
+        $this->assertNull(Diff::diff(null, []));
+    }
 }

@@ -28,6 +28,9 @@ final class Diff implements DiffInterface
 
         // New repository, add all tools as new.
         if (null === $old) {
+            if (empty($new)) {
+                return null;
+            }
             $differences = [];
             foreach ($new as $tool) {
                 $differences[$tool->getName()] = ToolAddedDiff::diff($tool);
@@ -37,6 +40,9 @@ final class Diff implements DiffInterface
 
         // Tool got removed, add all versions as removed.
         if (null === $new) {
+            if (empty($old)) {
+                return null;
+            }
             $differences = [];
             foreach ($old as $tool) {
                 $differences[$tool->getName()] = ToolRemovedDiff::diff($tool);
