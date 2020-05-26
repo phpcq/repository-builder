@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder;
 
+use LogicException;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
 use Phpcq\RepositoryBuilder\Repository\BootstrapInterface;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
@@ -27,6 +28,20 @@ final class RepositoryDiffBuilder
     public function generate(): ?Diff
     {
         $newData = $this->loadRepository();
+
+        if (null === $this->oldData && null === $newData) {
+            throw new LogicException('new value and old value must not both be null.');
+        }
+
+        // New repository, add all tools as new.
+        if (null === $this->oldData) {
+            return Diff::created($newData);
+        }
+
+        // Repository got removed, add all versions as removed.
+        if (null === $newData) {
+            return Diff::removed($this->oldData);
+        }
 
         return Diff::diff($this->oldData, $newData);
     }

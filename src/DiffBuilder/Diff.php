@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\DiffBuilder;
 
-use LogicException;
 use Phpcq\RepositoryBuilder\Repository\Tool;
 
 final class Diff implements DiffInterface
@@ -15,70 +14,47 @@ final class Diff implements DiffInterface
     private ?array $differences;
 
     /**
-     * @param Tool[]|null $old Tools indexed by tool name.
-     * @param Tool[]|null $new Tools indexed by tool name.
+     * @param Tool[] $new Tools indexed by tool name.
      *
      * @return Diff|null
      */
-    public static function diff(?array $old, ?array $new): ?Diff
+    public static function created(array $new): ?Diff
     {
-        if (null === $old && null === $new) {
-            throw new LogicException('new value and old value must not both be null.');
+        if (empty($new)) {
+            return null;
         }
-
-        // New repository, add all tools as new.
-        if (null === $old) {
-            if (empty($new)) {
-                return null;
-            }
-            $differences = [];
-            foreach ($new as $tool) {
-                $differences[$tool->getName()] = ToolAddedDiff::diff($tool);
-            }
-            return new Diff($differences);
+        $differences = [];
+        foreach ($new as $tool) {
+            $differences[$tool->getName()] = ToolAddedDiff::diff($tool);
         }
-
-        // Tool got removed, add all versions as removed.
-        if (null === $new) {
-            if (empty($old)) {
-                return null;
-            }
-            $differences = [];
-            foreach ($old as $tool) {
-                $differences[$tool->getName()] = ToolRemovedDiff::diff($tool);
-            }
-            return new Diff($differences);
-        }
-
-        return self::deepCompare($old, $new);
-    }
-
-    public function __toString(): string
-    {
-        return $this->asString('');
-    }
-
-    public function asString(string $prefix): string
-    {
-        if (empty($this->differences)) {
-            return '';
-        }
-
-        $result = [];
-        foreach ($this->differences as $difference) {
-            $result[] = $difference->asString($prefix . '  ');
-        }
-
-        return $prefix . 'Changes in repository:' . "\n" . implode('', $result);
+        return new Diff($differences);
     }
 
     /**
-     * @param Tool[] $old
-     * @param Tool[] $new
+     * @param Tool[] $old Tools indexed by tool name.
      *
      * @return Diff|null
      */
-    private static function deepCompare(array $old, array $new): ?Diff
+    public static function removed(array $old): ?Diff
+    {
+        if (empty($old)) {
+            return null;
+        }
+        $differences = [];
+        foreach ($old as $tool) {
+            $differences[$tool->getName()] = ToolRemovedDiff::diff($tool);
+        }
+
+        return new Diff($differences);
+    }
+
+    /**
+     * @param Tool[] $old Tools indexed by tool name.
+     * @param Tool[] $new Tools indexed by tool name.
+     *
+     * @return Diff|null
+     */
+    public static function diff(array $old, array $new): ?Diff
     {
         $differences = [];
         $toDiff  = [];
@@ -112,6 +88,25 @@ final class Diff implements DiffInterface
         }
 
         return new self($differences);
+    }
+
+    public function __toString(): string
+    {
+        return $this->asString('');
+    }
+
+    public function asString(string $prefix): string
+    {
+        if (empty($this->differences)) {
+            return '';
+        }
+
+        $result = [];
+        foreach ($this->differences as $difference) {
+            $result[] = $difference->asString($prefix . '  ');
+        }
+
+        return $prefix . 'Changes in repository:' . "\n" . implode('', $result);
     }
 
     private function __construct(array $differences)

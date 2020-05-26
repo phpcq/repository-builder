@@ -99,13 +99,13 @@ final class DiffTest extends TestCase
             EOF, (string) $diff);
     }
 
-    public function testProcessesEmptyDeletion(): void
+    public function testProcessesEmptyRemoval(): void
     {
-        $this->assertNull(Diff::diff([], null));
+        $this->assertNull(Diff::removed([]));
     }
 
-    public function testProcessesEmptyAddition(): void
+    public function testProcessesEmptyCreation(): void
     {
-        $this->assertNull(Diff::diff(null, []));
+        $this->assertNull(Diff::created([]));
     }
 }
