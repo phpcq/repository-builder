@@ -16,7 +16,7 @@ final class RepositoryDiffBuilder
 {
     private string $baseDir;
 
-    private array $oldData;
+    private ?array $oldData;
 
     public function __construct(string $baseDir)
     {
@@ -31,14 +31,17 @@ final class RepositoryDiffBuilder
         return Diff::diff($this->oldData, $newData);
     }
 
-    private function loadRepository(): array
+    private function loadRepository(): ?array
     {
         if (!is_file($this->baseDir . '/repository.json')) {
-            return [];
+            return null;
         }
 
         $data = [];
         $this->readFile($this->baseDir . '/repository.json', $data);
+        if (empty($data)) {
+            return null;
+        }
 
         return $data;
     }
