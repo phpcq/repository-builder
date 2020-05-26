@@ -78,7 +78,7 @@ final class Diff implements DiffInterface
 
         // 3. detect all changed versions.
         foreach ($toDiff as $diffTool) {
-            if ($diff = ToolChangedDiff::diff($old[$diffTool] ?? null, $new[$diffTool] ?? null)) {
+            if (null !== $diff = ToolChangedDiff::diff($old[$diffTool], $new[$diffTool])) {
                 $differences[$diffTool] = $diff;
             }
         }

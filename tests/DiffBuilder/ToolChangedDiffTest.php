@@ -17,40 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class ToolChangedDiffTest extends TestCase
 {
-    public function testAddsAllVersionsAsNewWhenOldIsNull(): void
-    {
-        $new = $this->mockToolWithVersions('tool-name', ['1.0.0', '2.0.0']);
-
-        $this->assertInstanceOf(ToolChangedDiff::class, $diff = ToolChangedDiff::diff(null, $new));
-        $this->assertSame(
-            <<<EOF
-            Changes for tool-name:
-              Added version 1.0.0
-              Added version 2.0.0
-
-            EOF,
-            $diff->__toString()
-        );
-        $this->assertSame('tool-name', $diff->getToolName());
-    }
-
-    public function testAddsAllVersionsAsRemovedWhenNewIsNull(): void
-    {
-        $old = $this->mockToolWithVersions('tool-name', ['1.0.0', '2.0.0']);
-
-        $this->assertInstanceOf(ToolChangedDiff::class, $diff = ToolChangedDiff::diff($old, null));
-        $this->assertSame(
-            <<<EOF
-            Changes for tool-name:
-              Removed version 1.0.0
-              Removed version 2.0.0
-
-            EOF,
-            $diff->__toString()
-        );
-        $this->assertSame('tool-name', $diff->getToolName());
-    }
-
     public function testAddsNewVersionsCorrectly(): void
     {
         $old = $this->mockToolWithVersions('tool-name', []);
