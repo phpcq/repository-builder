@@ -13,12 +13,12 @@ final class ToolAddedDiff implements DiffInterface
     public static function diff(Tool $new): ToolAddedDiff
     {
         // New tool, add all versions as new.
-        $changes = [];
+        $differences = [];
         foreach ($new->getIterator() as $version) {
-            $changes[$version->getVersion()] = VersionAddedDiff::diff($version);
+            $differences[$version->getVersion()] = VersionAddedDiff::diff($version);
         }
 
-        return new static($new->getName(), $changes);
+        return new static($new->getName(), $differences);
     }
 
     public function asString(string $prefix): string
@@ -28,8 +28,8 @@ final class ToolAddedDiff implements DiffInterface
         }
 
         $result = [];
-        foreach ($this->differences as $change) {
-            $result[] = $change->asString($prefix . '  ');
+        foreach ($this->differences as $difference) {
+            $result[] = $difference->asString($prefix . '  ');
         }
 
         return $prefix . 'Added ' . $this->toolName . ':' . "\n" . implode('', $result);

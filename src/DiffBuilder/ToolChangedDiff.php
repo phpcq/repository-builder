@@ -19,20 +19,20 @@ final class ToolChangedDiff implements DiffInterface
 
         // New tool, add all versions as new.
         if (null === $old) {
-            $changes = [];
+            $differences = [];
             foreach ($new->getIterator() as $version) {
-                $changes[$version->getVersion()] = VersionAddedDiff::diff($version);
+                $differences[$version->getVersion()] = VersionAddedDiff::diff($version);
             }
-            return new ToolChangedDiff($new->getName(), $changes);
+            return new ToolChangedDiff($new->getName(), $differences);
         }
 
         // Tool got removed, add all versions as removed.
         if (null === $new) {
-            $changes = [];
+            $differences = [];
             foreach ($old->getIterator() as $version) {
-                $changes[$version->getVersion()] = VersionRemovedDiff::diff($version);
+                $differences[$version->getVersion()] = VersionRemovedDiff::diff($version);
             }
-            return new ToolChangedDiff($old->getName(), $changes);
+            return new ToolChangedDiff($old->getName(), $differences);
         }
 
         assert($old->getName() === $new->getName());
@@ -46,8 +46,8 @@ final class ToolChangedDiff implements DiffInterface
         }
 
         $result = [];
-        foreach ($this->differences as $change) {
-            $result[] = $change->asString($prefix . '  ');
+        foreach ($this->differences as $difference) {
+            $result[] = $difference->asString($prefix . '  ');
         }
 
         return $prefix . 'Changes for ' . $this->toolName . ':' . "\n" . implode('', $result);
@@ -55,7 +55,7 @@ final class ToolChangedDiff implements DiffInterface
 
     private static function deepCompare(Tool $old, Tool $new): ?ToolChangedDiff
     {
-        $changes = [];
+        $differences = [];
         $toDiff  = [];
         // 1. detect all new versions.
         foreach ($new as $newVersion) {
@@ -63,7 +63,7 @@ final class ToolChangedDiff implements DiffInterface
                 $toDiff[$version] = $version;
                 continue;
             }
-            $changes[$version] = VersionAddedDiff::diff($newVersion);
+            $differences[$version] = VersionAddedDiff::diff($newVersion);
         }
 
         // 2. detect all removed versions.
@@ -72,20 +72,20 @@ final class ToolChangedDiff implements DiffInterface
                 $toDiff[$version] = $version;
                 continue;
             }
-            $changes[$version] = VersionRemovedDiff::diff($oldVersion);
+            $differences[$version] = VersionRemovedDiff::diff($oldVersion);
         }
 
         // 3. detect all changed versions.
         foreach ($toDiff as $diffVersion) {
             if ($diff = VersionChangedDiff::diff($old->getVersion($diffVersion), $new->getVersion($diffVersion))) {
-                $changes[$diffVersion] = $diff;
+                $differences[$diffVersion] = $diff;
             }
         }
 
-        if (empty($changes)) {
+        if (empty($differences)) {
             return null;
         }
 
-        return new self($old->getName(), $changes);
+        return new self($old->getName(), $differences);
     }
 }

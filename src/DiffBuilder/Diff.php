@@ -28,20 +28,20 @@ final class Diff implements DiffInterface
 
         // New repository, add all tools as new.
         if (null === $old) {
-            $changes = [];
+            $differences = [];
             foreach ($new as $tool) {
-                $changes[$tool->getName()] = ToolAddedDiff::diff($tool);
+                $differences[$tool->getName()] = ToolAddedDiff::diff($tool);
             }
-            return new Diff($changes);
+            return new Diff($differences);
         }
 
         // Tool got removed, add all versions as removed.
         if (null === $new) {
-            $changes = [];
+            $differences = [];
             foreach ($old as $tool) {
-                $changes[$tool->getName()] = ToolRemovedDiff::diff($tool);
+                $differences[$tool->getName()] = ToolRemovedDiff::diff($tool);
             }
-            return new Diff($changes);
+            return new Diff($differences);
         }
 
         return self::deepCompare($old, $new);
@@ -59,8 +59,8 @@ final class Diff implements DiffInterface
         }
 
         $result = [];
-        foreach ($this->differences as $change) {
-            $result[] = $change->asString($prefix . '  ');
+        foreach ($this->differences as $difference) {
+            $result[] = $difference->asString($prefix . '  ');
         }
 
         return $prefix . 'Changes in repository:' . "\n" . implode('', $result);
