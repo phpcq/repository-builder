@@ -53,6 +53,14 @@ final class ToolChangedDiffTest extends TestCase
         $this->assertSame('tool-name', $diff->getToolName());
     }
 
+    public function testReturnsNullOnNochanges(): void
+    {
+        $old = $this->mockToolWithVersions('tool-name', ['1.0.0', '2.0.0']);
+        $new = $this->mockToolWithVersions('tool-name', ['1.0.0', '2.0.0']);
+
+        $this->assertNull(ToolChangedDiff::diff($old, $new));
+    }
+
     public function testAddsChangedVersionCorrectly(): void
     {
         $old = new Tool('tool-name');

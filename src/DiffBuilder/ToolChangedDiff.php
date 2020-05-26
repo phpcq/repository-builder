@@ -35,7 +35,8 @@ final class ToolChangedDiff implements DiffInterface
 
         // 3. detect all changed versions.
         foreach ($toDiff as $diffVersion) {
-            if ($diff = VersionChangedDiff::diff($old->getVersion($diffVersion), $new->getVersion($diffVersion))) {
+            $diff = VersionChangedDiff::diff($old->getVersion($diffVersion), $new->getVersion($diffVersion));
+            if (null !== $diff) {
                 $differences[$diffVersion] = $diff;
             }
         }
@@ -49,10 +50,6 @@ final class ToolChangedDiff implements DiffInterface
 
     public function asString(string $prefix): string
     {
-        if (empty($this->differences)) {
-            return '';
-        }
-
         $result = [];
         foreach ($this->differences as $difference) {
             $result[] = $difference->asString($prefix . '  ');
