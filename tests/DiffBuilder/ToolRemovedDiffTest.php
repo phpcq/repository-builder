@@ -17,6 +17,14 @@ use PHPUnit\Framework\TestCase;
  */
 final class ToolRemovedDiffTest extends TestCase
 {
+    public function testIgnoresToolWithoutVersions(): void
+    {
+        $new = new Tool('tool-name');
+
+        $this->assertInstanceOf(ToolRemovedDiff::class, $diff = ToolRemovedDiff::diff($new));
+        $this->assertSame('', $diff->__toString());
+    }
+
     public function testAddsAllVersionsAsNew(): void
     {
         $new = $this->mockToolWithVersions('tool-name', ['1.0.0', '2.0.0']);
