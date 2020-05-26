@@ -59,39 +59,62 @@ class JsonRepositoryWriter
             'phars' => [],
         ];
 
-        $bootstraps = [];
         foreach ($this->tool as $tool) {
-            foreach ($tool->getIterator() as $version) {
-                $bootstrap = $version->getBootstrap();
-                if (null === $bootstrap) {
-                    // FIXME: Trigger error? We need a bootstrapper.
-                    continue;
-                }
+            if (null === $content = $this->processTool($tool)) {
+                continue;
+            }
+            $data['phars'][$tool->getName()] = $content;
+        }
 
-                if (!isset($bootstraps[$bootstrapHash = spl_object_hash($bootstrap)])) {
-                    $bootstraps[$bootstrapHash] = [
-                        'name' => 'bootstrap-' . count($bootstraps),
-                        'instance' => $bootstrap
-                    ];
-                }
-                $bootstrapName = $bootstraps[$bootstrapHash]['name'];
-                if (!isset($data['phars'][$name = $tool->getName()])) {
-                    $data['phars'][$name] = [];
-                }
-                // no phar url, nothing to download.
-                if (null === $pharUrl = $version->getPharUrl()) {
-                    continue;
-                }
+        $this->filesystem->dumpFile(
+            $this->baseDir . '/repository.json',
+            json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+    }
 
-                $data['phars'][$name][] = [
-                    'version'      => $version->getVersion(),
-                    'phar-url'     => $pharUrl,
-                    'bootstrap'    => $bootstrapName,
-                    'requirements' => $this->encodeRequirements($version->getRequirements()),
-                    'hash'         => $this->encodeHash($version->getHash()),
-                    'signature'    => $version->getSignatureUrl(),
+    private function processTool(Tool $tool): ?array
+    {
+        if ($tool->isEmpty()) {
+            return null;
+        }
+        $bootstraps = [];
+        $data       = [
+            'bootstraps' => [],
+            'phars' => [],
+        ];
+        foreach ($tool->getIterator() as $version) {
+            $bootstrap = $version->getBootstrap();
+            if (null === $bootstrap) {
+                // FIXME: Trigger error? We need a bootstrapper.
+                continue;
+            }
+
+            if (!isset($bootstraps[$bootstrapHash = spl_object_hash($bootstrap)])) {
+                $bootstraps[$bootstrapHash] = [
+                    'name' => 'bootstrap-' . count($bootstraps),
+                    'instance' => $bootstrap
                 ];
             }
+            $bootstrapName = $bootstraps[$bootstrapHash]['name'];
+            if (!isset($data['phars'][$name = $tool->getName()])) {
+                $data['phars'][$name] = [];
+            }
+            // no phar url, nothing to download.
+            if (null === $pharUrl = $version->getPharUrl()) {
+                continue;
+            }
+
+            $data['phars'][$name][] = [
+                'version'      => $version->getVersion(),
+                'phar-url'     => $pharUrl,
+                'bootstrap'    => $bootstrapName,
+                'requirements' => $this->encodeRequirements($version->getRequirements()),
+                'hash'         => $this->encodeHash($version->getHash()),
+                'signature'    => $version->getSignatureUrl(),
+            ];
+        }
+        if (empty($data['phars'])) {
+            return null;
         }
         foreach ($bootstraps as $bootstrap) {
             $data['bootstraps'][$bootstrap['name']] = [
@@ -101,10 +124,20 @@ class JsonRepositoryWriter
             ];
         }
 
+        $fileName = $tool->getName() . '.json';
+
         $this->filesystem->dumpFile(
-            $this->baseDir . '/repository.json',
+            $fileNameAbsolute = $this->baseDir . '/' . $fileName,
             json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
+
+        return [
+            'url' => './' . $fileName,
+            'checksum' => [
+                'type'  => 'sha-512',
+                'value' => hash_file('sha512', $fileNameAbsolute),
+            ],
+        ];
     }
 
     private function encodeRequirements(VersionRequirementList $requirementList): stdClass
