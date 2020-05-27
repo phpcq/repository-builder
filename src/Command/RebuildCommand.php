@@ -7,6 +7,7 @@ namespace Phpcq\RepositoryBuilder\Command;
 use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
+use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
 use Phpcq\RepositoryBuilder\SourceProvider\EnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\VersionProvidingRepositoryInterface;
@@ -87,10 +88,17 @@ final class RebuildCommand extends Command
         /** @var EnrichingRepositoryInterface[] $enrichingProviders */
         [$versionProviders, $enrichingProviders] = $this->loadProviders($config['repositories']);
 
+        if ($output->isVerbose()) {
+            $diff = new RepositoryDiffBuilder($outdir);
+        }
         $writer = new JsonRepositoryWriter($outdir);
         $builder = new RepositoryBuilder($versionProviders, $enrichingProviders, $writer);
 
         $builder->build();
+
+        if (isset($diff)) {
+            $output->writeln($diff->generate());
+        }
 
         return 0;
     }

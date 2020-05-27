@@ -24,6 +24,12 @@ class Kernel extends BaseKernel
                     'enabled' => false,
                     'resource' => null,
                 ],
+                'assets' => [
+                    'enabled' => false,
+                ],
+                'secrets' => [
+                    'enabled' => false,
+                ],
             ]);
 
             if (!$container->hasDefinition('kernel')) {
