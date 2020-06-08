@@ -14,11 +14,6 @@
       "email": "david.molineus@netzmacht.de",
       "homepage": "https://netzmacht.de",
       "role": "lead"
-    },
-    {
-      "name": "Stefan Heimes",
-      "email": "stefan_heimes@hotmail.com",
-      "role": "lead"
     }
   ],
   "require": {
