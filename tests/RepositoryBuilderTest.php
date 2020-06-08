@@ -70,7 +70,7 @@ final class RepositoryBuilderTest extends TestCase
             ->expects(self::exactly(2))
             ->method('enrich')
             ->withConsecutive([$version11], [$version21]);
-        $enrichingProvider1
+        $enrichingProvider2
             ->expects(self::exactly(4))
             ->method('supports')
             ->withConsecutive(
@@ -80,7 +80,7 @@ final class RepositoryBuilderTest extends TestCase
                 [$version22],
             )
             ->willReturnOnConsecutiveCalls(false, true, false, true);
-        $enrichingProvider1
+        $enrichingProvider2
             ->expects(self::exactly(2))
             ->method('enrich')
             ->withConsecutive([$version21], [$version22]);
