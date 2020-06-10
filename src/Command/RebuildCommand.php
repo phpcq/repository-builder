@@ -21,6 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Yaml\Yaml;
 
+use function substr;
+
 /**
  * This rebuilds the repository.
  *
@@ -61,6 +63,12 @@ final class RebuildCommand extends Command
             'Input configuration',
             'sources.yaml'
         );
+        $this->addOption(
+            'truncate',
+            't',
+            InputOption::VALUE_REQUIRED,
+            'Truncate output (Defaults to MAX_ARG_STRLEN)'
+        );
     }
 
     /**
@@ -96,8 +104,12 @@ final class RebuildCommand extends Command
 
         $builder->build();
 
-        if (isset($diff)) {
-            $output->writeln($diff->generate());
+        if (isset($diff) && null !== ($generated = $diff->generate())) {
+            $buffer = $generated->asString('');
+            if (null !== ($truncate = $input->getOption('truncate'))) {
+                $buffer = substr($buffer, 0, (int) $truncate - 3) . '...';
+            }
+            $output->writeln($buffer);
         }
 
         return 0;
