@@ -35,7 +35,7 @@ class ToolVersionTest extends TestCase
             [$requirement1 = new VersionRequirement('test1')],
             $hash = new ToolHash(ToolHash::SHA_512, 'abcdefgh'),
             'https://example.org/supertool.phar.sig',
-            $bootstrap = new InlineBootstrap('1.0.0', 'bootstrap 1')
+            $bootstrap = new InlineBootstrap('1.0.0', 'bootstrap 1', null)
         );
         $this->assertSame('supertool', $version->getName());
         $this->assertSame('1.0.0', $version->getVersion());
@@ -52,7 +52,7 @@ class ToolVersionTest extends TestCase
             ['PharUrl', 'https://example.org/supertool.phar'],
             ['Hash', new ToolHash(ToolHash::SHA_512, 'abcdefgh')],
             ['SignatureUrl', 'https://example.org/supertool.phar.sig'],
-            ['Bootstrap', new InlineBootstrap('1.0.0', 'bootstrap 1')],
+            ['Bootstrap', new InlineBootstrap('1.0.0', 'bootstrap 1', null)],
         ];
     }
 

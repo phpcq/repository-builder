@@ -6,6 +6,7 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 
 use Closure;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
 use Phpcq\RepositoryBuilder\Repository\Tool;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
@@ -35,7 +36,7 @@ final class DiffTest extends TestCase
                 ],
                 new ToolHash('sha-1', 'old-hash'),
                 'https://example.org/old.phar.asc',
-                new InlineBootstrap('1.0.0', '<?php // old bootstrap...')
+                new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
             )
         );
 
@@ -54,7 +55,11 @@ final class DiffTest extends TestCase
                 ],
                 new ToolHash('sha-512', 'new-hash'),
                 'https://example.org/new.phar.asc',
-                new InlineBootstrap('1.0.0', '<?php // new bootstrap...')
+                new InlineBootstrap(
+                    '1.0.0',
+                    '<?php // new bootstrap...',
+                    new BootstrapHash(BootstrapHash::SHA_512, 'hash1')
+                )
             )
         );
 
@@ -96,6 +101,9 @@ final class DiffTest extends TestCase
                   bootstrap:
                     - inline:1.0.0:c5879adbbae0670b7fba764092e66beb
                     + inline:1.0.0:64d660def5a58dc88e958bf71a95528a
+                  bootstrap-hash:
+                    - 
+                    + sha-512:hash1
                 Added version 1.0.0
                 Added version 2.0.0
 

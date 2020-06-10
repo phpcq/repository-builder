@@ -36,6 +36,13 @@ final class VersionChangedDiff implements DiffInterface
             $differences['bootstrap'] = [$oldValue, $newValue];
         }
 
+        if (
+            ($oldValue = self::bootstrapHashToStr($oldVersion)) !==
+            ($newValue = self::bootstrapHashToStr($newVersion))
+        ) {
+            $differences['bootstrap-hash'] = [$oldValue, $newValue];
+        }
+
         if (empty($differences)) {
             return null;
         }

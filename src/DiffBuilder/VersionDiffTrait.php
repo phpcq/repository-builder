@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\DiffBuilder;
 
+use Phpcq\RepositoryBuilder\Repository\BootstrapInterface;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use RuntimeException;
@@ -76,5 +77,20 @@ trait VersionDiffTrait
         }
 
         return 'inline:' . $bootstrap->getPluginVersion() .  ':' . md5($bootstrap->getCode());
+    }
+
+    private static function bootstrapHashToStr(ToolVersion $toolVersion): string
+    {
+        $bootstrap = $toolVersion->getBootstrap();
+        if (null === $bootstrap) {
+            return '';
+        }
+
+        $hash = $bootstrap->getHash();
+        if (null === $hash) {
+            return '';
+        }
+
+        return $hash->getType() . ':' . $hash->getValue();
     }
 }

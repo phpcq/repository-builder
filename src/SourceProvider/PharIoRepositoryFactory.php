@@ -20,6 +20,7 @@ class PharIoRepositoryFactory implements SourceRepositoryFactoryInterface
 
     public function create(array $configuration): SourceRepositoryInterface
     {
+        assert(is_string($configuration['url']));
         return new PharIoRepository($configuration['url'], $this->cacheDir, $this->httpClient);
     }
 }

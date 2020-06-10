@@ -6,10 +6,13 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use Composer\Semver\VersionParser;
 use InvalidArgumentException;
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\BootstrapInterface;
 use Phpcq\RepositoryBuilder\Repository\FileBootstrap;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
+
+use function hash_file;
 
 class BootstrapProviderRepository implements EnrichingRepositoryInterface
 {
@@ -71,9 +74,11 @@ class BootstrapProviderRepository implements EnrichingRepositoryInterface
         $toolName = $version->getName() . '#' . $bootstrap['constraint'];
 
         if (!isset($this->instances[$toolName])) {
+            $absolutePath = StringUtil::makeAbsolutePath($bootstrap['file'], $this->sourceDir);
             $this->instances[$toolName] = new FileBootstrap(
                 $bootstrap['plugin-version'],
-                StringUtil::makeAbsolutePath($bootstrap['file'], $this->sourceDir)
+                $absolutePath,
+                $bootstrap['hash'] ?? new BootstrapHash(BootstrapHash::SHA_512, hash_file('sha3-512', $absolutePath))
             );
         }
         $version->setBootstrap($this->instances[$toolName]);

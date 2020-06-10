@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiff;
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
@@ -27,7 +28,7 @@ final class VersionChangedDiffTest extends TestCase
             ],
             new ToolHash('sha-1', 'old-hash'),
             'https://example.org/old.phar.asc',
-            new InlineBootstrap('1.0.0', '<?php // old bootstrap...')
+            new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
         );
 
         $this->assertNull(VersionChangedDiff::diff($oldVersion, $oldVersion));
@@ -166,7 +167,7 @@ final class VersionChangedDiffTest extends TestCase
                     null,
                     null,
                     null,
-                    new InlineBootstrap('1.0.0', '<?php // old bootstrap...')
+                    new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
                 ),
                 'new' => new ToolVersion(
                     'tool-name',
@@ -175,7 +176,42 @@ final class VersionChangedDiffTest extends TestCase
                     null,
                     null,
                     null,
-                    new InlineBootstrap('1.0.0', '<?php // new bootstrap...')
+                    new InlineBootstrap('1.0.0', '<?php // new bootstrap...', null)
+                ),
+            ],
+            'Change bootstrap hash' => [
+                'expected' => <<<EOF
+                Changed version 1.0.0:
+                  bootstrap-hash:
+                    - sha-512:hash-old
+                    + sha-512:hash-new
+
+                EOF,
+                'old' => new ToolVersion(
+                    'tool-name',
+                    '1.0.0',
+                    null,
+                    null,
+                    null,
+                    null,
+                    new InlineBootstrap(
+                        '1.0.0',
+                        '<?php // old bootstrap...',
+                        new BootstrapHash(BootstrapHash::SHA_512, 'hash-old')
+                    )
+                ),
+                'new' => new ToolVersion(
+                    'tool-name',
+                    '1.0.0',
+                    null,
+                    null,
+                    null,
+                    null,
+                    new InlineBootstrap(
+                        '1.0.0',
+                        '<?php // old bootstrap...',
+                        new BootstrapHash(BootstrapHash::SHA_512, 'hash-new')
+                    )
                 ),
             ],
         ];

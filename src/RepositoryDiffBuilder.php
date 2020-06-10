@@ -9,6 +9,7 @@ use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
 use Phpcq\RepositoryBuilder\Repository\BootstrapInterface;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
 use Phpcq\RepositoryBuilder\Repository\Tool;
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
 use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
@@ -121,11 +122,24 @@ final class RepositoryDiffBuilder
         $bootstrapInfo = $bootstraps[$bootstrap];
         switch ($bootstrapInfo['type']) {
             case 'inline':
-                return new InlineBootstrap($bootstrapInfo['plugin-version'], $bootstrapInfo['code']);
+                return new InlineBootstrap(
+                    $bootstrapInfo['plugin-version'],
+                    $bootstrapInfo['code'],
+                    $this->loadBootstrapHash($bootstrapInfo['hash'] ?? null),
+                );
             default:
         }
         // FIXME: add support for file based bootstrap loading when we dump it.
         throw new \RuntimeException('Unexpected bootstrap type encountered ' . $bootstrapInfo['type']);
+    }
+
+    private function loadBootstrapHash(?array $hash): ?BootstrapHash
+    {
+        if (null === $hash) {
+            return null;
+        }
+
+        return new BootstrapHash($hash['type'], $hash['value']);
     }
 
     private function loadHash(?array $hash): ?ToolHash

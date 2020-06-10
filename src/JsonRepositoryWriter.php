@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder;
 
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\Tool;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
@@ -109,7 +110,7 @@ class JsonRepositoryWriter
                 'phar-url'     => $pharUrl,
                 'bootstrap'    => $bootstrapName,
                 'requirements' => $this->encodeRequirements($version->getRequirements()),
-                'hash'         => $this->encodeHash($version->getHash()),
+                'hash'         => $this->encodeToolHash($version->getHash()),
                 'signature'    => $version->getSignatureUrl(),
             ];
         }
@@ -121,6 +122,7 @@ class JsonRepositoryWriter
                 'plugin-version' => $bootstrap['instance']->getPluginVersion(),
                 'type'           => 'inline',
                 'code'           => $bootstrap['instance']->getCode(),
+                'hash'           => $this->encodeBootstrapHash($bootstrap['instance']->getHash())
             ];
         }
 
@@ -154,7 +156,23 @@ class JsonRepositoryWriter
      *
      * @psalm-return array{type: string, value: string}|null
      */
-    private function encodeHash(?ToolHash $hash): ?array
+    private function encodeToolHash(?ToolHash $hash): ?array
+    {
+        if (null === $hash) {
+            return null;
+        }
+        return [
+            'type' => $hash->getType(),
+            'value' => $hash->getValue(),
+        ];
+    }
+
+    /**
+     * @return null|string[]
+     *
+     * @psalm-return array{type: string, value: string}|null
+     */
+    private function encodeBootstrapHash(?BootstrapHash $hash): ?array
     {
         if (null === $hash) {
             return null;

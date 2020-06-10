@@ -54,7 +54,7 @@ final class ToolAddedDiffTest extends TestCase
                 ],
                 new ToolHash('sha-512', $toolName . '-' . $version . '-hash'),
                 'https://example.org/' . $toolName . '-' . $version . '.phar.asc',
-                new InlineBootstrap('1.0.0', '<?php // bootstrap...')
+                new InlineBootstrap('1.0.0', '<?php // bootstrap...', null)
             ));
         }
 

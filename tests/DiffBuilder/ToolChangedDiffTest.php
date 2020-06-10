@@ -75,7 +75,7 @@ final class ToolChangedDiffTest extends TestCase
             ],
             new ToolHash('sha-1', 'old-hash'),
             'https://example.org/old.phar.asc',
-            new InlineBootstrap('1.0.0', '<?php // old bootstrap...')
+            new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
         );
         $newVersion = new ToolVersion(
             'tool-name',
@@ -86,7 +86,7 @@ final class ToolChangedDiffTest extends TestCase
             ],
             new ToolHash('sha-512', 'new-hash'),
             'https://example.org/new.phar.asc',
-            new InlineBootstrap('1.0.0', '<?php // new bootstrap...')
+            new InlineBootstrap('1.0.0', '<?php // new bootstrap...', null)
         );
 
         $old->addVersion($oldVersion);
@@ -135,7 +135,7 @@ final class ToolChangedDiffTest extends TestCase
                 ],
                 new ToolHash('sha-512', $toolName . '-' . $version . '-hash'),
                 'https://example.org/' . $toolName . '-' . $version . '.phar.asc',
-                new InlineBootstrap('1.0.0', '<?php // bootstrap...')
+                new InlineBootstrap('1.0.0', '<?php // bootstrap...', null)
             ));
         }
 

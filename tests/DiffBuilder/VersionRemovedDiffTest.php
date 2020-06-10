@@ -27,7 +27,7 @@ final class VersionRemovedDiffTest extends TestCase
             ],
             new ToolHash('sha-1', 'old-hash'),
             'https://example.org/old.phar.asc',
-            new InlineBootstrap('1.0.0', '<?php // old bootstrap...')
+            new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
         );
 
         $this->assertInstanceOf(VersionRemovedDiff::class, $diff = VersionRemovedDiff::diff($oldVersion));

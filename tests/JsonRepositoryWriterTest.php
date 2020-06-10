@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test;
 
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
+use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
 use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
 use Phpcq\RepositoryBuilder\Repository\Tool;
 use Phpcq\RepositoryBuilder\Repository\ToolHash;
@@ -31,7 +32,7 @@ final class JsonRepositoryWriterTest extends TestCase
             ],
             new ToolHash(ToolHash::SHA_512, 'hash1'),
             'https://example.org/some-1.0.0.phar.sig',
-            $bootstrap1 = new InlineBootstrap('1.0.0', 'bootstrap 1')
+            $bootstrap1 = new InlineBootstrap('1.0.0', 'bootstrap 1', null)
         ));
         $tool1->addVersion(new ToolVersion(
             'tool1',
@@ -57,7 +58,7 @@ final class JsonRepositoryWriterTest extends TestCase
             ],
             new ToolHash(ToolHash::SHA_512, 'hash3'),
             'https://example.org/another-1.0.0.phar.sig',
-            new InlineBootstrap('1.0.0', 'bootstrap 2'),
+            new InlineBootstrap('1.0.0', 'bootstrap 2', new BootstrapHash(BootstrapHash::SHA_512, 'hash2')),
         ));
         $tool2->addVersion(new ToolVersion(
             'tool2',
@@ -69,7 +70,7 @@ final class JsonRepositoryWriterTest extends TestCase
             ],
             new ToolHash(ToolHash::SHA_512, 'hash4'),
             'https://example.org/another-2.0.0.phar.sig',
-            new InlineBootstrap('1.0.0', 'bootstrap 3'),
+            new InlineBootstrap('1.0.0', 'bootstrap 3', null),
         ));
 
         $tempDir = sys_get_temp_dir() . '/' . uniqid();
@@ -90,7 +91,8 @@ final class JsonRepositoryWriterTest extends TestCase
                     'bootstrap-0' => [
                         'plugin-version' => '1.0.0',
                         'type'           => 'inline',
-                        'code'           => 'bootstrap 1'
+                        'code'           => 'bootstrap 1',
+                        'hash'           => null,
                     ],
                 ],
                 'phars' => [
@@ -125,12 +127,17 @@ final class JsonRepositoryWriterTest extends TestCase
                     'bootstrap-0' => [
                         'plugin-version' => '1.0.0',
                         'type'           => 'inline',
-                        'code'           => 'bootstrap 2'
+                        'code'           => 'bootstrap 2',
+                        'hash'           => [
+                            'type' => BootstrapHash::SHA_512,
+                            'value' => 'hash2'
+                        ]
                     ],
                     'bootstrap-1' => [
                         'plugin-version' => '1.0.0',
                         'type'           => 'inline',
-                        'code'           => 'bootstrap 3'
+                        'code'           => 'bootstrap 3',
+                        'hash'           => null,
                     ],
                 ],
                 'phars' => [
