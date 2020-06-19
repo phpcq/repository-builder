@@ -79,6 +79,8 @@ class GithubClient implements LoggerAwareInterface
                 try {
                     $data = $this->fetchHttp($url);
                     $save = true;
+                    // Cache up to two days.
+                    $item->expiresAfter(rand(2 * 86400));
                     return $data;
                 } catch (DataNotAvailableException $exception) {
                     return $exception;
