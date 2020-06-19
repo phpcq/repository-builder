@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\SourceProvider;
 
-use Composer\Semver\Constraint\ConstraintInterface;
 use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
@@ -30,7 +29,7 @@ class GithubTagRequirementProviderRepository implements
 
     private string $toolName;
 
-    private ConstraintInterface $allowedVersions;
+    private ToolVersionFilter $versionFilter;
 
     private GithubClient $githubClient;
 
@@ -44,13 +43,13 @@ class GithubTagRequirementProviderRepository implements
         string $repositoryName,
         string $toolName,
         string $fileNamePattern,
-        string $allowedVersions,
+        ToolVersionFilter $versionFilter,
         GithubClient $githubClient
     ) {
         $this->versionParser   = new VersionParser();
         $this->repositoryName  = $repositoryName;
         $this->toolName        = $toolName;
-        $this->allowedVersions = $this->versionParser->parseConstraints($allowedVersions);
+        $this->versionFilter   = $versionFilter;
         $this->githubClient    = $githubClient;
         $this->fileNameRegex   = '#' . str_replace('#', '\\#', $fileNamePattern) . '#i';
     }
@@ -64,9 +63,13 @@ class GithubTagRequirementProviderRepository implements
     public function enrich(ToolVersion $version): void
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
-        $tag               = $this->tags[$normalizedVersion];
-        $composerJson      = $this->githubClient->fetchFile($this->repositoryName, $tag['tag_name'], 'composer.json');
+        $tag               = $this->tags[$normalizedVersion] ?? null;
 
+        if (null === $tag) {
+            return;
+        }
+
+        $composerJson = $this->githubClient->fetchFile($this->repositoryName, $tag['tag_name'], 'composer.json');
         foreach ($composerJson['require'] as $requirement => $constraint) {
             if ('php' === $requirement || 0 === strncmp($requirement, 'ext-', 4)) {
                 $version->getRequirements()->add(new VersionRequirement($requirement, $constraint));
@@ -89,15 +92,16 @@ class GithubTagRequirementProviderRepository implements
             try {
                 $tagName = substr($entry['ref'], 10);
                 $version = $this->versionParser->normalize($tagName);
-                if (!$this->allowedVersions->matches($this->versionParser->parseConstraints($version))) {
-                    continue;
-                }
-                $entry['tag_name']    = $tagName;
-                $entry['version']     = $version;
-                $this->tags[$version] = $entry;
             } catch (UnexpectedValueException $exception) {
                 // Ignore tags not matching semver
+                continue;
             }
+            if (!$this->versionFilter->accepts($version)) {
+                continue;
+            }
+            $entry['tag_name']    = $tagName;
+            $entry['version']     = $version;
+            $this->tags[$version] = $entry;
         }
     }
 

@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 
-class GithubTagRequirementProviderRepositoryFactory
+class GithubTagRequirementProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
     private GithubClient $githubClient;
 
@@ -15,13 +15,18 @@ class GithubTagRequirementProviderRepositoryFactory
         $this->githubClient = $githubClient;
     }
 
-    public function create(array $configuration): SourceRepositoryInterface
+    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
     {
+        $filter = $filterRegistry->getFilterForTool($configuration['tool_name']);
+        if (isset($configuration['allowed_versions'])) {
+            $filter = new ToolVersionFilter($configuration['tool_name'], $configuration['allowed_versions'], $filter);
+        }
+
         return new GithubTagRequirementProviderRepository(
             $configuration['repository'],
             $configuration['tool_name'],
             $configuration['file_pattern'] ?? ($configuration['tool_name'] . '.*'),
-            $configuration['allowed_versions'] ?? '*',
+            $filter,
             $this->githubClient
         );
     }

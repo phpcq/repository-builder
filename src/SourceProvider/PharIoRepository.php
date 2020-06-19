@@ -35,11 +35,18 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
 
     private HttpClientInterface $httpClient;
 
-    public function __construct(string $repositoryUrl, string $cacheDir, HttpClientInterface $httpClient)
-    {
+    private ToolVersionFilterRegistry $filterRegistry;
+
+    public function __construct(
+        string $repositoryUrl,
+        string $cacheDir,
+        HttpClientInterface $httpClient,
+        ToolVersionFilterRegistry $filterRegistry
+    ) {
         $this->repositoryUrl = $repositoryUrl;
         $this->cacheDir      = $cacheDir;
         $this->httpClient    = $httpClient;
+        $this->filterRegistry = $filterRegistry;
     }
 
     public function isFresh(): bool
@@ -58,9 +65,17 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
         foreach ($this->downloadXml()->query('//rootNs:release') as $releaseNode) {
             assert($releaseNode instanceof DOMElement);
             assert($releaseNode->parentNode instanceof DOMElement);
+            $toolName = $releaseNode->parentNode->getAttribute('name');
+            $version  = $releaseNode->getAttribute('version');
+
+            $filter = $this->filterRegistry->getFilterForTool($toolName);
+            if (!$filter->accepts($version)) {
+                continue;
+            }
+
             yield new ToolVersion(
-                $releaseNode->parentNode->getAttribute('name'),
-                $releaseNode->getAttribute('version'),
+                $toolName,
+                $version,
                 $releaseNode->getAttribute('url'),
                 [],
                 $this->getHash($releaseNode),

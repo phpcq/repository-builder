@@ -18,9 +18,9 @@ class PharIoRepositoryFactory implements SourceRepositoryFactoryInterface
         $this->cacheDir   = $cacheDir;
     }
 
-    public function create(array $configuration): SourceRepositoryInterface
+    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
     {
         assert(is_string($configuration['url']));
-        return new PharIoRepository($configuration['url'], $this->cacheDir, $this->httpClient);
+        return new PharIoRepository($configuration['url'], $this->cacheDir, $this->httpClient, $filterRegistry);
     }
 }

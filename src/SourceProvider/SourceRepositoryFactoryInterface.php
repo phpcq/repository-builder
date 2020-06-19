@@ -6,5 +6,5 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 interface SourceRepositoryFactoryInterface
 {
-    public function create(array $configuration): SourceRepositoryInterface;
+    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface;
 }

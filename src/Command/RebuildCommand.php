@@ -10,6 +10,8 @@ use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
 use Phpcq\RepositoryBuilder\SourceProvider\EnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilterRegistry;
 use Phpcq\RepositoryBuilder\SourceProvider\VersionProvidingRepositoryInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -92,9 +94,14 @@ final class RebuildCommand extends Command
 
         $config = Yaml::parse(file_get_contents($configFile));
 
+        $filterRegistry = $this->loadFilterRegistry($config['allowed_versions'] ?? []);
+
         /** @var VersionProvidingRepositoryInterface[] $versionProviders */
         /** @var EnrichingRepositoryInterface[] $enrichingProviders */
-        [$versionProviders, $enrichingProviders] = $this->loadProviders($config['repositories']);
+        [$versionProviders, $enrichingProviders] = $this->loadProviders(
+            $config['repositories'] ?? [],
+            $filterRegistry
+        );
 
         if ($output->isVerbose()) {
             $diff = new RepositoryDiffBuilder($outdir);
@@ -115,14 +122,23 @@ final class RebuildCommand extends Command
         return 0;
     }
 
+    private function loadFilterRegistry(array $allowedVersions): ToolVersionFilterRegistry
+    {
+        $filters = [];
+        foreach ($allowedVersions as $toolName => $constraint) {
+            $filters[] = new ToolVersionFilter($toolName, $constraint);
+        }
+
+        return new ToolVersionFilterRegistry($filters);
+    }
+
     /**
      * Returns the version providers and enriching providers.
      *
-     * @param array $repositoryConfig
-     *
-     * @return array|array[]
+     * @return VersionProvidingRepositoryInterface[][]|EnrichingRepositoryInterface[][]
+     * @psalm-return array{list<VersionProvidingRepositoryInterface>,list<EnrichingRepositoryInterface>}
      */
-    private function loadProviders(array $repositoryConfig): array
+    private function loadProviders(array $repositoryConfig, ToolVersionFilterRegistry $filterRegistry): array
     {
         $versionProviders   = [];
         $enrichingProviders = [];
@@ -132,7 +148,7 @@ final class RebuildCommand extends Command
             }
             /** @var SourceRepositoryFactoryInterface $factory */
             $factory = $this->repositoryFactories->get($repository['type']);
-            $source  = $factory->create($repository);
+            $source  = $factory->create($repository, $filterRegistry);
 
             if ($source instanceof VersionProvidingRepositoryInterface) {
                 $versionProviders[] = $source;

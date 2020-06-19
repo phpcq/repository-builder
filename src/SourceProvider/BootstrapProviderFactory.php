@@ -8,7 +8,7 @@ use Phpcq\RepositoryBuilder\Util\StringUtil;
 
 class BootstrapProviderFactory implements SourceRepositoryFactoryInterface
 {
-    public function create(array $configuration): SourceRepositoryInterface
+    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
     {
         $sourcePath = StringUtil::makeAbsolutePath($configuration['source_dir'], getcwd());
 
