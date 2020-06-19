@@ -75,7 +75,10 @@ class JsonRepositoryWriter
 
     private function processTool(Tool $tool): ?array
     {
+        $fileName         = $tool->getName() . '.json';
+        $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($tool->isEmpty()) {
+            $this->filesystem->remove($fileNameAbsolute);
             return null;
         }
         $bootstraps = [];
@@ -126,10 +129,8 @@ class JsonRepositoryWriter
             ];
         }
 
-        $fileName = $tool->getName() . '.json';
-
         $this->filesystem->dumpFile(
-            $fileNameAbsolute = $this->baseDir . '/' . $fileName,
+            $fileNameAbsolute,
             json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
