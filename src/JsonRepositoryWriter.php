@@ -56,7 +56,6 @@ class JsonRepositoryWriter
     public function save(): void
     {
         $data = [
-            'bootstraps' => [],
             'phars' => [],
         ];
 
