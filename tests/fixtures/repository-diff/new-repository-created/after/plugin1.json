@@ -1,0 +1,31 @@
+{
+  "plugins": {
+    "plugin1": [
+      {
+        "api-version": "1.0.0",
+        "version": "1.0.0",
+        "type": "php-file",
+        "url": "plugin1-1.0.0.php",
+        "requirements": {
+          "php": {
+            "php": "^7.4",
+            "ext-zlib": "*"
+          },
+          "tool": {
+            "tool1": "^1.0"
+          },
+          "plugin": {
+            "plugin2": "^1.0"
+          },
+          "composer": {
+            "vendor/package": "1.0.0"
+          }
+        },
+        "checksum": {
+          "type": "sha-512",
+          "value": "03357efbc1802229ce00dcfa466fdfdf622f11f88ba9c2a7acc4aba4d882252835d24597ab6a1808fc648ed345d633d1d1c12f6b5956323867bab82cef4e6824"
+        }
+      }
+    ]
+  }
+}

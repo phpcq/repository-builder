@@ -8,11 +8,10 @@ use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
-use Phpcq\RepositoryBuilder\SourceProvider\EnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilterRegistry;
-use Phpcq\RepositoryBuilder\SourceProvider\VersionProvidingRepositoryInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -96,9 +95,7 @@ final class RebuildCommand extends Command
 
         $filterRegistry = $this->loadFilterRegistry($config['allowed_versions'] ?? []);
 
-        /** @var VersionProvidingRepositoryInterface[] $versionProviders */
-        /** @var EnrichingRepositoryInterface[] $enrichingProviders */
-        [$versionProviders, $enrichingProviders] = $this->loadProviders(
+        $providers = $this->loadProviders(
             $config['repositories'] ?? [],
             $filterRegistry
         );
@@ -107,7 +104,7 @@ final class RebuildCommand extends Command
             $diff = new RepositoryDiffBuilder($outdir);
         }
         $writer = new JsonRepositoryWriter($outdir);
-        $builder = new RepositoryBuilder($versionProviders, $enrichingProviders, $writer);
+        $builder = new RepositoryBuilder($providers, $writer);
 
         $builder->build();
 
@@ -133,33 +130,27 @@ final class RebuildCommand extends Command
     }
 
     /**
-     * Returns the version providers and enriching providers.
+     * Returns the providers.
      *
-     * @return VersionProvidingRepositoryInterface[][]|EnrichingRepositoryInterface[][]
-     * @psalm-return array{list<VersionProvidingRepositoryInterface>,list<EnrichingRepositoryInterface>}
+     * @return SourceRepositoryInterface[]
+     * @psalm-return list<SourceRepositoryInterface>
      */
     private function loadProviders(array $repositoryConfig, ToolVersionFilterRegistry $filterRegistry): array
     {
-        $versionProviders   = [];
-        $enrichingProviders = [];
+        $providers = [];
         foreach ($repositoryConfig as $repository) {
             if (!$this->repositoryFactories->has($repository['type'])) {
                 throw new InvalidArgumentException('Unknown repository type: ' . $repository['type']);
             }
             /** @var SourceRepositoryFactoryInterface $factory */
-            $factory = $this->repositoryFactories->get($repository['type']);
-            $source  = $factory->create($repository, $filterRegistry);
-
-            if ($source instanceof VersionProvidingRepositoryInterface) {
-                $versionProviders[] = $source;
-            }
-            if ($source instanceof EnrichingRepositoryInterface) {
-                $enrichingProviders[] = $source;
-            }
+            $factory     = $this->repositoryFactories->get($repository['type']);
+            $source      = $factory->create($repository, $filterRegistry);
+            $providers[] = $source;
             if ($source instanceof LoggerAwareInterface) {
                 $source->setLogger($this->logger);
             }
         }
-        return [$versionProviders, $enrichingProviders];
+
+        return $providers;
     }
 }

@@ -1,0 +1,9 @@
+Update versions of "plugin1", "tool1"
+
+Changes in repository:
+  Changed plugins:
+    Added plugin1:
+      Added version 1.0.0
+  Changed tools:
+    Added tool1:
+      Added version 1.0.0

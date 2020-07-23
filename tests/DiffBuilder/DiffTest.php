@@ -6,12 +6,16 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 
 use Closure;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
-use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
-use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
-use Phpcq\RepositoryBuilder\Repository\Tool;
-use Phpcq\RepositoryBuilder\Repository\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\ToolVersion;
+use Phpcq\RepositoryBuilder\Repository\Plugin\PhpInlinePluginVersion;
+use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
+use Phpcq\RepositoryBuilder\Repository\Plugin\PluginHash;
+use Phpcq\RepositoryBuilder\Repository\Plugin\PluginRequirements;
+use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin\PluginDiffTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,118 +23,242 @@ use PHPUnit\Framework\TestCase;
  */
 final class DiffTest extends TestCase
 {
+    use PluginDiffTrait;
+
     public function testProcessesCorrectly(): void
     {
-        $old = new Tool('test-tool');
+        $oldPlugin = new Plugin('test-plugin');
         // Versions to remove.
-        $old->addVersion(new ToolVersion('test-tool', '0.1.0', null, null, null, null, null));
-        $old->addVersion(new ToolVersion('test-tool', '0.2.0', null, null, null, null, null));
+        $oldPlugin->addVersion($this->mockPluginVersion('test-plugin', '0.1.0'));
+        $oldPlugin->addVersion($this->mockPluginVersion('test-plugin', '0.2.0'));
         // Version to change.
-        $old->addVersion(
+        $oldRequirements = new PluginRequirements();
+        $oldRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.3'));
+        $oldPlugin->addVersion(
+            $this->mockPluginVersion(
+                'test-plugin',
+                '0.5.0',
+                '',
+                $oldRequirements,
+                PluginHash::create('sha-1', 'old-hash'),
+                '',
+            )
+        );
+
+        $newPlugin = new Plugin('test-plugin');
+        // Versions to add.
+        $newPlugin->addVersion($this->mockPluginVersion('test-plugin', '1.0.0'));
+        $newPlugin->addVersion($this->mockPluginVersion('test-plugin', '2.0.0'));
+        // Version to change.
+        $newRequirements = new PluginRequirements();
+        $newRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.4'));
+        $newPlugin->addVersion(
+            $this->mockPluginVersion(
+                'test-plugin',
+                '0.5.0',
+                'new code',
+                $newRequirements,
+                PluginHash::create('sha-512', 'new-hash'),
+                'https://example.org/new.phar.asc',
+            )
+        );
+
+        $deletePlugin = new Plugin('delete-plugin');
+        $deletePlugin->addVersion($this->mockPluginVersion('delete-plugin', '1.0.0'));
+
+        $addPlugin = new Plugin('add-plugin');
+        $addPlugin->addVersion($this->mockPluginVersion('add-plugin', '1.0.0'));
+
+        $oldTool = new Tool('test-tool');
+        // Versions to remove.
+        $oldTool->addVersion(new ToolVersion('test-tool', '0.1.0', null, null, null, null));
+        $oldTool->addVersion(new ToolVersion('test-tool', '0.2.0', null, null, null, null));
+        // Version to change.
+        $oldRequirements = new ToolRequirements();
+        $oldRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.3'));
+        $oldTool->addVersion(
             new ToolVersion(
                 'test-tool',
                 '0.5.0',
                 'https://example.org/old.phar',
-                [
-                    new VersionRequirement('php', '^7.3'),
-                ],
-                new ToolHash('sha-1', 'old-hash'),
+                $oldRequirements,
+                ToolHash::create('sha-1', 'old-hash'),
                 'https://example.org/old.phar.asc',
-                new InlineBootstrap('1.0.0', '<?php // old bootstrap...', null)
             )
         );
 
-        $new = new Tool('test-tool');
+        $newTool = new Tool('test-tool');
         // Versions to add.
-        $new->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null, null));
-        $new->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null, null));
+        $newTool->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null));
+        $newTool->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null));
         // Version to change.
-        $new->addVersion(
+        $newRequirements = new ToolRequirements();
+        $newRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.4'));
+        $newTool->addVersion(
             new ToolVersion(
                 'test-tool',
                 '0.5.0',
                 'https://example.org/new.phar',
-                [
-                    new VersionRequirement('php', '^7.4'),
-                ],
-                new ToolHash('sha-512', 'new-hash'),
+                $newRequirements,
+                ToolHash::create('sha-512', 'new-hash'),
                 'https://example.org/new.phar.asc',
-                new InlineBootstrap(
-                    '1.0.0',
-                    '<?php // new bootstrap...',
-                    new BootstrapHash(BootstrapHash::SHA_512, 'hash1')
-                )
             )
         );
 
         $deleteTool = new Tool('delete-tool');
-        $deleteTool->addVersion(new ToolVersion('delete-tool', '1.0.0', null, null, null, null, null));
+        $deleteTool->addVersion(new ToolVersion('delete-tool', '1.0.0', null, null, null, null));
 
         $addTool = new Tool('add-tool');
-        $addTool->addVersion(new ToolVersion('add-tool', '1.0.0', null, null, null, null, null));
+        $addTool->addVersion(new ToolVersion('add-tool', '1.0.0', null, null, null, null));
 
         $diff = Diff::diff(
-            ['test-tool' => $old, 'delete-tool' => $deleteTool],
-            ['test-tool' => $new, 'add-tool' => $addTool]
+            ['test-plugin' => $oldPlugin, 'delete-plugin' => $deletePlugin],
+            ['test-plugin' => $newPlugin, 'add-plugin' => $addPlugin],
+            ['test-tool' => $oldTool, 'delete-tool' => $deleteTool],
+            ['test-tool' => $newTool, 'add-tool' => $addTool],
         );
 
         $this->assertSame(<<<EOF
-            Update versions of "add-tool", "delete-tool", "test-tool"
+            Update versions of "add-plugin", "add-tool" and 4 more
 
             Changes in repository:
-              Added add-tool:
-                Added version 1.0.0
-              Removed delete-tool:
-                Removed version 1.0.0
-              Changes for test-tool:
-                Removed version 0.1.0
-                Removed version 0.2.0
-                Changed version 0.5.0:
-                  phar-url:
-                    - https://example.org/old.phar
-                    + https://example.org/new.phar
-                  requirements:
-                    - php:^7.3
-                    + php:^7.4
-                  hash:
-                    - sha-1:old-hash
-                    + sha-512:new-hash
-                  signature:
-                    - https://example.org/old.phar.asc
-                    + https://example.org/new.phar.asc
-                  bootstrap:
-                    - inline:1.0.0:c5879adbbae0670b7fba764092e66beb
-                    + inline:1.0.0:64d660def5a58dc88e958bf71a95528a
-                  bootstrap-hash:
-                    - 
-                    + sha-512:hash1
-                Added version 1.0.0
-                Added version 2.0.0
+              Changed plugins:
+                Added add-plugin:
+                  Added version 1.0.0
+                Removed delete-plugin:
+                  Removed version 1.0.0
+                Changes for test-plugin:
+                  Removed version 0.1.0
+                  Removed version 0.2.0
+                  Changed version 0.5.0:
+                    code:
+                      - md5:d41d8cd98f00b204e9800998ecf8427e
+                      + md5:a976c7609360a930599e1980bf35ed9e
+                    requirements:
+                      - platform: php:^7.3
+                      + platform: php:^7.4
+                    checksum:
+                      - sha-1:old-hash
+                      + sha-512:new-hash
+                    signature:
+                      - md5:d41d8cd98f00b204e9800998ecf8427e
+                      + md5:de787c17a4da78ce7611a3b3a7c10388
+                  Added version 1.0.0
+                  Added version 2.0.0
+              Changed tools:
+                Added add-tool:
+                  Added version 1.0.0
+                Removed delete-tool:
+                  Removed version 1.0.0
+                Changes for test-tool:
+                  Removed version 0.1.0
+                  Removed version 0.2.0
+                  Changed version 0.5.0:
+                    url:
+                      - https://example.org/old.phar
+                      + https://example.org/new.phar
+                    requirements:
+                      - platform: php:^7.3
+                      + platform: php:^7.4
+                    checksum:
+                      - sha-1:old-hash
+                      + sha-512:new-hash
+                    signature:
+                      - https://example.org/old.phar.asc
+                      + https://example.org/new.phar.asc
+                  Added version 1.0.0
+                  Added version 2.0.0
 
             EOF, (string) $diff);
     }
 
     public function testProcessesEmptyRemoval(): void
     {
-        $this->assertNull(Diff::removed([]));
+        $this->assertNull(Diff::removed([], []));
+    }
+
+    public function testProcessesRemoval(): void
+    {
+        $deletePlugin = new Plugin('delete-plugin');
+        $deletePlugin->addVersion($this->mockPluginVersion('delete-plugin', '1.0.0'));
+        $deleteTool = new Tool('delete-tool');
+        $deleteTool->addVersion(new ToolVersion('delete-tool', '1.0.0', null, null, null, null));
+
+        $diff = Diff::removed(
+            ['delete-plugin' => $deletePlugin],
+            ['delete-tool' => $deleteTool],
+        );
+
+        $this->assertSame(<<<EOF
+            Update versions of "delete-plugin", "delete-tool"
+            
+            Changes in repository:
+              Changed plugins:
+                Removed delete-plugin:
+                  Removed version 1.0.0
+              Changed tools:
+                Removed delete-tool:
+                  Removed version 1.0.0
+
+            EOF, (string) $diff);
     }
 
     public function testProcessesEmptyCreation(): void
     {
-        $this->assertNull(Diff::created([]));
+        $this->assertNull(Diff::created([], []));
+    }
+
+    public function testProcessesCreation(): void
+    {
+        $newPlugin = new Plugin('test-plugin');
+        $newPlugin->addVersion($this->mockPluginVersion('test-plugin', '1.0.0'));
+        $newPlugin->addVersion($this->mockPluginVersion('test-plugin', '2.0.0'));
+        $newTool = new Tool('test-tool');
+        $newTool->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null));
+        $newTool->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null));
+
+        $diff = Diff::created(
+            ['test-plugin' => $newPlugin],
+            ['test-tool' => $newTool],
+        );
+
+        $this->assertSame(<<<EOF
+            Update versions of "test-plugin", "test-tool"
+            
+            Changes in repository:
+              Changed plugins:
+                Added test-plugin:
+                  Added version 1.0.0
+                  Added version 2.0.0
+              Changed tools:
+                Added test-tool:
+                  Added version 1.0.0
+                  Added version 2.0.0
+
+            EOF, (string) $diff);
     }
 
     public function testProcessesEmptyDiff(): void
     {
+        $testPluginOld = new Plugin('test-plugin');
+        $testPluginOld->addVersion(new PhpInlinePluginVersion('test-plugin', '1.0.0', '1.0.0', null, ''));
+        $testPluginOld->addVersion(new PhpInlinePluginVersion('test-plugin', '2.0.0', '1.0.0', null, ''));
+
+        $testPluginNew = new Plugin('test-plugin');
+        $testPluginNew->addVersion(new PhpInlinePluginVersion('test-plugin', '1.0.0', '1.0.0', null, ''));
+        $testPluginNew->addVersion(new PhpInlinePluginVersion('test-plugin', '2.0.0', '1.0.0', null, ''));
+
         $testToolOld = new Tool('test-tool');
-        $testToolOld->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null, null));
-        $testToolOld->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null, null));
+        $testToolOld->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null));
+        $testToolOld->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null));
 
         $testToolNew = new Tool('test-tool');
-        $testToolNew->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null, null));
-        $testToolNew->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null, null));
+        $testToolNew->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null));
+        $testToolNew->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null));
 
         $this->assertNull(Diff::diff(
+            [],
+            [],
             ['test-tool' => $testToolOld],
             ['test-tool' => $testToolNew],
         ));
@@ -144,7 +272,7 @@ final class DiffTest extends TestCase
                 'changes' => Closure::fromCallable(function () {
                     $tool = new Tool('tool-name');
 
-                    return Diff::created(['tool-name' => $tool]);
+                    return Diff::created([], ['tool-name' => $tool]);
                 })->__invoke(),
             ],
             'Old tool removed' => [
@@ -152,7 +280,7 @@ final class DiffTest extends TestCase
                 'changes' => Closure::fromCallable(function () {
                     $tool = new Tool('tool-name');
 
-                    return Diff::removed(['tool-name' => $tool]);
+                    return Diff::removed([], ['tool-name' => $tool]);
                 })->__invoke(),
             ],
             'Only one version has been added' => [
@@ -161,9 +289,9 @@ final class DiffTest extends TestCase
                     $toolOld = new Tool('tool-name');
                     $toolNew = new Tool('tool-name');
 
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    return Diff::diff(['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
                 })->__invoke(),
             ],
             'Only one version has been removed' => [
@@ -172,9 +300,9 @@ final class DiffTest extends TestCase
                     $toolOld = new Tool('tool-name');
                     $toolNew = new Tool('tool-name');
 
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null, null));
+                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    return Diff::diff(['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
                 })->__invoke(),
             ],
             'Only one version has been changed' => [
@@ -183,10 +311,10 @@ final class DiffTest extends TestCase
                     $toolOld = new Tool('tool-name');
                     $toolNew = new Tool('tool-name');
 
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null, null));
+                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
 
-                    return Diff::diff(['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
                 })->__invoke(),
             ],
             'Multiple changes have happened for one tool' => [
@@ -196,20 +324,20 @@ final class DiffTest extends TestCase
                     $toolNew = new Tool('tool-name');
 
                     // 3 new versions:
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.1', 'changed', null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.2', 'changed', null, null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.1', 'changed', null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.2', 'changed', null, null, null));
 
                     // 1 version deleted:
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.3', null, null, null, null, null));
+                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.3', null, null, null, null));
 
                     // 2 versions changed:
-                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.0', null, null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.0', 'changed', null, null, null, null));
-                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.1', null, null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.1', 'changed', null, null, null, null));
+                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.0', null, null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.0', 'changed', null, null, null));
+                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.1', null, null, null, null));
+                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.1', 'changed', null, null, null));
 
-                    return Diff::diff(['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
                 })->__invoke(),
             ],
 
@@ -221,10 +349,12 @@ final class DiffTest extends TestCase
                     $tool2Old = new Tool('tool-name-2');
                     $tool2New = new Tool('tool-name-2');
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null, null));
+                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
 
                     return Diff::diff(
+                        [],
+                        [],
                         ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old],
                         ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New]
                     );
@@ -241,11 +371,13 @@ final class DiffTest extends TestCase
                     $tool3Old = new Tool('tool-name-3');
                     $tool3New = new Tool('tool-name-3');
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null, null));
-                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null, null));
+                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
 
                     return Diff::diff(
+                        [],
+                        [],
                         ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old, 'tool-name-3' => $tool3Old],
                         ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New, 'tool-name-3' => $tool3New]
                     );
@@ -253,7 +385,7 @@ final class DiffTest extends TestCase
             ],
 
             'More than 3 tools changed' => [
-                'expected' => 'Update versions of "tool-name-1", "tool-name-2" and 2 more tools',
+                'expected' => 'Update versions of "tool-name-1", "tool-name-2" and 2 more',
                 'changes' => Closure::fromCallable(function () {
                     $tool1Old = new Tool('tool-name-1');
                     $tool1New = new Tool('tool-name-1');
@@ -264,12 +396,14 @@ final class DiffTest extends TestCase
                     $tool4Old = new Tool('tool-name-4');
                     $tool4New = new Tool('tool-name-4');
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null, null));
-                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null, null));
-                    $tool4New->addVersion(new ToolVersion('tool-name-4', '1.0.0', null, null, null, null, null));
+                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
+                    $tool4New->addVersion(new ToolVersion('tool-name-4', '1.0.0', null, null, null, null));
 
                     return Diff::diff(
+                        [],
+                        [],
                         [
                             'tool-name-1' => $tool1Old,
                             'tool-name-2' => $tool2Old,

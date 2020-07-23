@@ -7,8 +7,8 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 use DOMElement;
 use Generator;
 use Phpcq\RepositoryBuilder\File\XmlFile;
-use Phpcq\RepositoryBuilder\Repository\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\ToolVersion;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *   </phar>
  * </repository>
  */
-class PharIoRepository implements VersionProvidingRepositoryInterface
+class PharIoRepository implements ToolVersionProvidingRepositoryInterface
 {
     private string $repositoryUrl;
 
@@ -77,10 +77,9 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
                 $toolName,
                 $version,
                 $releaseNode->getAttribute('url'),
-                [],
+                null,
                 $this->getHash($releaseNode),
                 $this->getSignatureUrl($releaseNode),
-                null
             );
         }
     }
@@ -117,6 +116,6 @@ class PharIoRepository implements VersionProvidingRepositoryInterface
         $type      = $hashNode->getAttribute('type');
         $hashValue = $hashNode->getAttribute('value');
 
-        return new ToolHash($type, $hashValue);
+        return ToolHash::create($type, $hashValue);
     }
 }

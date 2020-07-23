@@ -1,0 +1,21 @@
+{
+  "plugin-a": [
+    {
+      "file": "plugin-a.php",
+      "plugin-version": "1.0.0",
+      "version": "1.0.0"
+    }
+  ],
+  "plugin-b": [
+    {
+      "file": "plugin-b1.php",
+      "plugin-version": "1.0.0",
+      "version": "1.0.0"
+    },
+    {
+      "file": "plugin-b2.php",
+      "plugin-version": "1.0.0",
+      "version": "1.0.1"
+    }
+  ]
+}

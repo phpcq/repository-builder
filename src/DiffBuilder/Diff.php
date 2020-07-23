@@ -4,86 +4,71 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\DiffBuilder;
 
-use Phpcq\RepositoryBuilder\Repository\Tool;
+use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginDiff;
+use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginDiffInterface;
+use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolAddedDiff;
+use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiff;
+use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiffInterface;
+use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolRemovedDiff;
+use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
+use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
 use UnexpectedValueException;
 
 final class Diff implements DiffInterface
 {
     /**
-     * @var DiffInterface[]
+     * @var ObjectDiffInterface[]
+     * @psalm-var list<ObjectDiffInterface>
      */
     private array $differences;
 
     /**
-     * @param Tool[] $new Tools indexed by tool name.
+     * @param Plugin[] $newPlugins Plugins indexed by name.
+     * @param Tool[]   $newTools Tools indexed by name.
      *
-     * @return Diff|null
+     * @psalm-param list<Plugin> $newPlugins
+     * @psalm-param list<Tool> $newTools
      */
-    public static function created(array $new): ?Diff
+    public static function created(array $newPlugins, array $newTools): ?self
     {
-        if (empty($new)) {
+        if (empty($newTools) && empty($newPlugins)) {
             return null;
         }
-        $differences = [];
-        foreach ($new as $tool) {
-            $differences[$tool->getName()] = ToolAddedDiff::diff($tool);
-        }
-        return new Diff($differences);
+
+        return self::diff([], $newPlugins, [], $newTools);
     }
 
     /**
-     * @param Tool[] $old Tools indexed by tool name.
+     * @param Plugin[] $oldPlugins Plugins indexed by name.
+     * @param Tool[] $oldTools     Tools indexed by name.
      *
-     * @return Diff|null
+     * @psalm-param list<Plugin> $oldPlugins
+     * @psalm-param list<Tool> $oldTools
      */
-    public static function removed(array $old): ?Diff
+    public static function removed(array $oldPlugins, array $oldTools): ?self
     {
-        if (empty($old)) {
+        if (empty($oldPlugins) && empty($oldTools)) {
             return null;
         }
-        $differences = [];
-        foreach ($old as $tool) {
-            $differences[$tool->getName()] = ToolRemovedDiff::diff($tool);
-        }
 
-        return new Diff($differences);
+        return self::diff($oldPlugins, [], $oldTools, []);
     }
 
     /**
-     * @param Tool[] $old Tools indexed by tool name.
-     * @param Tool[] $new Tools indexed by tool name.
+     * @param Plugin[] $oldPlugins Plugins indexed by name.
+     * @param Plugin[] $newPlugins Plugins indexed by name.
+     * @param Tool[]   $oldTools Tools indexed by tool name.
+     * @param Tool[]   $newTools Tools indexed by tool name.
      *
-     * @return Diff|null
+     * @psalm-param list<Plugin> $oldPlugins
+     * @psalm-param list<Plugin> $newPlugins
+     * @psalm-param list<Tool> $oldTools
+     * @psalm-param list<Tool> $newTools
      */
-    public static function diff(array $old, array $new): ?Diff
+    public static function diff(array $oldPlugins, array $newPlugins, array $oldTools, array $newTools): ?self
     {
-        $differences = [];
-        $toDiff  = [];
-        // 1. detect all new versions.
-        foreach ($new as $newTool) {
-            if (array_key_exists($name = $newTool->getName(), $old)) {
-                $toDiff[$name] = $name;
-                continue;
-            }
-            $differences[$name] = ToolAddedDiff::diff($newTool);
-        }
-
-        // 2. detect all removed versions.
-        foreach ($old as $oldTool) {
-            if (array_key_exists($name = $oldTool->getName(), $new)) {
-                $toDiff[$name] = $name;
-                continue;
-            }
-            $differences[$name] = ToolRemovedDiff::diff($oldTool);
-        }
-
-        // 3. detect all changed versions.
-        foreach ($toDiff as $diffTool) {
-            if (null !== $diff = ToolChangedDiff::diff($old[$diffTool], $new[$diffTool])) {
-                $differences[$diffTool] = $diff;
-            }
-        }
-
+        /** @psalm-var list<ObjectDiffInterface> $differences */
+        $differences = array_merge(PluginDiff::diff($oldPlugins, $newPlugins), ToolDiff::diff($oldTools, $newTools));
         if (empty($differences)) {
             return null;
         }
@@ -98,77 +83,104 @@ final class Diff implements DiffInterface
 
     public function asString(string $prefix): string
     {
-        $result = [
-            $prefix . $this->asSummary() . "\n" .
-            $prefix . "\n" .
-            $prefix . 'Changes in repository:' . "\n"
-        ];
-        foreach ($this->differences as $difference) {
-            $result[] = $difference->asString($prefix . '  ');
+        $byType = $this->differencesByTypeAsString($prefix);
+        $result = [];
+        foreach ($byType as $typeName => $values) {
+            $result[] = ['  Changed ' . $typeName . 's:' . "\n", ...$values];
         }
 
-        return implode('', $result);
+        return implode(
+            '',
+            array_merge(
+                [
+                    $prefix . $this->asSummary() . "\n" .
+                    $prefix . "\n" .
+                    $prefix . 'Changes in repository:' . "\n"
+                ],
+                ...$result
+            )
+        );
     }
 
     public function asSummary(): string
     {
         // 1. One tool has changed
         if (1 === count($this->differences)) {
-            /** @var ToolAddedDiff|ToolRemovedDiff|ToolChangedDiff $difference */
             $difference = reset($this->differences);
-            return $this->asSummaryForSingleTool($difference);
+            return $this->asSummaryForSingleObject($difference);
         }
 
-        // 2. Multiple tools have changed
-        $toolNames = [];
+        // 2. Multiple changes
+        $names = [];
         foreach ($this->differences as $difference) {
-            /** @var ToolAddedDiff|ToolRemovedDiff|ToolChangedDiff $difference */
-            $toolNames[] = $difference->getToolName();
+            $names[] = $difference->getName();
         }
+
         // 2.1. Up to 3 tools changed: 'Update versions of "tool-name", "tool-name-2", "tool-name-3"'
-        if (3 >= count($toolNames)) {
-            return 'Update versions of "' . implode('", "', $toolNames) . '"';
+        if (3 >= count($names)) {
+            return 'Update versions of "' . implode('", "', $names) . '"';
         }
 
         // 2.2. More than 3 tools changed: 'Update versions of "tool-name", "tool-name-2" and 2 more tools'
-        return 'Update versions of "' . implode('", "', array_slice($toolNames, 0, 2)) . '" and ' .
-            (count($toolNames) - 2) . ' more tools';
+        return 'Update versions of "' . implode('", "', array_slice($names, 0, 2)) . '" and ' .
+            (count($names) - 2) . ' more';
     }
 
+    /** @psalm-param list<ObjectDiffInterface> $differences */
     private function __construct(array $differences)
     {
         $this->differences = $differences;
-        ksort($this->differences);
+        usort(
+            $this->differences,
+            function (ObjectDiffInterface $objA, ObjectDiffInterface $objB) {
+                return $objA->getName() <=> $objB->getName();
+            }
+        );
+    }
+
+    /** @psalm-return array{tool: list<string>, plugin: list<string>} */
+    protected function differencesByTypeAsString(string $prefix): array
+    {
+        /** @psalm-var array{tool: list<string>, plugin: list<string>} $byType */
+        $byType = [
+            'plugin' => [],
+            'tool'   => [],
+        ];
+        foreach ($this->differences as $difference) {
+            $byType[$this->getSlugFromDiffType($difference)][] = $difference->asString($prefix . '    ');
+        }
+
+        return $byType;
     }
 
     /**
-     * @param ToolAddedDiff|ToolRemovedDiff|ToolChangedDiff $toolDiff
+     * @param ObjectDiffInterface $toolDiff
      */
-    private function asSummaryForSingleTool(DiffInterface $toolDiff): string
+    private function asSummaryForSingleObject(ObjectDiffInterface $toolDiff): string
     {
         // Easy out if tool is added or removed.
-        if (!$toolDiff instanceof ToolChangedDiff) {
-            return $this->asSummaryForSingleToolAddOrRemove($toolDiff);
+        if (!$toolDiff instanceof ObjectChangedDiffInterface) {
+            return $this->asSummaryForSingleObjectAddOrRemove($toolDiff);
         }
 
         $toolDifferences = $toolDiff->getDifferences();
         if (1 === count($toolDifferences)) {
-            return $this->asSummaryForSingleToolSingleDifference(reset($toolDifferences));
+            return $this->asSummaryForSingleObjectSingleDifference(reset($toolDifferences));
         }
 
-        return $this->asSummaryForSingleToolMultipleDifferences($toolDiff, $toolDifferences);
+        return $this->asSummaryForSingleObjectMultipleDifferences($toolDiff, $toolDifferences);
     }
 
     /**
-     * @param ToolAddedDiff|ToolRemovedDiff $diff
+     * @param ObjectDiffInterface $diff
      */
-    private function asSummaryForSingleToolAddOrRemove(DiffInterface $diff): string
+    private function asSummaryForSingleObjectAddOrRemove(ObjectDiffInterface $diff): string
     {
         switch (true) {
             case $diff instanceof ToolAddedDiff:
-                return sprintf('Add tool "%1$s"', $diff->getToolName());
+                return sprintf('Add tool "%1$s"', $diff->getName());
             case $diff instanceof ToolRemovedDiff:
-                return sprintf('Remove tool "%1$s"', $diff->getToolName());
+                return sprintf('Remove tool "%1$s"', $diff->getName());
             default:
         }
         // Can never happen.
@@ -177,23 +189,24 @@ final class Diff implements DiffInterface
         // @codeCoverageIgnoreEnd
     }
 
-    /**
-     * @param VersionAddedDiff|VersionRemovedDiff|VersionChangedDiff $diff
-     */
-    private function asSummaryForSingleToolSingleDifference(DiffInterface $diff): string
+    private function asSummaryForSingleObjectSingleDifference(ObjectVersionDiffInterface $diff): string
     {
+        $type    = $this->getSlugFromDiffType($diff);
+        $name    = $diff->getName();
+        $version = $diff->getVersion();
         switch (true) {
             // 1. Only one version has been added: 'Add version x.y.z of tool "tool-name"'
-            case $diff instanceof VersionAddedDiff:
-                return sprintf('Add version %1$s of tool "%2$s"', $diff->getVersion(), $diff->getToolName());
+            case $diff instanceof ObjectVersionAddedDiffInterface:
+                return sprintf('Add version %2$s of %1$s "%3$s"', $type, $version, $name);
             // 2. Only one version has been removed: 'Remove version x.y.z of tool "tool-name"'
-            case $diff instanceof VersionRemovedDiff:
-                return sprintf('Remove version %1$s of tool "%2$s"', $diff->getVersion(), $diff->getToolName());
+            case $diff instanceof ObjectVersionRemovedDiffInterface:
+                return sprintf('Remove version %2$s of %1$s "%3$s"', $type, $version, $name);
             // 3. Only one version has Changed: 'Update version x.y.z of tool "tool-name"'
-            case $diff instanceof VersionChangedDiff:
-                return sprintf('Update version %1$s of tool "%2$s"', $diff->getVersion(), $diff->getToolName());
+            case $diff instanceof ObjectVersionChangedDiffInterface:
+                return sprintf('Update version %2$s of %1$s "%3$s"', $type, $version, $name);
             default:
         }
+
         // Can never happen.
         // @codeCoverageIgnoreStart
         throw new UnexpectedValueException('Unknown diff class: ' . get_class($diff));
@@ -201,9 +214,9 @@ final class Diff implements DiffInterface
     }
 
     /**
-     * @param VersionAddedDiff[]|VersionRemovedDiff[]|VersionChangedDiff[] $differences
+     * @param ObjectVersionDiffInterface[] $differences
      */
-    private function asSummaryForSingleToolMultipleDifferences(ToolChangedDiff $tool, array $differences): string
+    private function asSummaryForSingleObjectMultipleDifferences(ObjectDiffInterface $tool, array $differences): string
     {
         // Multiple changes happened: 'Update tool "tool-name": 3 new versions, 1 deleted, 2 changed'
         $add = 0;
@@ -211,13 +224,13 @@ final class Diff implements DiffInterface
         $chg = 0;
         foreach ($differences as $toolDifference) {
             switch (true) {
-                case $toolDifference instanceof VersionAddedDiff:
+                case $toolDifference instanceof ObjectVersionAddedDiffInterface:
                     $add++;
                     break;
-                case $toolDifference instanceof VersionRemovedDiff:
+                case $toolDifference instanceof ObjectVersionRemovedDiffInterface:
                     $del++;
                     break;
-                case $toolDifference instanceof VersionChangedDiff:
+                case $toolDifference instanceof ObjectVersionChangedDiffInterface:
                     $chg++;
                     break;
                 default:
@@ -241,8 +254,25 @@ final class Diff implements DiffInterface
 
         return sprintf(
             'Update tool "%1$s": %2$s',
-            $tool->getToolName(),
+            $tool->getName(),
             implode(', ', $actions)
         );
+    }
+
+    /** @psalm-return 'plugin'|'tool' */
+    private function getSlugFromDiffType(DiffInterface $difference): string
+    {
+        switch (true) {
+            case $difference instanceof PluginDiffInterface:
+                return 'plugin';
+            case $difference instanceof ToolDiffInterface:
+                return 'tool';
+            default:
+        }
+
+        // Can never happen.
+        // @codeCoverageIgnoreStart
+        throw new UnexpectedValueException('Unknown diff type: ' . implode(',', class_implements($difference)));
+        // @codeCoverageIgnoreEnd
     }
 }

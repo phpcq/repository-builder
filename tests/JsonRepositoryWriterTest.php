@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test;
 
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
-use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
-use Phpcq\RepositoryBuilder\Repository\InlineBootstrap;
-use Phpcq\RepositoryBuilder\Repository\Tool;
-use Phpcq\RepositoryBuilder\Repository\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\ToolVersion;
+use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
+use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,55 +21,53 @@ final class JsonRepositoryWriterTest extends TestCase
     public function testWrite(): void
     {
         $tool1 = new Tool('tool1');
+
+        $req1 = new ToolRequirements();
+        $req1->getPhpRequirements()->add(new VersionRequirement('php', '7.1.0'));
+        $req1->getPhpRequirements()->add(new VersionRequirement('ext-foo', '*'));
         $tool1->addVersion(new ToolVersion(
             'tool1',
             '1.0.0',
             'https://example.org/some-1.0.0.phar',
-            [
-                new VersionRequirement('php', '7.1.0'),
-                new VersionRequirement('ext-foo', '*'),
-            ],
-            new ToolHash(ToolHash::SHA_512, 'hash1'),
+            $req1,
+            ToolHash::create(ToolHash::SHA_512, 'hash1'),
             'https://example.org/some-1.0.0.phar.sig',
-            $bootstrap1 = new InlineBootstrap('1.0.0', 'bootstrap 1', null)
         ));
+        $req2 = new ToolRequirements();
+        $req2->getPhpRequirements()->add(new VersionRequirement('php', '7.3.0'));
+        $req2->getPhpRequirements()->add(new VersionRequirement('ext-foo', '*'));
         $tool1->addVersion(new ToolVersion(
             'tool1',
             '2.0.0',
             'https://example.org/some-2.0.0.phar',
-            [
-                new VersionRequirement('php', '7.3.0'),
-                new VersionRequirement('ext-foo', '*'),
-            ],
-            new ToolHash(ToolHash::SHA_512, 'hash2'),
+            $req2,
+            ToolHash::create(ToolHash::SHA_512, 'hash2'),
             'https://example.org/some-2.0.0.phar.sig',
-            $bootstrap1,
         ));
 
         $tool2 = new Tool('tool2');
+
+        $req3 = new ToolRequirements();
+        $req3->getPhpRequirements()->add(new VersionRequirement('php', '7.1.1'));
+        $req3->getPhpRequirements()->add(new VersionRequirement('ext-foo', '*'));
         $tool2->addVersion(new ToolVersion(
             'tool2',
             '1.0.0',
             'https://example.org/another-1.0.0.phar',
-            [
-                new VersionRequirement('php', '7.1.1'),
-                new VersionRequirement('ext-foo', '*'),
-            ],
-            new ToolHash(ToolHash::SHA_512, 'hash3'),
+            $req3,
+            ToolHash::create(ToolHash::SHA_512, 'hash3'),
             'https://example.org/another-1.0.0.phar.sig',
-            new InlineBootstrap('1.0.0', 'bootstrap 2', new BootstrapHash(BootstrapHash::SHA_512, 'hash2')),
         ));
+        $req4 = new ToolRequirements();
+        $req4->getPhpRequirements()->add(new VersionRequirement('php', '7.3.1'));
+        $req4->getPhpRequirements()->add(new VersionRequirement('ext-foo', '*'));
         $tool2->addVersion(new ToolVersion(
             'tool2',
             '2.0.0',
             'https://example.org/another-2.0.0.phar',
-            [
-                new VersionRequirement('php', '7.3.1'),
-                new VersionRequirement('ext-foo', '*'),
-            ],
-            new ToolHash(ToolHash::SHA_512, 'hash4'),
+            $req4,
+            ToolHash::create(ToolHash::SHA_512, 'hash4'),
             'https://example.org/another-2.0.0.phar.sig',
-            new InlineBootstrap('1.0.0', 'bootstrap 3', null),
         ));
 
         $tempDir = sys_get_temp_dir() . '/' . uniqid();
@@ -78,111 +75,89 @@ final class JsonRepositoryWriterTest extends TestCase
         $fileSystem->mkdir($tempDir);
         try {
             $writer = new JsonRepositoryWriter($tempDir);
-            $writer->write($tool1);
-            $writer->write($tool2);
+            $writer->writeTool($tool1);
+            $writer->writeTool($tool2);
             $writer->save();
 
             $this->assertFileExists($tempDir . '/repository.json');
-            $this->assertFileExists($tempDir . '/tool1.json');
-            $this->assertFileExists($tempDir . '/tool2.json');
+            $this->assertFileExists($tempDir . '/tool1-tool.json');
+            $this->assertFileExists($tempDir . '/tool2-tool.json');
 
             $this->assertRepositoryFileMatches([
-                'bootstraps' => [
-                    'bootstrap-0' => [
-                        'plugin-version' => '1.0.0',
-                        'type'           => 'inline',
-                        'code'           => 'bootstrap 1',
-                        'hash'           => null,
-                    ],
-                ],
-                'phars' => [
+                'tools' => [
                     'tool1' => [
                         [
                             'version'      => '1.0.0',
-                            'phar-url'     => 'https://example.org/some-1.0.0.phar',
-                            'bootstrap'    => 'bootstrap-0',
+                            'url'          => 'https://example.org/some-1.0.0.phar',
                             'requirements' => [
-                                'php'      => '7.1.0',
-                                'ext-foo'  => '*',
+                                'php' => [
+                                    'php'      => '7.1.0',
+                                    'ext-foo'  => '*',
+                                ],
                             ],
-                            'hash'         => ['type' => 'sha-512', 'value' => 'hash1'],
+                            'checksum'     => ['type' => 'sha-512', 'value' => 'hash1'],
                             'signature'    => 'https://example.org/some-1.0.0.phar.sig',
                         ],
                         [
                             'version'      => '2.0.0',
-                            'phar-url'     => 'https://example.org/some-2.0.0.phar',
-                            'bootstrap'    => 'bootstrap-0',
+                            'url'          => 'https://example.org/some-2.0.0.phar',
                             'requirements' => [
-                                'php'      => '7.3.0',
-                                'ext-foo'  => '*',
+                                'php' => [
+                                    'php'      => '7.3.0',
+                                    'ext-foo'  => '*',
+                                ],
                             ],
-                            'hash'         => ['type' => 'sha-512', 'value' => 'hash2'],
+                            'checksum'     => ['type' => 'sha-512', 'value' => 'hash2'],
                             'signature'    => 'https://example.org/some-2.0.0.phar.sig',
                         ],
                     ],
                 ],
-            ], $tempDir . '/tool1.json');
+            ], $tempDir . '/tool1-tool.json');
             $this->assertRepositoryFileMatches([
-                'bootstraps' => [
-                    'bootstrap-0' => [
-                        'plugin-version' => '1.0.0',
-                        'type'           => 'inline',
-                        'code'           => 'bootstrap 2',
-                        'hash'           => [
-                            'type' => BootstrapHash::SHA_512,
-                            'value' => 'hash2'
-                        ]
-                    ],
-                    'bootstrap-1' => [
-                        'plugin-version' => '1.0.0',
-                        'type'           => 'inline',
-                        'code'           => 'bootstrap 3',
-                        'hash'           => null,
-                    ],
-                ],
-                'phars' => [
+                'tools' => [
                     'tool2' => [
                         [
                             'version'      => '1.0.0',
-                            'phar-url'     => 'https://example.org/another-1.0.0.phar',
-                            'bootstrap'    => 'bootstrap-0',
+                            'url'          => 'https://example.org/another-1.0.0.phar',
                             'requirements' => [
-                                'php'      => '7.1.1',
-                                'ext-foo'  => '*',
+                                'php' => [
+                                    'php'      => '7.1.1',
+                                    'ext-foo'  => '*',
+                                ],
                             ],
-                            'hash'         => ['type' => 'sha-512', 'value' => 'hash3'],
+                            'checksum'     => ['type' => 'sha-512', 'value' => 'hash3'],
                             'signature'    => 'https://example.org/another-1.0.0.phar.sig',
                         ],
                         [
                             'version'      => '2.0.0',
-                            'phar-url'     => 'https://example.org/another-2.0.0.phar',
-                            'bootstrap'    => 'bootstrap-1',
+                            'url'          => 'https://example.org/another-2.0.0.phar',
                             'requirements' => [
-                                'php'      => '7.3.1',
-                                'ext-foo'  => '*',
+                                'php' => [
+                                    'php'      => '7.3.1',
+                                    'ext-foo'  => '*',
+                                ],
                             ],
-                            'hash'         => ['type' => 'sha-512', 'value' => 'hash4'],
+                            'checksum'     => ['type' => 'sha-512', 'value' => 'hash4'],
                             'signature'    => 'https://example.org/another-2.0.0.phar.sig',
                         ],
                     ],
                 ],
-            ], $tempDir . '/tool2.json');
+            ], $tempDir . '/tool2-tool.json');
 
             $this->assertSame([
-                'bootstraps' => [],
-                'phars' => [
-                    'tool1' => [
-                        'url'      => './tool1.json',
+                'includes' => [
+                    [
+                        'url'      => './tool1-tool.json',
                         'checksum' => [
                             'type'  => 'sha-512',
-                            'value' => hash_file('sha512', $tempDir . '/tool1.json'),
+                            'value' => hash_file('sha512', $tempDir . '/tool1-tool.json'),
                         ],
                     ],
-                    'tool2' => [
-                        'url'      => './tool2.json',
+                    [
+                        'url'      => './tool2-tool.json',
                         'checksum' => [
                             'type'  => 'sha-512',
-                            'value' => hash_file('sha512', $tempDir . '/tool2.json'),
+                            'value' => hash_file('sha512', $tempDir . '/tool2-tool.json'),
                         ],
                     ],
                 ],

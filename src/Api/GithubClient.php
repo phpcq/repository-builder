@@ -49,10 +49,14 @@ class GithubClient implements LoggerAwareInterface
         );
     }
 
+    /**
+     * @throws DataNotAvailableException
+     */
     public function fetchFile(string $repository, string $refSpec, string $filePath): array
     {
         // We handle exceptions differently here - we cache file downloads forever but exceptions only for an hour.
-        return $this->cache->get(
+        /** @var array<string, mixed>|DataNotAvailableException $value */
+        $value = $this->cache->get(
             StringUtil::makeFilename('file_' . $repository . '/' . $refSpec . '/' . $filePath),
             function (ItemInterface $item, bool &$save) use ($repository, $refSpec, $filePath) {
                 $save = true;
@@ -66,13 +70,22 @@ class GithubClient implements LoggerAwareInterface
                 }
             }
         );
+
+        if ($value instanceof DataNotAvailableException) {
+            throw $value;
+        }
+
+        return $value;
     }
 
     /**
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     *
+     * @throws DataNotAvailableException
      */
     private function fetchJson(string $url): array
     {
+        /** @var array<string, mixed>|DataNotAvailableException $value */
         $value    = $this->cache->get(
             StringUtil::makeFilename($url),
             function (ItemInterface $item, bool &$save) use ($url) {
@@ -94,11 +107,15 @@ class GithubClient implements LoggerAwareInterface
         return $value;
     }
 
+    /**
+     * @throws DataNotAvailableException
+     */
     private function fetchHttp(string $url): array
     {
         $this->logger->debug('Fetching: ' . $url);
         try {
-            return json_decode(
+            /** @var array<string, mixed> $value */
+            $value = json_decode(
                 $this->httpClient->request(
                     'GET',
                     $url,
@@ -106,6 +123,8 @@ class GithubClient implements LoggerAwareInterface
                 )->getContent(),
                 true
             );
+
+            return $value;
         } catch (ClientException $exception) {
             throw new DataNotAvailableException(
                 $exception->getResponse()->getContent(false),
