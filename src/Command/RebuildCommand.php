@@ -28,6 +28,22 @@ use function substr;
  * This rebuilds the repository.
  *
  * @psalm-suppress PropertyNotSetInConstructor
+ *
+ * @psalm-type TRepositoryBuilderConfigurationAllowedVersions = array<string, string>
+ * @psalm-type TRepositoryBuilderConfigurationRepositoryConfiguration = array{
+ *     type: string,
+ *     source_dir?: string,
+ *     repository?: string,
+ *     tool_name?: string
+ *   }
+ * @psalm-type TRepositoryBuilderConfigurationRepositoryConfigurationArray = array<
+ *   string,
+ *   TRepositoryBuilderConfigurationRepositoryConfiguration
+ * >
+ * @psalm-type TRepositoryBuilderConfiguration = array{
+ *   allowed_versions: TRepositoryBuilderConfigurationAllowedVersions,
+ *   repositories: TRepositoryBuilderConfigurationRepositoryConfigurationArray
+ * }
  */
 final class RebuildCommand extends Command
 {
@@ -79,11 +95,14 @@ final class RebuildCommand extends Command
     {
         $this->logger = new ConsoleLogger($output);
 
-        $configFile = realpath((string) $input->getOption('config'));
+        $configFile = realpath($this->getConfigOptionString($input, 'config'));
         if (false === $configFile || !is_readable($configFile)) {
-            throw new InvalidArgumentException('Config file not found: ' . $input->getOption('config'));
+            throw new InvalidArgumentException(
+                'Config file not found: ' . $this->getConfigOptionString($input, 'config')
+            );
         }
-        $outdir = (string) $input->getOption('output-directory');
+
+        $outdir = $this->getConfigOptionString($input, 'output-directory');
         if (!is_dir($outdir) && !mkdir($outdir, 0775, true)) {
             throw new InvalidArgumentException('Could not create directory: ' . $outdir);
         }
@@ -91,6 +110,7 @@ final class RebuildCommand extends Command
 
         chdir(dirname($configFile));
 
+        /** @psalm-var TRepositoryBuilderConfiguration $config */
         $config = Yaml::parse(file_get_contents($configFile));
 
         $filterRegistry = $this->loadFilterRegistry($config['allowed_versions'] ?? []);
@@ -100,6 +120,7 @@ final class RebuildCommand extends Command
             $filterRegistry
         );
 
+        $diff = null;
         if ($output->isVerbose()) {
             $diff = new RepositoryDiffBuilder($outdir);
         }
@@ -119,6 +140,13 @@ final class RebuildCommand extends Command
         return 0;
     }
 
+    private function getConfigOptionString(InputInterface $input, string $option): string
+    {
+        /** @psalm-suppress PossiblyInvalidCast - we don't have array options */
+        return (string) $input->getOption($option);
+    }
+
+    /** @psalm-param TRepositoryBuilderConfigurationAllowedVersions $allowedVersions */
     private function loadFilterRegistry(array $allowedVersions): ToolVersionFilterRegistry
     {
         $filters = [];
@@ -131,6 +159,8 @@ final class RebuildCommand extends Command
 
     /**
      * Returns the providers.
+     *
+     * @psalm-param TRepositoryBuilderConfigurationRepositoryConfigurationArray $repositoryConfig
      *
      * @return SourceRepositoryInterface[]
      * @psalm-return list<SourceRepositoryInterface>
