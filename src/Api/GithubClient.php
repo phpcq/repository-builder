@@ -12,6 +12,7 @@ use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GithubClient implements LoggerAwareInterface
@@ -110,7 +111,7 @@ class GithubClient implements LoggerAwareInterface
     /**
      * @throws DataNotAvailableException
      */
-    private function fetchHttp(string $url): array
+    private function fetchHttp(string $url, int $limit = 20): array
     {
         $this->logger->debug('Fetching: ' . $url);
         try {
@@ -125,6 +126,20 @@ class GithubClient implements LoggerAwareInterface
             );
 
             return $value;
+        } catch (RedirectionExceptionInterface $exception) {
+            // Handle redirects https://github.com/symfony/symfony/issues/38207
+            if ($limit > 0) {
+                $headers = $exception->getResponse()->getHeaders(false);
+                if (isset($headers['location'][0])) {
+                    return $this->fetchHttp($headers['location'][0], $limit-1);
+                }
+            }
+
+            throw new DataNotAvailableException(
+                $exception->getResponse()->getContent(false),
+                (int) $exception->getCode(),
+                $exception
+            );
         } catch (ClientException $exception) {
             throw new DataNotAvailableException(
                 $exception->getResponse()->getContent(false),
