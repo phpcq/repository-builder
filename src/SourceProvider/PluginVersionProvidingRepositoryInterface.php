@@ -10,6 +10,7 @@ use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 
 /**
  * This describes a tool version providing repository.
+ * @SuppressWarnings(PHPMD.LongClassName)
  */
 interface PluginVersionProvidingRepositoryInterface extends IteratorAggregate, SourceRepositoryInterface
 {

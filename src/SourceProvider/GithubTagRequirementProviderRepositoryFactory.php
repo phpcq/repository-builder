@@ -13,6 +13,7 @@ use Phpcq\RepositoryBuilder\Api\GithubClient;
  *   repository: string,
  *   file_pattern?: string,
  * }
+ * @SuppressWarnings(PHPMD.LongClassName)
  */
 class GithubTagRequirementProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
