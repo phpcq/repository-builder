@@ -2,7 +2,7 @@
 .DS_Store
 Thumbs.db
 
-# IDEs 
+# IDEs & build
 .buildpath
 .project
 .settings/
@@ -11,6 +11,7 @@ Thumbs.db
 .external*/
 .idea/
 nbproject/
+.phpunit.result.cache
 
 # symfony related
 var
