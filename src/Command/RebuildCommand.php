@@ -114,7 +114,10 @@ final class RebuildCommand extends Command
         if (isset($diff) && null !== ($generated = $diff->generate())) {
             $buffer = $generated->asString('');
             if (null !== ($truncate = $input->getOption('truncate'))) {
-                $buffer = substr($buffer, 0, (int) $truncate - 3) . '...';
+                $truncate = (int) $truncate;
+                if (strlen($buffer) > $truncate) {
+                    $buffer = substr($buffer, 0, $truncate) . '...';
+                }
             }
             $output->writeln($buffer);
         }
