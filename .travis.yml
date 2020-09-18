@@ -28,7 +28,7 @@ before_install:
   - travis_retry composer self-update && composer --version
   # pre install phpcq
   - git clone -b dev-2.0 https://github.com/phpcq/phpcq.git phpcq-runner
-  - travis_retry cd phpcq-runner && composer install --prefer-dist --no-interaction;
+  - travis_retry (cd phpcq-runner && composer install --prefer-dist --no-interaction);
 
 install:
   - >
