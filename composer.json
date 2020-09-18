@@ -26,6 +26,7 @@
     "ext-mbstring": "*",
     "ext-xml": "*",
     "composer/semver": "^1.5",
+    "phpcq/repository-definition": "^1.0@dev",
     "psr/log": "^1.1.2",
     "symfony/cache": "^5.0.7",
     "symfony/cache-contracts": "^2.0",

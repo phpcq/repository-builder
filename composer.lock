@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "83b8dd025a98a5aa8863b641371351f6",
+    "content-hash": "7f6978b16bf3f58c63571307e8125f8b",
     "packages": [
         {
             "name": "composer/semver",
@@ -66,6 +66,67 @@
                 "versioning"
             ],
             "time": "2020-01-13T12:06:48+00:00"
+        },
+        {
+            "name": "phpcq/repository-definition",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpcq/repository-definition.git",
+                "reference": "bb6d65bbb1007aafba963726563b4cc99d6e772c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpcq/repository-definition/zipball/bb6d65bbb1007aafba963726563b4cc99d6e772c",
+                "reference": "bb6d65bbb1007aafba963726563b4cc99d6e772c",
+                "shasum": ""
+            },
+            "require": {
+                "ext-hash": "*",
+                "ext-json": "*",
+                "php": "^7.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Phpcq\\RepositoryDefinition\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Schiffler",
+                    "email": "c.schiffler@cyberspectrum.de",
+                    "homepage": "http://cyberspectrum.de",
+                    "role": "lead"
+                },
+                {
+                    "name": "David Molineus",
+                    "email": "david.molineus@netzmacht.de",
+                    "homepage": "https://netzmacht.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "PHP code quality project.",
+            "funding": [
+                {
+                    "url": "https://github.com/discordier",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/dmolineus",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-09-18T07:32:49+00:00"
         },
         {
             "name": "psr/cache",
@@ -2529,6 +2590,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "phpcq/repository-definition": 20,
         "phpcq/schema": 20
     },
     "prefer-stable": false,
