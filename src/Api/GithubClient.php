@@ -131,7 +131,7 @@ class GithubClient implements LoggerAwareInterface
             if ($limit > 0) {
                 $headers = $exception->getResponse()->getHeaders(false);
                 if (isset($headers['location'][0])) {
-                    return $this->fetchHttp($headers['location'][0], $limit-1);
+                    return $this->fetchHttp($headers['location'][0], $limit - 1);
                 }
             }
 
