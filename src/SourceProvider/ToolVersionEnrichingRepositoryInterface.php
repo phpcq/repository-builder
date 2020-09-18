@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use InvalidArgumentException;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 
 /**
  * This describes an enriching source repository.

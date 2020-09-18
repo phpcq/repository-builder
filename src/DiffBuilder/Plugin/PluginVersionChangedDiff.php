@@ -7,7 +7,7 @@ namespace Phpcq\RepositoryBuilder\DiffBuilder\Plugin;
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectVersionChangedDiffInterface;
 use Phpcq\RepositoryBuilder\DiffBuilder\PropertyDifference;
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginVersionInterface;
+use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 
 final class PluginVersionChangedDiff implements ObjectVersionChangedDiffInterface, PluginDiffInterface
 {

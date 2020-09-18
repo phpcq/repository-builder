@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Tool;
 
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolHash;
+use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 
 trait ToolDiffTrait
 {

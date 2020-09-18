@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectAddedDiffTrait;
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffInterface;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\Tool;
 
 final class ToolAddedDiff implements ObjectDiffInterface, ToolDiffInterface
 {

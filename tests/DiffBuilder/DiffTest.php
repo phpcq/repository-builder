@@ -6,16 +6,16 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 
 use Closure;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PhpInlinePluginVersion;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginHash;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginRequirements;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
 use Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin\PluginDiffTrait;
+use Phpcq\RepositoryDefinition\Plugin\PhpInlinePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\PluginHash;
+use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolHash;
+use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 use PHPUnit\Framework\TestCase;
 
 /**

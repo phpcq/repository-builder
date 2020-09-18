@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\SourceProvider;
 
-use Phpcq\RepositoryBuilder\Repository\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository;
+use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use PHPUnit\Framework\TestCase;
 
 /** @covers \Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository */

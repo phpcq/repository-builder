@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test;
 
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use PHPUnit\Framework\TestCase;
 
 /**

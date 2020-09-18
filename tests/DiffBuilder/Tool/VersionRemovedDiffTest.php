@@ -6,10 +6,10 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\PropertyDifference;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolVersionRemovedDiff;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryDefinition\Tool\ToolHash;
+use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -7,9 +7,9 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 use DOMElement;
 use Generator;
 use Phpcq\RepositoryBuilder\File\XmlFile;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
+use Phpcq\RepositoryDefinition\Tool\ToolHash;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**

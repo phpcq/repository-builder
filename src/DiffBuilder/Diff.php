@@ -10,8 +10,8 @@ use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolAddedDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiffInterface;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolRemovedDiff;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Tool\Tool;
 use UnexpectedValueException;
 
 final class Diff implements DiffInterface

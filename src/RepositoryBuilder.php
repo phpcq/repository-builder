@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder;
 
 use InvalidArgumentException;
-use Phpcq\RepositoryBuilder\Repository\Repository;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProviderRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryDefinition\Repository;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 
 class RepositoryBuilder
 {

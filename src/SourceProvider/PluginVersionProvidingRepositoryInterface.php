@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use Generator;
 use IteratorAggregate;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginVersionInterface;
+use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 
 /**
  * This describes a tool version providing repository.

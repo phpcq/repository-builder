@@ -8,8 +8,8 @@ use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 use UnexpectedValueException;
 
 use function preg_match;

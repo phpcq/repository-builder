@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffInterface;
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectRemovedDiffTrait;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
 
 final class PluginRemovedDiff implements ObjectDiffInterface, PluginDiffInterface
 {

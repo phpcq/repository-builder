@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffInterface;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\Tool;
 
 final class ToolDiff
 {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\VersionRequirementList;
 
 trait ToolVersionDiffTrait
 {

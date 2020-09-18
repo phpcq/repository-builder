@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffInterface;
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffTrait;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
 
 final class PluginChangedDiff implements ObjectChangedDiffInterface, PluginDiffInterface
 {

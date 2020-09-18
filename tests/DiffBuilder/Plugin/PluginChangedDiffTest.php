@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginChangedDiff;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginHash;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginRequirements;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\PluginHash;
+use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 use PHPUnit\Framework\TestCase;
 
 /**

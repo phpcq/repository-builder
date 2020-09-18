@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder;
 
-use Phpcq\RepositoryBuilder\Repository\AbstractHash;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PhpFilePluginVersion;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginRequirements;
-use Phpcq\RepositoryBuilder\Repository\Tool\Tool;
-use Phpcq\RepositoryBuilder\Repository\Tool\ToolRequirements;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
+use Phpcq\RepositoryDefinition\AbstractHash;
+use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\VersionRequirementList;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 

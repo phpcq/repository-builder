@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginRemovedDiff;
-use Phpcq\RepositoryBuilder\Repository\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
 use PHPUnit\Framework\TestCase;
 
 /**

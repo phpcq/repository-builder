@@ -6,7 +6,7 @@ namespace Phpcq\RepositoryBuilder;
 
 use LogicException;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
-use Phpcq\RepositoryBuilder\Repository\RepositoryLoader;
+use Phpcq\RepositoryDefinition\RepositoryLoader;
 
 final class RepositoryDiffBuilder
 {
@@ -14,8 +14,8 @@ final class RepositoryDiffBuilder
 
     /**
      * @psalm-var array{
-     *   tools: list<\Phpcq\RepositoryBuilder\Repository\Tool\Tool>,
-     *   plugins: list<\Phpcq\RepositoryBuilder\Repository\Plugin\Plugin>
+     *   tools: list<\Phpcq\RepositoryDefinition\Tool\Tool>,
+     *   plugins: list<\Phpcq\RepositoryDefinition\Plugin\Plugin>
      * }|null
      */
     private ?array $oldData;

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PhpFilePluginVersionInterface;
-use Phpcq\RepositoryBuilder\Repository\Plugin\PluginVersionInterface;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
+use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersionInterface;
+use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
+use Phpcq\RepositoryDefinition\VersionRequirementList;
 
 trait PluginVersionDiffTrait
 {
