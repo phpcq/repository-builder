@@ -7,15 +7,17 @@ namespace Phpcq\RepositoryBuilder\DiffBuilder\Tool;
 use Phpcq\RepositoryBuilder\DiffBuilder\ObjectVersionChangedDiffInterface;
 use Phpcq\RepositoryBuilder\DiffBuilder\PropertyDifference;
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait;
-use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 
 final class ToolVersionChangedDiff implements ObjectVersionChangedDiffInterface, ToolDiffInterface
 {
     use VersionChangedDiffTrait;
     use ToolVersionDiffTrait;
 
-    public static function diff(ToolVersion $oldVersion, ToolVersion $newVersion): ?ToolVersionChangedDiff
-    {
+    public static function diff(
+        ToolVersionInterface $oldVersion,
+        ToolVersionInterface $newVersion
+    ): ?ToolVersionChangedDiff {
         // ensure both versions are same tool version.
         assert($oldVersion->getName() === $newVersion->getName());
         assert($oldVersion->getVersion() === $newVersion->getVersion());

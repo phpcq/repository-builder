@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
-use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirementList;
 
 trait ToolVersionDiffTrait
 {
     use VersionDiffTrait;
 
-    private static function reqToStr(ToolVersion $toolVersion): string
+    private static function reqToStr(ToolVersionInterface $toolVersion): string
     {
         $requirements = $toolVersion->getRequirements();
         $result       = [];
@@ -42,7 +42,7 @@ trait ToolVersionDiffTrait
         return implode(', ', $result);
     }
 
-    private static function hashToStr(ToolVersion $toolVersion): string
+    private static function hashToStr(ToolVersionInterface $toolVersion): string
     {
         $hash = $toolVersion->getHash();
         if (null === $hash) {

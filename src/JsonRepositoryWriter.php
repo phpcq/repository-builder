@@ -6,9 +6,9 @@ namespace Phpcq\RepositoryBuilder;
 
 use Phpcq\RepositoryDefinition\AbstractHash;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
-use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use Phpcq\RepositoryDefinition\Plugin\PluginInterface;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
-use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirementList;
 use stdClass;
@@ -24,12 +24,12 @@ class JsonRepositoryWriter
     private Filesystem $filesystem;
 
     /**
-     * @var Tool[]
+     * @var ToolInterface[]
      */
     private array $tools = [];
 
     /**
-     * @var Plugin[]
+     * @var PluginInterface[]
      */
     private array $plugins = [];
 
@@ -47,11 +47,11 @@ class JsonRepositoryWriter
     /**
      * Add the passed tool to the json.
      *
-     * @param Tool $tool
+     * @param ToolInterface $tool
      *
      * @return void
      */
-    public function writeTool(Tool $tool): void
+    public function writeTool(ToolInterface $tool): void
     {
         $this->tools[] = $tool;
     }
@@ -59,11 +59,11 @@ class JsonRepositoryWriter
     /**
      * Add the passed plugin to the json.
      *
-     * @param Plugin $plugin
+     * @param PluginInterface $plugin
      *
      * @return void
      */
-    public function writePlugin(Plugin $plugin): void
+    public function writePlugin(PluginInterface $plugin): void
     {
         $this->plugins[] = $plugin;
     }
@@ -99,7 +99,7 @@ class JsonRepositoryWriter
         );
     }
 
-    private function processTool(Tool $tool): ?array
+    private function processTool(ToolInterface $tool): ?array
     {
         $fileName         = $tool->getName() . '-tool.json';
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
@@ -110,7 +110,7 @@ class JsonRepositoryWriter
         $data = [
             'tools' => [],
         ];
-        foreach ($tool->getIterator() as $version) {
+        foreach ($tool as $version) {
             if (!isset($data['tools'][$name = $tool->getName()])) {
                 $data['tools'][$name] = [];
             }
@@ -167,7 +167,7 @@ class JsonRepositoryWriter
         return $output;
     }
 
-    private function processPlugin(Plugin $plugin): ?array
+    private function processPlugin(PluginInterface $plugin): ?array
     {
         $fileName         = $plugin->getName() . '-plugin.json';
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
@@ -176,7 +176,7 @@ class JsonRepositoryWriter
             return null;
         }
         $data = [];
-        foreach ($plugin->getIterator() as $version) {
+        foreach ($plugin as $version) {
             // if file plugin, copy file - dump it otherwise.
             $pluginFile    = $plugin->getName() . '-' . $version->getVersion() . '.php';
             $signatureFile = $pluginFile . '.asc';

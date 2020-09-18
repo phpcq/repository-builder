@@ -9,6 +9,7 @@ use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
 use UnexpectedValueException;
 
@@ -69,13 +70,13 @@ class GithubTagRequirementProviderRepository implements
         $this->fileNameRegex   = '#' . str_replace('#', '\\#', $fileNamePattern) . '#i';
     }
 
-    public function supports(ToolVersion $version): bool
+    public function supports(ToolVersionInterface $version): bool
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
         return ($version->getName() === $this->toolName) && isset($this->tags[$normalizedVersion]);
     }
 
-    public function enrich(ToolVersion $version): void
+    public function enrich(ToolVersionInterface $version): void
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
         $tag               = $this->tags[$normalizedVersion] ?? null;

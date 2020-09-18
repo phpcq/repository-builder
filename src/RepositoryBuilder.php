@@ -9,8 +9,10 @@ use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProviderRepositoryInterf
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryDefinition\Plugin\Plugin;
 use Phpcq\RepositoryDefinition\Repository;
-use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 
 class RepositoryBuilder
 {
@@ -86,6 +88,9 @@ class RepositoryBuilder
         foreach ($this->toolProviders as $versionProvider) {
             foreach ($versionProvider->getIterator() as $version) {
                 $toolName = $version->getName();
+                if (!$repository->hasTool($toolName)) {
+                    $repository->addTool(new Tool($toolName));
+                }
                 $tool = $repository->getTool($toolName);
 
                 if ($tool->has($version->getVersion())) {
@@ -105,6 +110,9 @@ class RepositoryBuilder
         foreach ($this->pluginProviders as $versionProvider) {
             foreach ($versionProvider->getIterator() as $version) {
                 $pluginName = $version->getName();
+                if (!$repository->hasPlugin($pluginName)) {
+                    $repository->addPlugin(new Plugin($pluginName));
+                }
                 $plugin = $repository->getPlugin($pluginName);
 
                 if ($plugin->has($version->getVersion())) {
@@ -118,7 +126,7 @@ class RepositoryBuilder
         }
     }
 
-    private function enrichVersion(ToolVersion $version): void
+    private function enrichVersion(ToolVersionInterface $version): void
     {
         foreach ($this->enrichingProviders as $enrichingProvider) {
             if ($enrichingProvider->supports($version)) {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use InvalidArgumentException;
-use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 
 /**
  * This describes an enriching source repository.
@@ -17,20 +17,20 @@ interface ToolVersionEnrichingRepositoryInterface extends SourceRepositoryInterf
     /**
      * Test if a given version is supported.
      *
-     * @param ToolVersion $version The version to test.
+     * @param ToolVersionInterface $version The version to test.
      *
      * @return bool
      */
-    public function supports(ToolVersion $version): bool;
+    public function supports(ToolVersionInterface $version): bool;
 
     /**
      * Enrich the passed version.
      *
-     * @param ToolVersion $version The version to enrich
+     * @param ToolVersionInterface $version The version to enrich
      *
      * @return void
      *
      * @throws InvalidArgumentException When the passed version is not supported.
      */
-    public function enrich(ToolVersion $version): void;
+    public function enrich(ToolVersionInterface $version): void;
 }
