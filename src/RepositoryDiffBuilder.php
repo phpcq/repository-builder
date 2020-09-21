@@ -23,12 +23,12 @@ final class RepositoryDiffBuilder
     public function __construct(string $baseDir)
     {
         $this->baseDir = $baseDir;
-        $this->oldData = RepositoryLoader::load($this->baseDir);
+        $this->oldData = RepositoryLoader::loadData($this->baseDir . '/repository.json');
     }
 
     public function generate(): ?Diff
     {
-        $newData = RepositoryLoader::load($this->baseDir);
+        $newData = RepositoryLoader::loadData($this->baseDir . '/repository.json');
 
         if (null === $this->oldData && null === $newData) {
             throw new LogicException('new value and old value must not both be null.');
