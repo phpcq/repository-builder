@@ -43,7 +43,7 @@ install:
   - ./phpcq-runner/phpcq update
 
 script:
-  - ./phpcq-runner/phpcq run
+  - ./phpcq-runner/phpcq run -v --threshold=marginal
 
 # Hack to make things work again - we can not use a shallow repository.
 git:
