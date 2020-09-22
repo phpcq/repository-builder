@@ -167,20 +167,18 @@ final class RebuildCommand extends Command
      */
     private function loadProviders(array $repositoryConfig, ToolVersionFilterRegistry $filterRegistry): array
     {
-        $providers = [];
-        foreach ($repositoryConfig as $repository) {
+        return array_map(function ($repository) use ($filterRegistry) {
             if (!$this->repositoryFactories->has($repository['type'])) {
                 throw new InvalidArgumentException('Unknown repository type: ' . $repository['type']);
             }
+
             /** @var SourceRepositoryFactoryInterface $factory */
             $factory     = $this->repositoryFactories->get($repository['type']);
             $source      = $factory->create($repository, $filterRegistry);
-            $providers[] = $source;
             if ($source instanceof LoggerAwareInterface) {
                 $source->setLogger($this->logger);
             }
-        }
-
-        return $providers;
+            return $source;
+        }, array_values($repositoryConfig));
     }
 }
