@@ -61,7 +61,7 @@ trait PluginVersionDiffTrait
             return 'url:' . $version->getFilePath();
         }
 
-        return 'md5:' . md5($version->getCode());
+        return 'unknown';
     }
 
     private static function getSignatureFromVersion(PluginVersionInterface $version): ?string
@@ -73,10 +73,6 @@ trait PluginVersionDiffTrait
             return 'url:' . $signature;
         }
 
-        if (null === $signature = $version->getSignature()) {
-            return null;
-        }
-
-        return 'md5:' . md5($signature);
+        return null;
     }
 }

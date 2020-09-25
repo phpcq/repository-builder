@@ -7,7 +7,7 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 use Closure;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
 use Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin\PluginDiffTrait;
-use Phpcq\RepositoryDefinition\Plugin\PhpInlinePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\Plugin\Plugin;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
@@ -36,13 +36,13 @@ final class DiffTest extends TestCase
         $oldRequirements = new PluginRequirements();
         $oldRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.3'));
         $oldPlugin->addVersion(
-            $this->mockPluginVersion(
+            $this->mockPhpFilePluginVersionInterface(
                 'test-plugin',
                 '0.5.0',
-                '',
+                'https://example.org/test-plugin-0.5.0.phar',
                 $oldRequirements,
                 PluginHash::create('sha-1', 'old-hash'),
-                '',
+                'https://example.org/test-plugin-0.5.0.phar.asc',
             )
         );
 
@@ -54,13 +54,13 @@ final class DiffTest extends TestCase
         $newRequirements = new PluginRequirements();
         $newRequirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.4'));
         $newPlugin->addVersion(
-            $this->mockPluginVersion(
+            $this->mockPhpFilePluginVersionInterface(
                 'test-plugin',
                 '0.5.0',
-                'new code',
+                'https://example.org/0.5.0/test-plugin.phar',
                 $newRequirements,
                 PluginHash::create('sha-512', 'new-hash'),
-                'https://example.org/new.phar.asc',
+                'https://example.org/0.5.0/test-plugin.phar.asc',
             )
         );
 
@@ -133,8 +133,8 @@ final class DiffTest extends TestCase
                   Removed version 0.2.0
                   Changed version 0.5.0:
                     code:
-                      - md5:d41d8cd98f00b204e9800998ecf8427e
-                      + md5:a976c7609360a930599e1980bf35ed9e
+                      - url:https://example.org/test-plugin-0.5.0.phar
+                      + url:https://example.org/0.5.0/test-plugin.phar
                     requirements:
                       - platform: php:^7.3
                       + platform: php:^7.4
@@ -142,8 +142,8 @@ final class DiffTest extends TestCase
                       - sha-1:old-hash
                       + sha-512:new-hash
                     signature:
-                      - md5:d41d8cd98f00b204e9800998ecf8427e
-                      + md5:de787c17a4da78ce7611a3b3a7c10388
+                      - url:https://example.org/test-plugin-0.5.0.phar.asc
+                      + url:https://example.org/0.5.0/test-plugin.phar.asc
                   Added version 1.0.0
                   Added version 2.0.0
               Changed tools:
@@ -242,12 +242,12 @@ final class DiffTest extends TestCase
     public function testProcessesEmptyDiff(): void
     {
         $testPluginOld = new Plugin('test-plugin');
-        $testPluginOld->addVersion(new PhpInlinePluginVersion('test-plugin', '1.0.0', '1.0.0', null, ''));
-        $testPluginOld->addVersion(new PhpInlinePluginVersion('test-plugin', '2.0.0', '1.0.0', null, ''));
+        $testPluginOld->addVersion($this->mockPhpFilePluginVersionInterface('test-plugin', '1.0.0'));
+        $testPluginOld->addVersion($this->mockPhpFilePluginVersionInterface('test-plugin', '2.0.0'));
 
         $testPluginNew = new Plugin('test-plugin');
-        $testPluginNew->addVersion(new PhpInlinePluginVersion('test-plugin', '1.0.0', '1.0.0', null, ''));
-        $testPluginNew->addVersion(new PhpInlinePluginVersion('test-plugin', '2.0.0', '1.0.0', null, ''));
+        $testPluginNew->addVersion($this->mockPhpFilePluginVersionInterface('test-plugin', '1.0.0'));
+        $testPluginNew->addVersion($this->mockPhpFilePluginVersionInterface('test-plugin', '2.0.0'));
 
         $testToolOld = new Tool('test-tool');
         $testToolOld->addVersion(new ToolVersion('test-tool', '1.0.0', null, null, null, null));
@@ -258,8 +258,8 @@ final class DiffTest extends TestCase
         $testToolNew->addVersion(new ToolVersion('test-tool', '2.0.0', null, null, null, null));
 
         $this->assertNull(Diff::diff(
-            [],
-            [],
+            ['test-plugin' => $testPluginOld],
+            ['test-plugin' => $testPluginNew],
             ['test-tool' => $testToolOld],
             ['test-tool' => $testToolNew],
         ));

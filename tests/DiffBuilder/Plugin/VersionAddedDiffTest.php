@@ -30,10 +30,10 @@ final class VersionAddedDiffTest extends TestCase
         $newRequirements->getComposerRequirements()->add(new VersionRequirement('vendor/lib', '^42.0'));
 
         return [
-            'create minimal inline version' => [
+            'create minimal unknown version' => [
                 'expected' => [
                     PropertyDifference::added('api-version', '1.0.0'),
-                    PropertyDifference::added('code', 'md5:' . md5('code')),
+                    PropertyDifference::added('code', 'unknown'),
                     PropertyDifference::added('requirements', ''),
                     PropertyDifference::added('checksum', 'sha-1:new-checksum'),
                     PropertyDifference::added('signature', null),
@@ -41,30 +41,26 @@ final class VersionAddedDiffTest extends TestCase
                 'version' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     null,
                     PluginHash::create('sha-1', 'new-checksum'),
-                    null,
                 ),
             ],
-            'create inline version' => [
+            'create unknown version' => [
                 'expected' => [
                     PropertyDifference::added('api-version', '1.0.0'),
-                    PropertyDifference::added('code', 'md5:' . md5('code')),
+                    PropertyDifference::added('code', 'unknown'),
                     PropertyDifference::added(
                         'requirements',
                         'platform: php:^7.3, tool: othertool:^1.5, plugin: peerplugin:^1.0, composer: vendor/lib:^42.0'
                     ),
                     PropertyDifference::added('checksum', 'sha-1:new-checksum'),
-                    PropertyDifference::added('signature', 'md5:' . md5('signature value')),
+                    PropertyDifference::added('signature', null),
                 ],
                 'version' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     $newRequirements,
                     PluginHash::create('sha-1', 'new-checksum'),
-                    'signature value',
                 ),
             ],
             'create minimal file version' => [

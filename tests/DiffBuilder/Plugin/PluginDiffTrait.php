@@ -20,7 +20,7 @@ trait PluginDiffTrait
             $requirements = new PluginRequirements();
             $requirements->getPhpRequirements()->add(new VersionRequirement('php', '^7.4'));
 
-            $plugVersion = $this->mockPluginVersion($name, $version, 'code', $requirements);
+            $plugVersion = $this->mockPluginVersion($name, $version, $requirements);
             $plugin->addVersion($plugVersion);
         }
 
@@ -30,23 +30,23 @@ trait PluginDiffTrait
     private function mockPluginVersion(
         string $name,
         string $version,
-        string $code = 'code',
         ?PluginRequirements $requirements = null,
         ?PluginHash $hash = null,
-        ?string $signature = 'signature',
         string $apiVersion = '1.0.0'
     ): PluginVersionInterface {
         $plugVersion = $this->getMockForAbstractClass(PluginVersionInterface::class);
         $plugVersion->method('getName')->willReturn($name);
         $plugVersion->method('getApiVersion')->willReturn($apiVersion);
         $plugVersion->method('getVersion')->willReturn($version);
-        $plugVersion->method('getCode')->willReturn($code);
-        $plugVersion->method('getSignature')->willReturn($signature);
+        $plugVersion->expects($this->never())->method('getFilePath');
+        $plugVersion->expects($this->never())->method('getSignaturePath');
         $plugVersion->method('getHash')->willReturn($hash ?? PluginHash::create(PluginHash::SHA_512, 'abcdef...'));
         $plugVersion->method('getRequirements')->willReturn($requirements ?? new PluginRequirements());
+        $plugVersion->expects($this->never())->method('merge');
 
         return $plugVersion;
     }
+
     private function mockPhpFilePluginVersionInterface(
         string $name,
         string $version,
@@ -60,12 +60,11 @@ trait PluginDiffTrait
         $plugVersion->method('getName')->willReturn($name);
         $plugVersion->method('getApiVersion')->willReturn($apiVersion);
         $plugVersion->method('getVersion')->willReturn($version);
-        $plugVersion->expects($this->never())->method('getCode');
-        $plugVersion->expects($this->never())->method('getSignature');
-        $plugVersion->method('getHash')->willReturn($hash ?? PluginHash::create(PluginHash::SHA_512, 'abcdef...'));
-        $plugVersion->method('getRequirements')->willReturn($requirements ?? new PluginRequirements());
         $plugVersion->method('getFilePath')->willReturn($filePath);
         $plugVersion->method('getSignaturePath')->willReturn($signaturePath);
+        $plugVersion->method('getHash')->willReturn($hash ?? PluginHash::create(PluginHash::SHA_512, 'abcdef...'));
+        $plugVersion->method('getRequirements')->willReturn($requirements ?? new PluginRequirements());
+        $plugVersion->expects($this->never())->method('merge');
 
         return $plugVersion;
     }

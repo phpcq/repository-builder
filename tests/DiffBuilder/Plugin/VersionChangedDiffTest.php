@@ -28,10 +28,8 @@ final class VersionChangedDiffTest extends TestCase
         $oldVersion = $this->mockPluginVersion(
             'tool-name',
             '1.0.0',
-            'code',
             $requirements,
             PluginHash::create('sha-1', 'old-hash'),
-            'old phar asc',
         );
 
         $this->assertNull(PluginVersionChangedDiff::diff($oldVersion, $oldVersion));
@@ -57,19 +55,15 @@ final class VersionChangedDiffTest extends TestCase
                 'old' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     null,
                     null,
-                    'signature',
                     '1.0.0',
                 ),
                 'new' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     null,
                     null,
-                    'signature',
                     '1.1.0',
                 ),
             ],
@@ -105,13 +99,11 @@ final class VersionChangedDiffTest extends TestCase
                 'old' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     $requirementsOld,
                 ),
                 'new' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     $requirementsNew,
                 ),
             ],
@@ -126,14 +118,12 @@ final class VersionChangedDiffTest extends TestCase
                 'old' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     null,
                     PluginHash::create('sha-1', 'old-checksum'),
                 ),
                 'new' => $this->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
-                    'code',
                     null,
                     PluginHash::create('sha-512', 'new-checksum'),
                 ),
