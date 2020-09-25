@@ -6,7 +6,6 @@ Thumbs.db
 .buildpath
 .project
 .settings/
-.phpcq/build
 .build/
 .external*/
 .idea/
@@ -16,5 +15,9 @@ nbproject/
 # symfony related
 var
 .env*.local
-# composer related
+
+# composer related & toolchain
 vendor/
+.phpcq
+.phpunit.result.cache
+.phpcq.yaml
