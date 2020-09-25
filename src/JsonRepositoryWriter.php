@@ -182,8 +182,6 @@ class JsonRepositoryWriter
             $signatureFile = $pluginFile . '.asc';
             if ($version instanceof PhpFilePluginVersion) {
                 $this->filesystem->copy($version->getFilePath(), $this->baseDir . '/' . $pluginFile);
-            } else {
-                $this->filesystem->dumpFile($this->baseDir . '/' . $pluginFile, $version->getCode());
             }
 
             $serialized = [
@@ -198,13 +196,6 @@ class JsonRepositoryWriter
             if ($version instanceof PhpFilePluginVersion) {
                 if (null !== $signature = $version->getSignaturePath()) {
                     $this->filesystem->copy($signature, $this->baseDir . '/' . $signatureFile);
-                } else {
-                    $this->filesystem->remove($this->baseDir . '/' . $signatureFile);
-                }
-            } else {
-                if (null !== $signature = $version->getSignature()) {
-                    $serialized['signature'] = $signatureFile;
-                    $this->filesystem->dumpFile($this->baseDir . '/' . $signatureFile, $signature);
                 } else {
                     $this->filesystem->remove($this->baseDir . '/' . $signatureFile);
                 }
