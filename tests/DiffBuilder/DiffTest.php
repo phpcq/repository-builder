@@ -25,6 +25,7 @@ final class DiffTest extends TestCase
 {
     use PluginDiffTrait;
 
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function testProcessesCorrectly(): void
     {
         $oldPlugin = new Plugin('test-plugin');
@@ -264,6 +265,7 @@ final class DiffTest extends TestCase
         ));
     }
 
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function summaryProvider(): array
     {
         return [

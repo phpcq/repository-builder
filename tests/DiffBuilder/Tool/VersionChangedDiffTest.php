@@ -35,6 +35,7 @@ final class VersionChangedDiffTest extends TestCase
         $this->assertNull(ToolVersionChangedDiff::diff($oldVersion, $oldVersion));
     }
 
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function compareTestProvider(): array
     {
         $requirementsOld = new ToolRequirements();

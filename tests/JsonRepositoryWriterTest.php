@@ -18,6 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 final class JsonRepositoryWriterTest extends TestCase
 {
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function testWrite(): void
     {
         $tool1 = new Tool('tool1');

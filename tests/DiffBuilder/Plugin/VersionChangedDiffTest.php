@@ -37,6 +37,7 @@ final class VersionChangedDiffTest extends TestCase
         $this->assertNull(PluginVersionChangedDiff::diff($oldVersion, $oldVersion));
     }
 
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function compareTestProvider(): array
     {
         $requirementsOld = new PluginRequirements();
