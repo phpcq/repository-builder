@@ -148,14 +148,14 @@ final class JsonRepositoryWriterTest extends TestCase
             $this->assertSame([
                 'includes' => [
                     [
-                        'url'      => './tool1-tool.json',
+                        'url'      => 'tool1-tool.json',
                         'checksum' => [
                             'type'  => 'sha-512',
                             'value' => hash_file('sha512', $tempDir . '/tool1-tool.json'),
                         ],
                     ],
                     [
-                        'url'      => './tool2-tool.json',
+                        'url'      => 'tool2-tool.json',
                         'checksum' => [
                             'type'  => 'sha-512',
                             'value' => hash_file('sha512', $tempDir . '/tool2-tool.json'),
