@@ -6,6 +6,7 @@ namespace Phpcq\RepositoryBuilder;
 
 use LogicException;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
+use Phpcq\RepositoryDefinition\Exception\JsonFileNotFoundException;
 use Phpcq\RepositoryDefinition\RepositoryLoader;
 
 final class RepositoryDiffBuilder
@@ -23,7 +24,11 @@ final class RepositoryDiffBuilder
     public function __construct(string $baseDir)
     {
         $this->baseDir = $baseDir;
-        $this->oldData = RepositoryLoader::loadData($this->baseDir . '/repository.json');
+        try {
+            $this->oldData = RepositoryLoader::loadData($this->baseDir . '/repository.json');
+        } catch (JsonFileNotFoundException $exception) {
+            $this->oldData = ['plugins' => [], 'tools' => []];
+        }
     }
 
     public function generate(): ?Diff

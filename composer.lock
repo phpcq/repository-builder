@@ -87,12 +87,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcq/repository-definition.git",
-                "reference": "ac1125918abe624d1277debbf2f68d668b0594a1"
+                "reference": "7be5c6a8fb590faf64a9fa66d6dbe6c062b14141"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcq/repository-definition/zipball/ac1125918abe624d1277debbf2f68d668b0594a1",
-                "reference": "ac1125918abe624d1277debbf2f68d668b0594a1",
+                "url": "https://api.github.com/repos/phpcq/repository-definition/zipball/7be5c6a8fb590faf64a9fa66d6dbe6c062b14141",
+                "reference": "7be5c6a8fb590faf64a9fa66d6dbe6c062b14141",
                 "shasum": ""
             },
             "require": {
@@ -141,7 +141,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-24T14:11:20+00:00"
+            "time": "2020-09-25T11:44:08+00:00"
         },
         {
             "name": "psr/cache",
