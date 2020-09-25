@@ -7,6 +7,7 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 use Generator;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirement;
 use RuntimeException;
@@ -82,6 +83,7 @@ class PluginProviderRepository implements PluginVersionProviderRepositoryInterfa
                     $this->loadPluginRequirements($version['requirements'] ?? null),
                     $absolutePathPlugin,
                     $absolutePathSig,
+                    PluginHash::createForFile($absolutePathPlugin)
                 );
             }
         }
