@@ -1,0 +1,24 @@
+{
+  "tools": {
+    "tool1": [
+      {
+        "version": "1.0.0",
+        "url": "https://example.org/tools/tool1/releases/download/1.0.0/tool1.phar",
+        "requirements": {
+          "php": {
+            "php": "^7.4",
+            "ext-zlib": "*"
+          },
+          "composer": {
+            "vendor/package": "1.0.0"
+          }
+        },
+        "checksum": {
+          "type": "sha-512",
+          "value": "de93a8139d5b89fb9d024b138b23d2fa381f83e50b773c1511328545ed01bdbf269aeb246a9f55758495db2b106a362e1bd48fbcef8902ef6911f64211601089"
+        },
+        "signature": null
+      }
+    ]
+  }
+}

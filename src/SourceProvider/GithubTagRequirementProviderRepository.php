@@ -8,8 +8,9 @@ use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
-use Phpcq\RepositoryBuilder\Repository\ToolVersion;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirement;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
+use Phpcq\RepositoryDefinition\VersionRequirement;
 use UnexpectedValueException;
 
 use function preg_match;
@@ -20,10 +21,24 @@ use function substr;
  * This reads the composer.json file from the tags on github and produces the platform requirements.
  *
  * Additionally, this can produce versions from all tags.
+ *
+ * @psalm-type TTag = array{
+ *   ref: string,
+ *   tag_name: string,
+ *   version: string
+ * }
+ * @psalm-type TTagList = array<string, TTag>
+ * @psalm-type TTagInfo = array{
+ *   assets: list<array{
+ *     name: string,
+ *     browser_download_url: string,
+ *   }>
+ * }
+ *
  */
 class GithubTagRequirementProviderRepository implements
-    EnrichingRepositoryInterface,
-    VersionProvidingRepositoryInterface
+    ToolVersionEnrichingRepositoryInterface,
+    ToolVersionProvidingRepositoryInterface
 {
     private string $repositoryName;
 
@@ -35,6 +50,7 @@ class GithubTagRequirementProviderRepository implements
 
     private VersionParser $versionParser;
 
+    /** @psalm-var TTagList */
     private array $tags = [];
 
     private string $fileNameRegex;
@@ -54,13 +70,13 @@ class GithubTagRequirementProviderRepository implements
         $this->fileNameRegex   = '#' . str_replace('#', '\\#', $fileNamePattern) . '#i';
     }
 
-    public function supports(ToolVersion $version): bool
+    public function supports(ToolVersionInterface $version): bool
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
         return ($version->getName() === $this->toolName) && isset($this->tags[$normalizedVersion]);
     }
 
-    public function enrich(ToolVersion $version): void
+    public function enrich(ToolVersionInterface $version): void
     {
         $normalizedVersion = $this->versionParser->normalize($version->getVersion());
         $tag               = $this->tags[$normalizedVersion] ?? null;
@@ -69,12 +85,17 @@ class GithubTagRequirementProviderRepository implements
             return;
         }
 
-        $composerJson = $this->githubClient->fetchFile($this->repositoryName, $tag['tag_name'], 'composer.json');
+        $composerJson    = $this->githubClient->fetchFile($this->repositoryName, $tag['tag_name'], 'composer.json');
+        $phpRequirements = $version->getRequirements()->getPhpRequirements();
+        /** @psalm-var array{require: array<string, string>} $composerJson */
         foreach ($composerJson['require'] as $requirement => $constraint) {
             if ('php' === $requirement || 0 === strncmp($requirement, 'ext-', 4)) {
-                $version->getRequirements()->add(new VersionRequirement($requirement, $constraint));
+                $phpRequirements->add(new VersionRequirement($requirement, $constraint));
             }
         }
+
+        // Push information we have.
+        // FIXME: should enrich all the info instead of doing it in getIterator().
     }
 
     public function isFresh(): bool
@@ -86,6 +107,7 @@ class GithubTagRequirementProviderRepository implements
     {
         $this->tags = [];
         // Download all tags... then download all composer.json files.
+        /** @psalm-var TTagList $data */
         $data = $this->githubClient->fetchTags($this->repositoryName);
 
         foreach ($data as $entry) {
@@ -113,6 +135,7 @@ class GithubTagRequirementProviderRepository implements
         foreach ($this->tags as $tag) {
             // Obtain release by tag name.
             try {
+                /** @psalm-var TTagInfo $data */
                 $data = $this->githubClient->fetchTag($this->repositoryName, $tag['tag_name']);
             } catch (DataNotAvailableException $exception) {
                 if ($exception->getCode() === 404) {
@@ -143,10 +166,9 @@ class GithubTagRequirementProviderRepository implements
                 $this->toolName,
                 $tag['tag_name'],
                 $pharUrl,
-                [],
+                null,
                 null,
                 $signatureUrl,
-                null
             );
         }
     }

@@ -12,6 +12,7 @@ use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GithubClient implements LoggerAwareInterface
@@ -49,10 +50,14 @@ class GithubClient implements LoggerAwareInterface
         );
     }
 
+    /**
+     * @throws DataNotAvailableException
+     */
     public function fetchFile(string $repository, string $refSpec, string $filePath): array
     {
         // We handle exceptions differently here - we cache file downloads forever but exceptions only for an hour.
-        return $this->cache->get(
+        /** @var array<string, mixed>|DataNotAvailableException $value */
+        $value = $this->cache->get(
             StringUtil::makeFilename('file_' . $repository . '/' . $refSpec . '/' . $filePath),
             function (ItemInterface $item, bool &$save) use ($repository, $refSpec, $filePath) {
                 $save = true;
@@ -66,13 +71,22 @@ class GithubClient implements LoggerAwareInterface
                 }
             }
         );
+
+        if ($value instanceof DataNotAvailableException) {
+            throw $value;
+        }
+
+        return $value;
     }
 
     /**
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     *
+     * @throws DataNotAvailableException
      */
     private function fetchJson(string $url): array
     {
+        /** @var array<string, mixed>|DataNotAvailableException $value */
         $value    = $this->cache->get(
             StringUtil::makeFilename($url),
             function (ItemInterface $item, bool &$save) use ($url) {
@@ -94,17 +108,37 @@ class GithubClient implements LoggerAwareInterface
         return $value;
     }
 
-    private function fetchHttp(string $url): array
+    /**
+     * @throws DataNotAvailableException
+     */
+    private function fetchHttp(string $url, int $limit = 20): array
     {
         $this->logger->debug('Fetching: ' . $url);
         try {
-            return json_decode(
+            /** @var array<string, mixed> $value */
+            $value = json_decode(
                 $this->httpClient->request(
                     'GET',
                     $url,
                     ['headers' => ['Authorization' => 'token ' . $this->token]]
                 )->getContent(),
                 true
+            );
+
+            return $value;
+        } catch (RedirectionExceptionInterface $exception) {
+            // Handle redirects https://github.com/symfony/symfony/issues/38207
+            if ($limit > 0) {
+                $headers = $exception->getResponse()->getHeaders(false);
+                if (isset($headers['location'][0])) {
+                    return $this->fetchHttp($headers['location'][0], $limit - 1);
+                }
+            }
+
+            throw new DataNotAvailableException(
+                $exception->getResponse()->getContent(false),
+                (int) $exception->getCode(),
+                $exception
             );
         } catch (ClientException $exception) {
             throw new DataNotAvailableException(

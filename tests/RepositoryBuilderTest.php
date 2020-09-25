@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test;
 
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
-use Phpcq\RepositoryBuilder\Repository\Tool;
-use Phpcq\RepositoryBuilder\Repository\ToolVersion;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
-use Phpcq\RepositoryBuilder\SourceProvider\EnrichingRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\VersionProvidingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryDefinition\Tool\Tool;
+use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,8 +19,8 @@ final class RepositoryBuilderTest extends TestCase
 {
     public function testBuild(): void
     {
-        $versionProvider1 = $this->createMock(VersionProvidingRepositoryInterface::class);
-        $versionProvider2 = $this->createMock(VersionProvidingRepositoryInterface::class);
+        $versionProvider1 = $this->createMock(ToolVersionProvidingRepositoryInterface::class);
+        $versionProvider2 = $this->createMock(ToolVersionProvidingRepositoryInterface::class);
 
         $version11 = $this->createMock(ToolVersion::class);
         $version12 = $this->createMock(ToolVersion::class);
@@ -53,8 +53,8 @@ final class RepositoryBuilderTest extends TestCase
                 yield $version22;
             });
 
-        $enrichingProvider1 = $this->createMock(EnrichingRepositoryInterface::class);
-        $enrichingProvider2 = $this->createMock(EnrichingRepositoryInterface::class);
+        $enrichingProvider1 = $this->createMock(ToolVersionEnrichingRepositoryInterface::class);
+        $enrichingProvider2 = $this->createMock(ToolVersionEnrichingRepositoryInterface::class);
 
         $enrichingProvider1
             ->expects(self::exactly(4))
@@ -87,15 +87,14 @@ final class RepositoryBuilderTest extends TestCase
 
         $writer  = $this->createMock(JsonRepositoryWriter::class);
         $builder = new RepositoryBuilder(
-            [$versionProvider1, $versionProvider2],
-            [$enrichingProvider1, $enrichingProvider2],
+            [$versionProvider1, $versionProvider2, $enrichingProvider1, $enrichingProvider2],
             $writer
         );
 
         $names = ['version1', 'version2'];
         $writer
             ->expects($this->exactly(2))
-            ->method('write')
+            ->method('writeTool')
             ->willReturnOnConsecutiveCalls()
             ->willReturnCallback(function (Tool $tool) use (&$names) {
                 $this->assertSame(current($names), $tool->getName());

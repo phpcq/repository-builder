@@ -6,6 +6,15 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 
+/**
+ * @psalm-type TGithubTagRequirementProviderRepositoryFactoryConfiguration = array{
+ *   tool_name: string,
+ *   allowed_versions?: string,
+ *   repository: string,
+ *   file_pattern?: string,
+ * }
+ * @SuppressWarnings(PHPMD.LongClassName)
+ */
 class GithubTagRequirementProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
     private GithubClient $githubClient;
@@ -15,6 +24,10 @@ class GithubTagRequirementProviderRepositoryFactory implements SourceRepositoryF
         $this->githubClient = $githubClient;
     }
 
+    /**
+     * @psalm-param TGithubTagRequirementProviderRepositoryFactoryConfiguration $configuration
+     * @psalm-suppress MoreSpecificImplementedParamType
+     */
     public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
     {
         $filter = $filterRegistry->getFilterForTool($configuration['tool_name']);

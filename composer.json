@@ -26,6 +26,7 @@
     "ext-mbstring": "*",
     "ext-xml": "*",
     "composer/semver": "^1.5",
+    "phpcq/repository-definition": "^1.0@dev",
     "psr/log": "^1.1.2",
     "symfony/cache": "^5.0.7",
     "symfony/cache-contracts": "^2.0",
@@ -35,7 +36,7 @@
     "symfony/dotenv": "^5.0.7",
     "symfony/filesystem": "^5.0",
     "symfony/finder": "^5.0.7",
-    "symfony/framework-bundle": "^5.0.7",
+    "symfony/framework-bundle": "^5.1.0",
     "symfony/http-client": "^5.0",
     "symfony/http-client-contracts": "^2.1",
     "symfony/http-kernel": "^5.0.7",
@@ -49,6 +50,9 @@
     "symfony/polyfill-php72": "*",
     "symfony/polyfill-php73": "*"
   },
+  "require-dev": {
+    "phpcq/schema": "^1.0@dev"
+  },
   "extra": {
     "branch-alias": {
       "dev-master": "1.x-dev"
@@ -57,6 +61,11 @@
   "autoload": {
     "psr-4": {
       "Phpcq\\RepositoryBuilder\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Phpcq\\RepositoryBuilder\\Test\\": "tests/"
     }
   }
 }

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder;
 
-use Phpcq\RepositoryBuilder\Repository\BootstrapHash;
-use Phpcq\RepositoryBuilder\Repository\Tool;
-use Phpcq\RepositoryBuilder\Repository\ToolHash;
-use Phpcq\RepositoryBuilder\Repository\VersionRequirementList;
+use Phpcq\RepositoryDefinition\AbstractHash;
+use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\PluginInterface;
+use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
+use Phpcq\RepositoryDefinition\Tool\ToolInterface;
+use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\VersionRequirementList;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -21,9 +24,14 @@ class JsonRepositoryWriter
     private Filesystem $filesystem;
 
     /**
-     * @var Tool[]
+     * @var ToolInterface[]
      */
-    private array $tool = [];
+    private array $tools = [];
+
+    /**
+     * @var PluginInterface[]
+     */
+    private array $plugins = [];
 
     /**
      * Create a new instance.
@@ -39,13 +47,25 @@ class JsonRepositoryWriter
     /**
      * Add the passed tool to the json.
      *
-     * @param Tool $tool
+     * @param ToolInterface $tool
      *
      * @return void
      */
-    public function write(Tool $tool): void
+    public function writeTool(ToolInterface $tool): void
     {
-        $this->tool[] = $tool;
+        $this->tools[] = $tool;
+    }
+
+    /**
+     * Add the passed plugin to the json.
+     *
+     * @param PluginInterface $plugin
+     *
+     * @return void
+     */
+    public function writePlugin(PluginInterface $plugin): void
+    {
+        $this->plugins[] = $plugin;
     }
 
     /**
@@ -56,14 +76,21 @@ class JsonRepositoryWriter
     public function save(): void
     {
         $data = [
-            'phars' => [],
+            'includes' => [],
         ];
 
-        foreach ($this->tool as $tool) {
+        foreach ($this->tools as $tool) {
             if (null === $content = $this->processTool($tool)) {
                 continue;
             }
-            $data['phars'][$tool->getName()] = $content;
+            $data['includes'][] = $content;
+        }
+
+        foreach ($this->plugins as $plugin) {
+            if (null === $content = $this->processPlugin($plugin)) {
+                continue;
+            }
+            $data['includes'][] = $content;
         }
 
         $this->filesystem->dumpFile(
@@ -72,60 +99,41 @@ class JsonRepositoryWriter
         );
     }
 
-    private function processTool(Tool $tool): ?array
+    private function processTool(ToolInterface $tool): ?array
     {
-        $fileName         = $tool->getName() . '.json';
+        $fileName         = $tool->getName() . '-tool.json';
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($tool->isEmpty()) {
             $this->filesystem->remove($fileNameAbsolute);
             return null;
         }
-        $bootstraps = [];
-        $data       = [
-            'bootstraps' => [],
-            'phars' => [],
+        $data = [
+            'tools' => [],
         ];
-        foreach ($tool->getIterator() as $version) {
-            $bootstrap = $version->getBootstrap();
-            if (null === $bootstrap) {
-                // FIXME: Trigger error? We need a bootstrapper.
-                continue;
-            }
-
-            if (!isset($bootstraps[$bootstrapHash = spl_object_hash($bootstrap)])) {
-                $bootstraps[$bootstrapHash] = [
-                    'name' => 'bootstrap-' . count($bootstraps),
-                    'instance' => $bootstrap
-                ];
-            }
-            $bootstrapName = $bootstraps[$bootstrapHash]['name'];
-            if (!isset($data['phars'][$name = $tool->getName()])) {
-                $data['phars'][$name] = [];
+        foreach ($tool as $version) {
+            if (!isset($data['tools'][$name = $tool->getName()])) {
+                $data['tools'][$name] = [];
             }
             // no phar url, nothing to download.
             if (null === $pharUrl = $version->getPharUrl()) {
                 continue;
             }
 
-            $data['phars'][$name][] = [
+            $serialized = [
                 'version'      => $version->getVersion(),
-                'phar-url'     => $pharUrl,
-                'bootstrap'    => $bootstrapName,
-                'requirements' => $this->encodeRequirements($version->getRequirements()),
-                'hash'         => $this->encodeToolHash($version->getHash()),
-                'signature'    => $version->getSignatureUrl(),
+                'url'          => $pharUrl,
+                'requirements' => $this->encodeToolRequirements($version->getRequirements()),
             ];
+            if (null !== $hash = $this->encodeHash($version->getHash())) {
+                $serialized['checksum'] = $hash;
+            }
+            if (null !== $signature = $version->getSignatureUrl()) {
+                $serialized['signature'] = $signature;
+            }
+            $data['tools'][$name][] = $serialized;
         }
-        if (empty($data['phars'])) {
+        if (empty($data['tools'])) {
             return null;
-        }
-        foreach ($bootstraps as $bootstrap) {
-            $data['bootstraps'][$bootstrap['name']] = [
-                'plugin-version' => $bootstrap['instance']->getPluginVersion(),
-                'type'           => 'inline',
-                'code'           => $bootstrap['instance']->getCode(),
-                'hash'           => $this->encodeBootstrapHash($bootstrap['instance']->getHash())
-            ];
         }
 
         $this->filesystem->dumpFile(
@@ -142,12 +150,100 @@ class JsonRepositoryWriter
         ];
     }
 
-    private function encodeRequirements(VersionRequirementList $requirementList): stdClass
+    private function encodeToolRequirements(ToolRequirements $requirements): stdClass
     {
-        $requirements = new stdClass();
-        foreach ($requirementList->getIterator() as $requirement) {
-            $requirements->{$requirement->getName()} = $requirement->getConstraint();
+        $output = new stdClass();
+        foreach (
+            [
+                'php'      => $requirements->getPhpRequirements(),
+                'composer' => $requirements->getComposerRequirements(),
+            ] as $key => $list
+        ) {
+            if ([] !== $encoded = $this->encodeRequirements($list)) {
+                $output->{$key} = $encoded;
+            }
         }
+
+        return $output;
+    }
+
+    private function processPlugin(PluginInterface $plugin): ?array
+    {
+        $fileName         = $plugin->getName() . '-plugin.json';
+        $fileNameAbsolute = $this->baseDir . '/' . $fileName;
+        if ($plugin->isEmpty()) {
+            $this->filesystem->remove($fileNameAbsolute);
+            return null;
+        }
+        $data = [];
+        foreach ($plugin as $version) {
+            // if file plugin, copy file - dump it otherwise.
+            $pluginFile    = $plugin->getName() . '-' . $version->getVersion() . '.php';
+            $signatureFile = $pluginFile . '.asc';
+            if ($version instanceof PhpFilePluginVersion) {
+                $this->filesystem->copy($version->getFilePath(), $this->baseDir . '/' . $pluginFile);
+            }
+
+            $serialized = [
+                'api-version'  => $version->getApiVersion(),
+                'version'      => $version->getVersion(),
+                'type'         => 'php-file',
+                'url'          => $pluginFile,
+                'requirements' => $this->encodePluginRequirements($version->getRequirements()),
+                'checksum'     => $this->encodeHash($version->getHash()),
+            ];
+
+            if ($version instanceof PhpFilePluginVersion) {
+                if (null !== $signature = $version->getSignaturePath()) {
+                    $this->filesystem->copy($signature, $this->baseDir . '/' . $signatureFile);
+                } else {
+                    $this->filesystem->remove($this->baseDir . '/' . $signatureFile);
+                }
+            }
+
+            $data[] = $serialized;
+        }
+
+        $this->filesystem->dumpFile(
+            $fileNameAbsolute,
+            json_encode(['plugins' => [$plugin->getName() => $data]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+
+        return [
+            'url' => './' . $fileName,
+            'checksum' => [
+                'type'  => 'sha-512',
+                'value' => hash_file('sha512', $fileNameAbsolute),
+            ],
+        ];
+    }
+
+    private function encodePluginRequirements(PluginRequirements $requirements): stdClass
+    {
+        $output = new stdClass();
+        foreach (
+            [
+                'php'      => $requirements->getPhpRequirements(),
+                'tool'     => $requirements->getToolRequirements(),
+                'plugin'   => $requirements->getPluginRequirements(),
+                'composer' => $requirements->getComposerRequirements(),
+            ] as $key => $list
+        ) {
+            if ([] !== $encoded = $this->encodeRequirements($list)) {
+                $output->{$key} = $encoded;
+            }
+        }
+
+        return $output;
+    }
+
+    private function encodeRequirements(VersionRequirementList $requirementList): array
+    {
+        $requirements = [];
+        foreach ($requirementList->getIterator() as $requirement) {
+            $requirements[$requirement->getName()] = $requirement->getConstraint();
+        }
+
         return $requirements;
     }
 
@@ -156,23 +252,7 @@ class JsonRepositoryWriter
      *
      * @psalm-return array{type: string, value: string}|null
      */
-    private function encodeToolHash(?ToolHash $hash): ?array
-    {
-        if (null === $hash) {
-            return null;
-        }
-        return [
-            'type' => $hash->getType(),
-            'value' => $hash->getValue(),
-        ];
-    }
-
-    /**
-     * @return null|string[]
-     *
-     * @psalm-return array{type: string, value: string}|null
-     */
-    private function encodeBootstrapHash(?BootstrapHash $hash): ?array
+    private function encodeHash(?AbstractHash $hash): ?array
     {
         if (null === $hash) {
             return null;

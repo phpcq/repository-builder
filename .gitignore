@@ -2,18 +2,22 @@
 .DS_Store
 Thumbs.db
 
-# IDEs 
+# IDEs & build
 .buildpath
 .project
 .settings/
-.phpcq/build
 .build/
 .external*/
 .idea/
 nbproject/
+.phpunit.result.cache
 
 # symfony related
 var
 .env*.local
-# composer related
+
+# composer related & toolchain
 vendor/
+.phpcq
+.phpunit.result.cache
+.phpcq.yaml

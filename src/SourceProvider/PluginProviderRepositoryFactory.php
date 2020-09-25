@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Phpcq\RepositoryBuilder\SourceProvider;
+
+use Phpcq\RepositoryBuilder\Util\StringUtil;
+use RuntimeException;
+
+/**
+ * @psalm-type TPluginProviderRepositoryFactoryConfiguration = array{
+ *   source_dir: string
+ * }
+ */
+class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterface
+{
+    /**
+     * @psalm-param TPluginProviderRepositoryFactoryConfiguration $configuration
+     * @psalm-suppress MoreSpecificImplementedParamType
+     */
+    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
+    {
+        if (!is_string($sourceDir = $configuration['source_dir'] ?? null)) {
+            throw new RuntimeException('No source directory configured');
+        }
+
+        $sourcePath = StringUtil::makeAbsolutePath($sourceDir, getcwd());
+
+        return new PluginProviderRepository($sourcePath);
+    }
+}
