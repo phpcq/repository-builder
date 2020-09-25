@@ -210,7 +210,7 @@ class JsonRepositoryWriter
         );
 
         return [
-            'url' => './' . $fileName,
+            'url' => $fileName,
             'checksum' => [
                 'type'  => 'sha-512',
                 'value' => hash_file('sha512', $fileNameAbsolute),
