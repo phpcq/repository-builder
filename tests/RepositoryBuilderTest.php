@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test;
 
+use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
+use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -102,5 +105,34 @@ final class RepositoryBuilderTest extends TestCase
             });
 
         $builder->build();
+    }
+
+    public function testMultiPurposeProvider(): void
+    {
+        $writer  = $this->createMock(JsonRepositoryWriter::class);
+        $provider = $this->getMockForAbstractClass(ToolVersionProvidingAndEnrichingRepositoryInterface::class);
+        $builder = new RepositoryBuilder([$provider], $writer);
+
+        $version = $this->createMock(ToolVersionInterface::class);
+
+        $provider->expects($this->once())
+            ->method('getIterator')
+            ->willReturnCallback(function () use ($version) {
+                yield $version;
+            });
+
+        $provider->expects($this->once())->method('supports')->willReturn(true);
+        $provider->expects($this->once())->method('enrich');
+
+        $builder->build();
+    }
+
+    public function testThrowForUnsupportedRepositoryProvider(): void
+    {
+        $writer  = $this->createMock(JsonRepositoryWriter::class);
+        $provider = $this->getMockForAbstractClass(SourceRepositoryInterface::class);
+
+        $this->expectException(InvalidArgumentException::class);
+        new RepositoryBuilder([$provider], $writer);
     }
 }

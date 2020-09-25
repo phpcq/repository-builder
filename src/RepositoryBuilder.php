@@ -42,18 +42,23 @@ class RepositoryBuilder
     public function __construct(array $providers, JsonRepositoryWriter $writer)
     {
         foreach ($providers as $provider) {
-            switch (true) {
-                case $provider instanceof ToolVersionProvidingRepositoryInterface:
+            $supported = false;
+            if ($provider instanceof PluginVersionProviderRepositoryInterface) {
+                $supported = true;
+                $this->pluginProviders[] = $provider;
+            } else {
+                if ($provider instanceof ToolVersionProvidingRepositoryInterface) {
+                    $supported = true;
                     $this->toolProviders[] = $provider;
-                    break;
-                case $provider instanceof ToolVersionEnrichingRepositoryInterface:
+                }
+                if ($provider instanceof ToolVersionEnrichingRepositoryInterface) {
+                    $supported = true;
                     $this->enrichingProviders[] = $provider;
-                    break;
-                case $provider instanceof PluginVersionProviderRepositoryInterface:
-                    $this->pluginProviders[] = $provider;
-                    break;
-                default:
-                    throw new InvalidArgumentException('Unknown provider type ' . get_class($provider));
+                }
+            }
+
+            if (!$supported) {
+                throw new InvalidArgumentException('Unknown provider type ' . get_class($provider));
             }
         }
 
