@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3869d18910c1ffbd058e4f534e99dcb",
+    "content-hash": "e42f837d2b75118fafc13b91dc01b060",
     "packages": [
         {
             "name": "composer/semver",
@@ -87,15 +87,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcq/repository-definition.git",
-                "reference": "9dd52066960d4c56368548b4bd5264df771c8886"
+                "reference": "ac1125918abe624d1277debbf2f68d668b0594a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcq/repository-definition/zipball/9dd52066960d4c56368548b4bd5264df771c8886",
-                "reference": "9dd52066960d4c56368548b4bd5264df771c8886",
+                "url": "https://api.github.com/repos/phpcq/repository-definition/zipball/ac1125918abe624d1277debbf2f68d668b0594a1",
+                "reference": "ac1125918abe624d1277debbf2f68d668b0594a1",
                 "shasum": ""
             },
             "require": {
+                "ext-filter": "*",
                 "ext-hash": "*",
                 "ext-json": "*",
                 "php": "^7.3"
@@ -140,7 +141,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-21T10:02:35+00:00"
+            "time": "2020-09-24T14:11:20+00:00"
         },
         {
             "name": "psr/cache",
@@ -2556,19 +2557,24 @@
     "packages-dev": [
         {
             "name": "phpcq/schema",
-            "version": "dev-feature/plugin-extension",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcq/schema.git",
-                "reference": "62f17e1f05f0211e56a6fa98014b852d56261d64"
+                "reference": "aff755eed61faf73c812c1adb38824d0e9fa7df1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcq/schema/zipball/62f17e1f05f0211e56a6fa98014b852d56261d64",
-                "reference": "62f17e1f05f0211e56a6fa98014b852d56261d64",
+                "url": "https://api.github.com/repos/phpcq/schema/zipball/aff755eed61faf73c812c1adb38824d0e9fa7df1",
+                "reference": "aff755eed61faf73c812c1adb38824d0e9fa7df1",
                 "shasum": ""
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -2598,7 +2604,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-08-19T14:44:43+00:00"
+            "time": "2020-09-25T08:07:04+00:00"
         }
     ],
     "aliases": [],

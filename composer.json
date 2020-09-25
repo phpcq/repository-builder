@@ -51,7 +51,7 @@
     "symfony/polyfill-php73": "*"
   },
   "require-dev": {
-    "phpcq/schema": "dev-feature/plugin-extension@dev"
+    "phpcq/schema": "^1.0@dev"
   },
   "extra": {
     "branch-alias": {
