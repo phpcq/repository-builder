@@ -6,6 +6,7 @@ namespace Phpcq\RepositoryBuilder\Test\SourceProvider;
 
 use Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
+use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use PHPUnit\Framework\TestCase;
 
 /** @covers \Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository */
@@ -23,7 +24,8 @@ class PluginProviderRepositoryTest extends TestCase
                     '1.0.0',
                     null,
                     $baseDir . '/plugin-a.php',
-                    null
+                    null,
+                    PluginHash::createForFile($baseDir . '/plugin-a.php')
                 ),
                 new PhpFilePluginVersion(
                     'plugin-b',
@@ -31,7 +33,8 @@ class PluginProviderRepositoryTest extends TestCase
                     '1.0.0',
                     null,
                     $baseDir . '/plugin-b1.php',
-                    null
+                    null,
+                    PluginHash::createForFile($baseDir . '/plugin-b1.php')
                 ),
                 new PhpFilePluginVersion(
                     'plugin-b',
@@ -39,7 +42,8 @@ class PluginProviderRepositoryTest extends TestCase
                     '1.0.0',
                     null,
                     $baseDir . '/plugin-b2.php',
-                    null
+                    null,
+                    PluginHash::createForFile($baseDir . '/plugin-b2.php')
                 ),
             ],
             iterator_to_array($provider->getIterator())
