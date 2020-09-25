@@ -94,19 +94,8 @@ final class RebuildCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->logger = new ConsoleLogger($output);
-
-        $configFile = realpath($this->getConfigOptionString($input, 'config'));
-        if (false === $configFile || !is_readable($configFile)) {
-            throw new InvalidArgumentException(
-                'Config file not found: ' . $this->getConfigOptionString($input, 'config')
-            );
-        }
-
-        $outdir = $this->getConfigOptionString($input, 'output-directory');
-        if (!is_dir($outdir) && !mkdir($outdir, 0775, true)) {
-            throw new InvalidArgumentException('Could not create directory: ' . $outdir);
-        }
-        $outdir = realpath($outdir);
+        $configFile   = $this->getConfigFile($input);
+        $outdir       = $this->getOutputDirectory($input);
 
         chdir(dirname($configFile));
 
@@ -141,6 +130,29 @@ final class RebuildCommand extends Command
         }
 
         return 0;
+    }
+
+    private function getConfigFile(InputInterface $input): string
+    {
+        $configFile = realpath($this->getConfigOptionString($input, 'config'));
+        if (false === $configFile || !is_readable($configFile)) {
+            throw new InvalidArgumentException(
+                'Config file not found: ' . $this->getConfigOptionString($input, 'config')
+            );
+        }
+
+        return $configFile;
+    }
+
+    private function getOutputDirectory(InputInterface $input): string
+    {
+        $outDir = $this->getConfigOptionString($input, 'output-directory');
+        if (!is_dir($outDir) && !mkdir($outDir, 0775, true)) {
+            throw new InvalidArgumentException('Could not create directory: ' . $outDir);
+        }
+        $outDir = realpath($outDir);
+
+        return $outDir;
     }
 
     private function getConfigOptionString(InputInterface $input, string $option): string
