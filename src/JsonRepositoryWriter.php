@@ -181,7 +181,7 @@ class JsonRepositoryWriter
             $pluginFile    = $plugin->getName() . '-' . $version->getVersion() . '.php';
             $signatureFile = $pluginFile . '.asc';
             if ($version instanceof PhpFilePluginVersion) {
-                $this->filesystem->copy($version->getFilePath(), $this->baseDir . '/' . $pluginFile);
+                $this->filesystem->copy($version->getFilePath(), $this->baseDir . '/' . $pluginFile, true);
             }
 
             $serialized = [
