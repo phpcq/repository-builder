@@ -24,7 +24,7 @@ final class PluginVersionRemovedDiff implements ObjectVersionRemovedDiffInterfac
             PropertyDifference::removed('checksum', self::hashToStr($oldVersion)),
             PropertyDifference::removed('signature', self::getSignatureFromVersion($oldVersion)),
         ];
-        
+
         return new static($oldVersion->getName(), $oldVersion->getVersion(), $differences);
     }
 }

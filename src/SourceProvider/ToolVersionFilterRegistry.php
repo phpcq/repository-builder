@@ -6,10 +6,10 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 final class ToolVersionFilterRegistry
 {
-    /** @var ?ToolVersionFilter[] */
+    /** @var array<string, ToolVersionFilter> */
     private array $filters = [];
 
-    /** @param ToolVersionFilter[] $filters */
+    /** @param list<ToolVersionFilter> $filters */
     public function __construct(array $filters)
     {
         foreach ($filters as $filter) {
