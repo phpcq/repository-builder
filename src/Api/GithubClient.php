@@ -15,6 +15,20 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * @psalm-type TTag = array{
+ *   ref: string,
+ *   tag_name: string,
+ *   version: string
+ * }
+ * @psalm-type TTagList = array<string, TTag>
+ * @psalm-type TTagInfo = array{
+ *   assets: list<array{
+ *     name: string,
+ *     browser_download_url: string,
+ *   }>
+ * }
+ */
 class GithubClient implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -33,21 +47,27 @@ class GithubClient implements LoggerAwareInterface
         $this->logger     = new NullLogger();
     }
 
+    /** @return TTagList */
     public function fetchTags(string $repository): array
     {
-        return $this->fetchJson(
+        /** @var TTagList $data */
+        $data = $this->fetchJson(
             'https://api.github.com/repos/' . $repository . '/git/matching-refs/tags/'
         );
+        return $data;
     }
 
+    /** @return TTagInfo */
     public function fetchTag(string $repository, string $tagName): array
     {
         // We handle exceptions differently here:
         // - we cache successful responses forever
         // - but exceptions only for an hour.
-        return $this->fetchJson(
+        /** @var TTagInfo $data */
+        $data =  $this->fetchJson(
             'https://api.github.com/repos/' . $repository . '/releases/tags/' . $tagName
         );
+        return $data;
     }
 
     /**

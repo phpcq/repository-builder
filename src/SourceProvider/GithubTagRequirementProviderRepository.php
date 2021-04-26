@@ -22,19 +22,7 @@ use function substr;
  *
  * Additionally, this can produce versions from all tags.
  *
- * @psalm-type TTag = array{
- *   ref: string,
- *   tag_name: string,
- *   version: string
- * }
- * @psalm-type TTagList = array<string, TTag>
- * @psalm-type TTagInfo = array{
- *   assets: list<array{
- *     name: string,
- *     browser_download_url: string,
- *   }>
- * }
- *
+ * @psalm-import-type TTagList from GithubClient
  */
 class GithubTagRequirementProviderRepository implements
     ToolVersionEnrichingRepositoryInterface,
@@ -107,7 +95,6 @@ class GithubTagRequirementProviderRepository implements
     {
         $this->tags = [];
         // Download all tags... then download all composer.json files.
-        /** @psalm-var TTagList $data */
         $data = $this->githubClient->fetchTags($this->repositoryName);
 
         foreach ($data as $entry) {
@@ -135,7 +122,6 @@ class GithubTagRequirementProviderRepository implements
         foreach ($this->tags as $tag) {
             // Obtain release by tag name.
             try {
-                /** @psalm-var TTagInfo $data */
                 $data = $this->githubClient->fetchTag($this->repositoryName, $tag['tag_name']);
             } catch (DataNotAvailableException $exception) {
                 if ($exception->getCode() === 404) {
