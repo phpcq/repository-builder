@@ -51,6 +51,7 @@
     "symfony/polyfill-php73": "*"
   },
   "require-dev": {
+    "phpcq/runner-bootstrap": "^1.0@dev",
     "phpcq/schema": "^1.0@dev"
   },
   "extra": {
