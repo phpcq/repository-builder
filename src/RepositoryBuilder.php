@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder;
 
 use InvalidArgumentException;
-use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProviderRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
@@ -27,7 +27,7 @@ class RepositoryBuilder
     private array $enrichingProviders = [];
 
     /**
-     * @var PluginVersionProviderRepositoryInterface[]
+     * @var PluginVersionProvidingRepositoryInterface[]
      */
     private array $pluginProviders = [];
 
@@ -43,7 +43,7 @@ class RepositoryBuilder
     {
         foreach ($providers as $provider) {
             $supported = false;
-            if ($provider instanceof PluginVersionProviderRepositoryInterface) {
+            if ($provider instanceof PluginVersionProvidingRepositoryInterface) {
                 $supported = true;
                 $this->pluginProviders[] = $provider;
             } else {

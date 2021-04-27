@@ -28,7 +28,7 @@ use RuntimeException;
  * }
  * @psalm-type TPluginCatalog = array<string, list<TPluginCatalogEntry>>
  */
-class PluginProviderRepository implements PluginVersionProviderRepositoryInterface
+class PluginProviderRepository implements PluginVersionProvidingRepositoryInterface
 {
     private string $sourceDir;
 
