@@ -60,7 +60,7 @@ class PharIoRepository implements ToolVersionProvidingRepositoryInterface
         // TODO: Implement refresh() method.
     }
 
-    public function getIterator(): Generator
+    public function getToolIterator(): Generator
     {
         foreach ($this->downloadXml()->query('//rootNs:release') as $releaseNode) {
             assert($releaseNode instanceof DOMElement);

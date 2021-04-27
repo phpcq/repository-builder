@@ -114,7 +114,7 @@ class GithubTagRequirementProviderRepository implements
         }
     }
 
-    public function getIterator(): Generator
+    public function getToolIterator(): Generator
     {
         if ([] === $this->tags) {
             $this->refresh();

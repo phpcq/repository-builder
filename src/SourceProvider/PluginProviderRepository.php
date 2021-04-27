@@ -64,7 +64,7 @@ class PluginProviderRepository implements PluginVersionProvidingRepositoryInterf
         $this->catalog = $decoded;
     }
 
-    public function getIterator(): Generator
+    public function getPluginIterator(): Generator
     {
         if (!$this->isFresh()) {
             $this->refresh();

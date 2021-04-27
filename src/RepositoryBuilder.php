@@ -91,7 +91,7 @@ class RepositoryBuilder
         }
 
         foreach ($this->toolProviders as $versionProvider) {
-            foreach ($versionProvider->getIterator() as $version) {
+            foreach ($versionProvider->getToolIterator() as $version) {
                 $toolName = $version->getName();
                 if (!$repository->hasTool($toolName)) {
                     $repository->addTool(new Tool($toolName));
@@ -113,7 +113,7 @@ class RepositoryBuilder
     private function collectPlugins(Repository $repository): void
     {
         foreach ($this->pluginProviders as $versionProvider) {
-            foreach ($versionProvider->getIterator() as $version) {
+            foreach ($versionProvider->getToolIterator() as $version) {
                 $pluginName = $version->getName();
                 if (!$repository->hasPlugin($pluginName)) {
                     $repository->addPlugin(new Plugin($pluginName));
