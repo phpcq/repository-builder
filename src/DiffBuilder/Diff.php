@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\DiffBuilder;
 
+use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginAddedDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginDiffInterface;
+use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginRemovedDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolAddedDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolDiffInterface;
@@ -181,6 +183,10 @@ final class Diff implements DiffInterface
                 return sprintf('Add tool "%1$s"', $diff->getName());
             case $diff instanceof ToolRemovedDiff:
                 return sprintf('Remove tool "%1$s"', $diff->getName());
+            case $diff instanceof PluginAddedDiff:
+                return sprintf('Add plugin "%1$s"', $diff->getName());
+            case $diff instanceof PluginRemovedDiff:
+                return sprintf('Remove plugin "%1$s"', $diff->getName());
             default:
         }
         // Can never happen.
