@@ -82,9 +82,7 @@ class GithubClient implements LoggerAwareInterface
             function (ItemInterface $item, bool &$save) use ($repository, $refSpec, $filePath) {
                 $save = true;
                 try {
-                    return $this->fetchJson(
-                        'https://raw.githubusercontent.com/' . $repository . '/' . $refSpec . '/' . $filePath
-                    );
+                    return $this->fetchJson($this->fileUri($repository, $refSpec, $filePath));
                 } catch (DataNotAvailableException $exception) {
                     $item->expiresAfter(3600);
                     return $exception;
@@ -97,6 +95,11 @@ class GithubClient implements LoggerAwareInterface
         }
 
         return $value;
+    }
+
+    public function fileUri(string $repository, string $refSpec, string $filePath): string
+    {
+        return 'https://raw.githubusercontent.com/' . $repository . '/' . $refSpec . '/' . $filePath;
     }
 
     /**
