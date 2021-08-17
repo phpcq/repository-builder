@@ -64,6 +64,10 @@ services:
         tags:
             - { name: 'repository.factory', key: 'plugin' }
 
+    Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory:
+        tags:
+            - { name: 'repository.factory', key: 'github-plugin' }
+
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     # Phpcq\RepositoryBuilder\Controller\:
