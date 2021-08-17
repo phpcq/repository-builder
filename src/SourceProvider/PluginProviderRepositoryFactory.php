@@ -11,6 +11,8 @@ use RuntimeException;
  * @psalm-type TPluginProviderRepositoryFactoryConfiguration = array{
  *   source_dir: string
  * }
+ *
+ * @deprecated This is the legacy repository loader.
  */
 class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
@@ -18,7 +20,7 @@ class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterfac
      * @psalm-param TPluginProviderRepositoryFactoryConfiguration $configuration
      * @psalm-suppress MoreSpecificImplementedParamType
      */
-    public function create(array $configuration, ToolVersionFilterRegistry $filterRegistry): SourceRepositoryInterface
+    public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         if (!is_string($sourceDir = $configuration['source_dir'] ?? null)) {
             throw new RuntimeException('No source directory configured');

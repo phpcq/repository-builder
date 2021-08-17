@@ -46,7 +46,7 @@ class PluginProviderRepositoryTest extends TestCase
                     PluginHash::createForFile($baseDir . '/plugin-b2.php')
                 ),
             ],
-            iterator_to_array($provider->getIterator())
+            iterator_to_array($provider->getPluginIterator())
         );
     }
 }

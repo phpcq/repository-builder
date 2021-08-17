@@ -27,6 +27,8 @@ use RuntimeException;
  *   }
  * }
  * @psalm-type TPluginCatalog = array<string, list<TPluginCatalogEntry>>
+ *
+ * @deprecated This is the legacy repository loader.
  */
 class PluginProviderRepository implements PluginVersionProvidingRepositoryInterface
 {
