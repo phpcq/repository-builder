@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\SourceProvider;
+namespace Phpcq\RepositoryBuilder\SourceProvider\Tool\Github;
 
 use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
@@ -24,7 +27,7 @@ use function substr;
  *
  * @psalm-import-type TTagList from GithubClient
  */
-class GithubTagRequirementProviderRepository implements
+class TagProviderRepository implements
     ToolVersionEnrichingRepositoryInterface,
     ToolVersionProvidingRepositoryInterface
 {
@@ -32,7 +35,7 @@ class GithubTagRequirementProviderRepository implements
 
     private string $toolName;
 
-    private ToolVersionFilter $versionFilter;
+    private ?ToolVersionFilter $versionFilter;
 
     private GithubClient $githubClient;
 
@@ -47,7 +50,7 @@ class GithubTagRequirementProviderRepository implements
         string $repositoryName,
         string $toolName,
         string $fileNamePattern,
-        ToolVersionFilter $versionFilter,
+        ?ToolVersionFilter $versionFilter,
         GithubClient $githubClient
     ) {
         $this->versionParser   = new VersionParser();
@@ -105,7 +108,7 @@ class GithubTagRequirementProviderRepository implements
                 // Ignore tags not matching semver
                 continue;
             }
-            if (!$this->versionFilter->accepts($version)) {
+            if ($this->versionFilter && !$this->versionFilter->accepts($version)) {
                 continue;
             }
             $entry['tag_name']    = $tagName;
