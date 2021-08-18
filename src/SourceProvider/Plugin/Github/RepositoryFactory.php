@@ -68,12 +68,12 @@ class RepositoryFactory implements SourceRepositoryFactoryInterface
                 continue;
             }
             if (null !== ($requirements = $allRequirements['plugin'] ?? null)) {
-                foreach ($this->processRequirements($requirements, $context) as $child) {
+                foreach ($this->processPluginRequirements($requirements, $context) as $child) {
                     yield $child;
                 };
             }
             if (null !== ($requirements = $allRequirements['tool'] ?? null)) {
-                foreach ($this->processRequirements($requirements, $context) as $child) {
+                foreach ($this->processToolRequirements($requirements, $context) as $child) {
                     yield $child;
                 };
             }
@@ -81,15 +81,32 @@ class RepositoryFactory implements SourceRepositoryFactoryInterface
     }
 
     /**
-     * @param TPluginRequirementsSchema|TToolRequirementsSchema $requirements
+     * @param TPluginRequirementsSchema $requirements
      *
      * @return Generator<int, SourceRepositoryInterface>
      */
-    private function processRequirements(array $requirements, LoaderContext $context): Generator
+    private function processPluginRequirements(array $requirements, LoaderContext $context): Generator
     {
         $loader = $context->getLoader();
         foreach ($requirements as $name => $requirement) {
             foreach ($requirement['sources'] ?? [] as $source) {
+                $source['type'] = 'plugin-' . $source['type'];
+                yield $loader->load($source, $context->withPlugin($name, $requirement['constraints'] ?? '*'));
+            }
+        }
+    }
+
+    /**
+     * @param TToolRequirementsSchema $requirements
+     *
+     * @return Generator<int, SourceRepositoryInterface>
+     */
+    private function processToolRequirements(array $requirements, LoaderContext $context): Generator
+    {
+        $loader = $context->getLoader();
+        foreach ($requirements as $name => $requirement) {
+            foreach ($requirement['sources'] ?? [] as $source) {
+                $source['type'] = 'tool-' . $source['type'];
                 yield $loader->load($source, $context->withTool($name, $requirement['constraints'] ?? '*'));
             }
         }

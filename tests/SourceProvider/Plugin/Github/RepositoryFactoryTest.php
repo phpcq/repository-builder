@@ -113,9 +113,9 @@ class RepositoryFactoryTest extends TestCase
             ->willReturnCallback(
                 function (array $config, LoaderContext $context) use ($mock1, $mock2): SourceRepositoryInterface {
                     switch ($config) {
-                        case ['type' => 'dummy', 'tool' => 'plugin1']:
+                        case ['type' => 'plugin-dummy', 'tool' => 'plugin1']:
                             return $mock1;
-                        case ['type' => 'dummy', 'tool' => 'tool1']:
+                        case ['type' => 'tool-dummy', 'tool' => 'tool1']:
                             return $mock2;
                     }
                     self::fail('Invalid configuration');

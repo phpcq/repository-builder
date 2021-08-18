@@ -52,13 +52,13 @@ services:
             - '@http.client'
             - '%kernel.project_dir%/var/repositories/phar.io'
         tags:
-            - { name: 'repository.factory', key: 'phar.io' }
+            - { name: 'repository.factory', key: 'tool-phar.io' }
 
     Phpcq\RepositoryBuilder\SourceProvider\Tool\Github\TagProviderRepositoryFactory:
         arguments:
             - '@Phpcq\RepositoryBuilder\Api\GithubClient'
         tags:
-            - { name: 'repository.factory', key: 'github' }
+            - { name: 'repository.factory', key: 'tool-github' }
 
     Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepositoryFactory:
         tags:
@@ -66,7 +66,7 @@ services:
 
     Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory:
         tags:
-            - { name: 'repository.factory', key: 'github-plugin' }
+            - { name: 'repository.factory', key: 'plugin-github' }
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
