@@ -1,0 +1,57 @@
+name: Code Quality Diagnostics
+
+env:
+  PHPCQ_DIRECTORY: ./phpcq-runner
+
+on: [pull_request, push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull source
+        uses: actions/checkout@v2
+
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: xdebug2
+
+      - name: Cache composer cache directory
+        uses: actions/cache@v1
+        env:
+          cache-name: composer-cache-dir
+        with:
+          path: ~/.cache/composer
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+      - name: Install composer dependencies
+        run: composer install
+
+      - name: Cache vendor directory
+        uses: actions/cache@v1
+        env:
+          cache-name: vendor
+        with:
+          path: $GITHUB_WORKSPACE/vendor
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Install phpcq toolchain
+        run: $GITHUB_WORKSPACE/vendor/bin/phpcq install -v
+
+      - name: Cache phpcq directory
+        uses: actions/cache@v1
+        env:
+          cache-name: phpcq
+        with:
+          path: $GITHUB_WORKSPACE/vendor
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/.phpcq.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Run tests
+        run: $GITHUB_WORKSPACE/vendor/bin/phpcq run -o github-action -o default
