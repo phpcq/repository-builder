@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\SourceProvider;
+namespace Phpcq\RepositoryBuilder\SourceProvider\Tool\PharIo;
 
 use DOMElement;
 use Generator;
 use Phpcq\RepositoryBuilder\File\XmlFile;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use Phpcq\RepositoryDefinition\Tool\ToolHash;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
@@ -27,7 +29,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *   </phar>
  * </repository>
  */
-class PharIoRepository implements ToolVersionProvidingRepositoryInterface
+class Repository implements ToolVersionProvidingRepositoryInterface
 {
     private string $repositoryUrl;
 
@@ -35,18 +37,18 @@ class PharIoRepository implements ToolVersionProvidingRepositoryInterface
 
     private HttpClientInterface $httpClient;
 
-    private ToolVersionFilterRegistry $filterRegistry;
+    private ?ToolVersionFilter $filter;
 
     public function __construct(
         string $repositoryUrl,
         string $cacheDir,
         HttpClientInterface $httpClient,
-        ToolVersionFilterRegistry $filterRegistry
+        ?ToolVersionFilter $filter
     ) {
         $this->repositoryUrl = $repositoryUrl;
         $this->cacheDir      = $cacheDir;
         $this->httpClient    = $httpClient;
-        $this->filterRegistry = $filterRegistry;
+        $this->filter        = $filter;
     }
 
     public function isFresh(): bool
@@ -68,8 +70,7 @@ class PharIoRepository implements ToolVersionProvidingRepositoryInterface
             $toolName = $releaseNode->parentNode->getAttribute('name');
             $version  = $releaseNode->getAttribute('version');
 
-            $filter = $this->filterRegistry->getFilterForTool($toolName);
-            if (!$filter->accepts($version)) {
+            if ($this->filter && ($toolName !== $this->filter->getToolName() || !$this->filter->accepts($version))) {
                 continue;
             }
 

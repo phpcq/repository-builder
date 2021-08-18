@@ -47,7 +47,7 @@ services:
         arguments: [!tagged_locator { tag: 'repository.factory', index_by: 'key' }]
         tags: ['console.command']
 
-    Phpcq\RepositoryBuilder\SourceProvider\PharIoRepositoryFactory:
+    Phpcq\RepositoryBuilder\SourceProvider\Tool\PharIo\RepositoryFactory:
         arguments:
             - '@http.client'
             - '%kernel.project_dir%/var/repositories/phar.io'
