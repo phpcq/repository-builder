@@ -20,7 +20,7 @@ final class ToolVersionFilter
     {
         $this->toolName        = $toolName;
         $this->allowedVersions = $allowedVersions;
-        $this->previous = $previous;
+        $this->previous        = $previous;
     }
 
     public function getToolName(): string
