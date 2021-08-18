@@ -54,7 +54,7 @@ services:
         tags:
             - { name: 'repository.factory', key: 'phar.io' }
 
-    Phpcq\RepositoryBuilder\SourceProvider\GithubTagRequirementProviderRepositoryFactory:
+    Phpcq\RepositoryBuilder\SourceProvider\Tool\Github\TagProviderRepositoryFactory:
         arguments:
             - '@Phpcq\RepositoryBuilder\Api\GithubClient'
         tags:
