@@ -11,8 +11,6 @@ use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
 use Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository;
 use Phpcq\RepositoryBuilder\SourceProvider\LoaderContext;
 use Phpcq\RepositoryBuilder\SourceProvider\RepositoryLoader;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilterRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

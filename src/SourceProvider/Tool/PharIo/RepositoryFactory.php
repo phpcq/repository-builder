@@ -29,7 +29,10 @@ class RepositoryFactory implements SourceRepositoryFactoryInterface
         $this->cacheDir   = $cacheDir;
     }
 
-    /** @param TPharIoRepositoryConfiguration $configuration */
+    /**
+     * @param TPharIoRepositoryConfiguration $configuration
+     * @psalm-suppress MoreSpecificImplementedParamType
+     */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         $toolName = $context->getToolName() ?? $configuration['tool-name'] ?? null;
