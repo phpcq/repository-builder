@@ -126,39 +126,39 @@ class TagProviderRepository implements
             // Obtain release by tag name.
             try {
                 $data = $this->githubClient->fetchTag($this->repositoryName, $tag['tag_name']);
+                $pharUrl = null;
+                $signatureUrl = null;
+                foreach ($data['assets'] as $asset) {
+                    if (! preg_match($this->fileNameRegex, $asset['name'])) {
+                        continue;
+                    }
+
+                    if ('.phar' === substr($asset['name'], -5)) {
+                        $pharUrl = $asset['browser_download_url'];
+                        continue;
+                    }
+
+                    if ('.asc' === substr($asset['name'], -4)) {
+                        $signatureUrl = $asset['browser_download_url'];
+                        continue;
+                    }
+                }
+
+                // Walk the assets and try to determine the phar-url.
+                yield new ToolVersion(
+                    $this->toolName,
+                    $tag['tag_name'],
+                    $pharUrl,
+                    null,
+                    null,
+                    $signatureUrl,
+                );
             } catch (DataNotAvailableException $exception) {
                 if ($exception->getCode() === 404) {
                     continue;
                 }
                 throw $exception;
             }
-            $pharUrl = null;
-            $signatureUrl = null;
-            foreach ($data['assets'] as $asset) {
-                if (! preg_match($this->fileNameRegex, $asset['name'])) {
-                    continue;
-                }
-
-                if ('.phar' === substr($asset['name'], -5)) {
-                    $pharUrl = $asset['browser_download_url'];
-                    continue;
-                }
-
-                if ('.asc' === substr($asset['name'], -4)) {
-                    $signatureUrl = $asset['browser_download_url'];
-                    continue;
-                }
-            }
-
-            // Walk the assets and try to determine the phar-url.
-            yield new ToolVersion(
-                $this->toolName,
-                $tag['tag_name'],
-                $pharUrl,
-                null,
-                null,
-                $signatureUrl,
-            );
         }
     }
 }
