@@ -7,7 +7,7 @@ namespace Phpcq\RepositoryBuilder\SourceProvider\Tool\PharIo;
 use Phpcq\RepositoryBuilder\SourceProvider\LoaderContext;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**

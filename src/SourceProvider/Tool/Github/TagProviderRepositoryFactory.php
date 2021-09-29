@@ -8,7 +8,7 @@ use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\SourceProvider\LoaderContext;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter;
 use RuntimeException;
 
 /**

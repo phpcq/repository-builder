@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\SourceProvider;
+namespace Phpcq\RepositoryBuilder\SourceProvider\Tool;
 
 use Composer\Semver\Semver;
 use UnexpectedValueException;
