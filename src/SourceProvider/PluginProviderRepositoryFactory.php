@@ -19,6 +19,7 @@ class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterfac
     /**
      * @psalm-param TPluginProviderRepositoryFactoryConfiguration $configuration
      * @psalm-suppress MoreSpecificImplementedParamType
+     * @psalm-suppress DeprecatedClass
      */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
