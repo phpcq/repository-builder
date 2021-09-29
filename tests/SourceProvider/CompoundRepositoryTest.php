@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\Test\SourceProvider\MockRepositoryInterface\PluginVersionProvidingInterface;
 use Phpcq\RepositoryBuilder\Test\SourceProvider\MockRepositoryInterface\ToolVersionEnrichingInterface;

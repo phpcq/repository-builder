@@ -6,6 +6,7 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 
 use Generator;
 use InvalidArgumentException;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Psr\Log\LoggerAwareInterface;

@@ -8,7 +8,7 @@ use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
