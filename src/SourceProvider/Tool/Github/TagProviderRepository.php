@@ -9,13 +9,12 @@ use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
 use UnexpectedValueException;
-
 use function preg_match;
 use function str_replace;
 use function substr;

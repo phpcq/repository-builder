@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\SourceProvider;
+namespace Phpcq\RepositoryBuilder\SourceProvider\Tool;
 
 use Generator;
+use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 
 /**

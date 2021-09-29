@@ -10,7 +10,7 @@ use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
