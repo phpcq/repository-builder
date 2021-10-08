@@ -12,6 +12,7 @@ use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -129,9 +130,13 @@ class Repository implements PluginVersionProvidingRepositoryInterface
     {
         $scheme = parse_url($absoluteUriPlugin, PHP_URL_SCHEME);
         if (!empty($scheme) && $scheme !== 'file') {
-            return PluginHash::createForString(
-                $this->httpClient->request('GET', $absoluteUriPlugin)->getContent()
-            );
+            try {
+                return PluginHash::createForString(
+                    $this->httpClient->request('GET', $absoluteUriPlugin)->getContent()
+                );
+            } catch (ClientException $exception) {
+                throw new DataNotAvailableException($exception->getMessage(), 0, $exception);
+            }
         }
 
         return PluginHash::createForFile($absoluteUriPlugin);
