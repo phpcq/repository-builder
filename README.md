@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/github/license/phpcq/repository-builder?style=flat-square)](https://github.com/phpcq/repository-builder/blob/master/LICENSE)
-[![Stable Build Status](http://img.shields.io/travis/phpcq/repository-builder/master.svg?style=flat-square)](https://travis-ci.org/phpcq/repository-builder)
+[![Code Quality Diagnostics](https://github.com/phpcq/repository-builder/actions/workflows/diagnostics.yml/badge.svg)](https://github.com/phpcq/repository-builder/actions/workflows/diagnostics.yml)
 
 # PHP code quality project
 
