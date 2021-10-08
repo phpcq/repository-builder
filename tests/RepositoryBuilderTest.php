@@ -7,9 +7,10 @@ namespace Phpcq\RepositoryBuilder\Test;
 use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
+use Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionEnrichingRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
@@ -42,7 +43,7 @@ final class RepositoryBuilderTest extends TestCase
 
         $versionProvider1
             ->expects($this->once())
-            ->method('getIterator')
+            ->method('getToolIterator')
             ->willReturnCallback(function () use ($version11, $version12) {
                 yield $version11;
                 yield $version12;
@@ -50,7 +51,7 @@ final class RepositoryBuilderTest extends TestCase
 
         $versionProvider2
             ->expects($this->once())
-            ->method('getIterator')
+            ->method('getToolIterator')
             ->willReturnCallback(function () use ($version21, $version22) {
                 yield $version21;
                 yield $version22;
@@ -90,7 +91,12 @@ final class RepositoryBuilderTest extends TestCase
 
         $writer  = $this->createMock(JsonRepositoryWriter::class);
         $builder = new RepositoryBuilder(
-            [$versionProvider1, $versionProvider2, $enrichingProvider1, $enrichingProvider2],
+            new CompoundRepository(
+                $versionProvider1,
+                $versionProvider2,
+                $enrichingProvider1,
+                $enrichingProvider2
+            ),
             $writer
         );
 
@@ -111,12 +117,12 @@ final class RepositoryBuilderTest extends TestCase
     {
         $writer  = $this->createMock(JsonRepositoryWriter::class);
         $provider = $this->getMockForAbstractClass(ToolVersionProvidingAndEnrichingRepositoryInterface::class);
-        $builder = new RepositoryBuilder([$provider], $writer);
+        $builder = new RepositoryBuilder(new CompoundRepository($provider), $writer);
 
         $version = $this->createMock(ToolVersionInterface::class);
 
         $provider->expects($this->once())
-            ->method('getIterator')
+            ->method('getToolIterator')
             ->willReturnCallback(function () use ($version) {
                 yield $version;
             });
@@ -133,6 +139,6 @@ final class RepositoryBuilderTest extends TestCase
         $provider = $this->getMockForAbstractClass(SourceRepositoryInterface::class);
 
         $this->expectException(InvalidArgumentException::class);
-        new RepositoryBuilder([$provider], $writer);
+        new RepositoryBuilder(new CompoundRepository($provider), $writer);
     }
 }

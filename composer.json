@@ -6,7 +6,7 @@
     {
       "name": "Christian Schiffler",
       "email": "c.schiffler@cyberspectrum.de",
-      "homepage": "http://cyberspectrum.de",
+      "homepage": "https://cyberspectrum.de",
       "role": "lead"
     },
     {
@@ -27,6 +27,7 @@
     "ext-xml": "*",
     "composer/semver": "^1.5",
     "phpcq/repository-definition": "^1.0@dev",
+    "psr/container": "^1.0",
     "psr/log": "^1.1.2",
     "symfony/cache": "^5.0.7",
     "symfony/cache-contracts": "^2.0",
@@ -51,7 +52,11 @@
     "symfony/polyfill-php73": "*"
   },
   "require-dev": {
+    "phpcq/runner-bootstrap": "^1.0@dev",
     "phpcq/schema": "^1.0@dev"
+  },
+  "config": {
+    "sort-packages": true
   },
   "extra": {
     "branch-alias": {

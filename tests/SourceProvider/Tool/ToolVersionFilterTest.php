@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\Test\SourceProvider;
+namespace Phpcq\RepositoryBuilder\Test\SourceProvider\Tool;
 
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter */
+/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter */
 final class ToolVersionFilterTest extends TestCase
 {
     public function testToolNameGetterReturnsToolName(): void

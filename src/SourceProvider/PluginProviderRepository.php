@@ -27,8 +27,10 @@ use RuntimeException;
  *   }
  * }
  * @psalm-type TPluginCatalog = array<string, list<TPluginCatalogEntry>>
+ *
+ * @deprecated This is the legacy repository loader.
  */
-class PluginProviderRepository implements PluginVersionProviderRepositoryInterface
+class PluginProviderRepository implements PluginVersionProvidingRepositoryInterface
 {
     private string $sourceDir;
 
@@ -64,7 +66,7 @@ class PluginProviderRepository implements PluginVersionProviderRepositoryInterfa
         $this->catalog = $decoded;
     }
 
-    public function getIterator(): Generator
+    public function getPluginIterator(): Generator
     {
         if (!$this->isFresh()) {
             $this->refresh();

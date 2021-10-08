@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Phpcq\RepositoryBuilder\SourceProvider;
+namespace Phpcq\RepositoryBuilder\SourceProvider\Tool\Github;
 
 use Composer\Semver\VersionParser;
 use Generator;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
@@ -22,21 +25,9 @@ use function substr;
  *
  * Additionally, this can produce versions from all tags.
  *
- * @psalm-type TTag = array{
- *   ref: string,
- *   tag_name: string,
- *   version: string
- * }
- * @psalm-type TTagList = array<string, TTag>
- * @psalm-type TTagInfo = array{
- *   assets: list<array{
- *     name: string,
- *     browser_download_url: string,
- *   }>
- * }
- *
+ * @psalm-import-type TTagList from GithubClient
  */
-class GithubTagRequirementProviderRepository implements
+class TagProviderRepository implements
     ToolVersionEnrichingRepositoryInterface,
     ToolVersionProvidingRepositoryInterface
 {
@@ -44,7 +35,7 @@ class GithubTagRequirementProviderRepository implements
 
     private string $toolName;
 
-    private ToolVersionFilter $versionFilter;
+    private ?ToolVersionFilter $versionFilter;
 
     private GithubClient $githubClient;
 
@@ -59,7 +50,7 @@ class GithubTagRequirementProviderRepository implements
         string $repositoryName,
         string $toolName,
         string $fileNamePattern,
-        ToolVersionFilter $versionFilter,
+        ?ToolVersionFilter $versionFilter,
         GithubClient $githubClient
     ) {
         $this->versionParser   = new VersionParser();
@@ -107,7 +98,6 @@ class GithubTagRequirementProviderRepository implements
     {
         $this->tags = [];
         // Download all tags... then download all composer.json files.
-        /** @psalm-var TTagList $data */
         $data = $this->githubClient->fetchTags($this->repositoryName);
 
         foreach ($data as $entry) {
@@ -118,7 +108,7 @@ class GithubTagRequirementProviderRepository implements
                 // Ignore tags not matching semver
                 continue;
             }
-            if (!$this->versionFilter->accepts($version)) {
+            if ($this->versionFilter && !$this->versionFilter->accepts($version)) {
                 continue;
             }
             $entry['tag_name']    = $tagName;
@@ -127,7 +117,7 @@ class GithubTagRequirementProviderRepository implements
         }
     }
 
-    public function getIterator(): Generator
+    public function getToolIterator(): Generator
     {
         if ([] === $this->tags) {
             $this->refresh();
@@ -135,41 +125,40 @@ class GithubTagRequirementProviderRepository implements
         foreach ($this->tags as $tag) {
             // Obtain release by tag name.
             try {
-                /** @psalm-var TTagInfo $data */
                 $data = $this->githubClient->fetchTag($this->repositoryName, $tag['tag_name']);
+                $pharUrl = null;
+                $signatureUrl = null;
+                foreach ($data['assets'] as $asset) {
+                    if (! preg_match($this->fileNameRegex, $asset['name'])) {
+                        continue;
+                    }
+
+                    if ('.phar' === substr($asset['name'], -5)) {
+                        $pharUrl = $asset['browser_download_url'];
+                        continue;
+                    }
+
+                    if ('.asc' === substr($asset['name'], -4)) {
+                        $signatureUrl = $asset['browser_download_url'];
+                        continue;
+                    }
+                }
+
+                // Walk the assets and try to determine the phar-url.
+                yield new ToolVersion(
+                    $this->toolName,
+                    $tag['tag_name'],
+                    $pharUrl,
+                    null,
+                    null,
+                    $signatureUrl,
+                );
             } catch (DataNotAvailableException $exception) {
                 if ($exception->getCode() === 404) {
                     continue;
                 }
                 throw $exception;
             }
-            $pharUrl = null;
-            $signatureUrl = null;
-            foreach ($data['assets'] as $asset) {
-                if (! preg_match($this->fileNameRegex, $asset['name'])) {
-                    continue;
-                }
-
-                if ('.phar' === substr($asset['name'], -5)) {
-                    $pharUrl = $asset['browser_download_url'];
-                    continue;
-                }
-
-                if ('.asc' === substr($asset['name'], -4)) {
-                    $signatureUrl = $asset['browser_download_url'];
-                    continue;
-                }
-            }
-
-            // Walk the assets and try to determine the phar-url.
-            yield new ToolVersion(
-                $this->toolName,
-                $tag['tag_name'],
-                $pharUrl,
-                null,
-                null,
-                $signatureUrl,
-            );
         }
     }
 }

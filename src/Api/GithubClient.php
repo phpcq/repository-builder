@@ -7,7 +7,7 @@ namespace Phpcq\RepositoryBuilder\Api;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -15,9 +15,23 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * @psalm-type TTag = array{
+ *   ref: string,
+ *   tag_name: string,
+ *   version: string
+ * }
+ * @psalm-type TTagList = array<string, TTag>
+ * @psalm-type TTagInfo = array{
+ *   assets: list<array{
+ *     name: string,
+ *     browser_download_url: string,
+ *   }>
+ * }
+ */
 class GithubClient implements LoggerAwareInterface
 {
-    use LoggerAwareTrait;
+    private LoggerInterface $logger;
 
     private HttpClientInterface $httpClient;
 
@@ -33,21 +47,32 @@ class GithubClient implements LoggerAwareInterface
         $this->logger     = new NullLogger();
     }
 
-    public function fetchTags(string $repository): array
+    public function setLogger(LoggerInterface $logger): void
     {
-        return $this->fetchJson(
-            'https://api.github.com/repos/' . $repository . '/git/matching-refs/tags/'
-        );
+        $this->logger = $logger;
     }
 
+    /** @return TTagList */
+    public function fetchTags(string $repository): array
+    {
+        /** @var TTagList $data */
+        $data = $this->fetchJson(
+            'https://api.github.com/repos/' . $repository . '/git/matching-refs/tags/'
+        );
+        return $data;
+    }
+
+    /** @return TTagInfo */
     public function fetchTag(string $repository, string $tagName): array
     {
         // We handle exceptions differently here:
         // - we cache successful responses forever
         // - but exceptions only for an hour.
-        return $this->fetchJson(
+        /** @var TTagInfo $data */
+        $data =  $this->fetchJson(
             'https://api.github.com/repos/' . $repository . '/releases/tags/' . $tagName
         );
+        return $data;
     }
 
     /**
@@ -62,9 +87,7 @@ class GithubClient implements LoggerAwareInterface
             function (ItemInterface $item, bool &$save) use ($repository, $refSpec, $filePath) {
                 $save = true;
                 try {
-                    return $this->fetchJson(
-                        'https://raw.githubusercontent.com/' . $repository . '/' . $refSpec . '/' . $filePath
-                    );
+                    return $this->fetchJson($this->fileUri($repository, $refSpec, $filePath));
                 } catch (DataNotAvailableException $exception) {
                     $item->expiresAfter(3600);
                     return $exception;
@@ -77,6 +100,11 @@ class GithubClient implements LoggerAwareInterface
         }
 
         return $value;
+    }
+
+    public function fileUri(string $repository, string $refSpec, string $filePath): string
+    {
+        return 'https://raw.githubusercontent.com/' . $repository . '/' . $refSpec . '/' . $filePath;
     }
 
     /**

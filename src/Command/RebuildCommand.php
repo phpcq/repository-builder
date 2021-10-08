@@ -8,11 +8,9 @@ use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\JsonRepositoryWriter;
 use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
-use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryFactoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilter;
-use Phpcq\RepositoryBuilder\SourceProvider\ToolVersionFilterRegistry;
-use Psr\Log\LoggerAwareInterface;
+use Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository;
+use Phpcq\RepositoryBuilder\SourceProvider\LoaderContext;
+use Phpcq\RepositoryBuilder\SourceProvider\RepositoryLoader;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,7 +39,6 @@ use function substr;
  *   TRepositoryBuilderConfigurationRepositoryConfiguration
  * >
  * @psalm-type TRepositoryBuilderConfiguration = array{
- *   allowed_versions: TRepositoryBuilderConfigurationAllowedVersions,
  *   repositories: TRepositoryBuilderConfigurationRepositoryConfigurationArray
  * }
  */
@@ -102,12 +99,7 @@ final class RebuildCommand extends Command
         /** @psalm-var TRepositoryBuilderConfiguration $config */
         $config = Yaml::parse(file_get_contents($configFile));
 
-        $filterRegistry = $this->loadFilterRegistry($config['allowed_versions'] ?? []);
-
-        $providers = $this->loadProviders(
-            $config['repositories'] ?? [],
-            $filterRegistry
-        );
+        $providers = $this->loadProviders($config['repositories'] ?? []);
 
         $diff = null;
         if ($output->isVerbose()) {
@@ -120,6 +112,7 @@ final class RebuildCommand extends Command
 
         if (isset($diff) && null !== ($generated = $diff->generate())) {
             $buffer = $generated->asString('');
+            /** @psalm-suppress MixedAssignment */
             if (null !== ($truncate = $input->getOption('truncate'))) {
                 $truncate = (int) $truncate;
                 if (strlen($buffer) > $truncate) {
@@ -161,39 +154,24 @@ final class RebuildCommand extends Command
         return (string) $input->getOption($option);
     }
 
-    /** @psalm-param TRepositoryBuilderConfigurationAllowedVersions $allowedVersions */
-    private function loadFilterRegistry(array $allowedVersions): ToolVersionFilterRegistry
-    {
-        $filters = [];
-        foreach ($allowedVersions as $toolName => $constraint) {
-            $filters[] = new ToolVersionFilter($toolName, $constraint);
-        }
-
-        return new ToolVersionFilterRegistry($filters);
-    }
-
     /**
      * Returns the providers.
      *
      * @psalm-param TRepositoryBuilderConfigurationRepositoryConfigurationArray $repositoryConfig
-     *
-     * @return SourceRepositoryInterface[]
-     * @psalm-return list<SourceRepositoryInterface>
      */
-    private function loadProviders(array $repositoryConfig, ToolVersionFilterRegistry $filterRegistry): array
+    private function loadProviders(array $repositoryConfig): CompoundRepository
     {
-        return array_map(function ($repository) use ($filterRegistry) {
-            if (!$this->repositoryFactories->has($repository['type'])) {
-                throw new InvalidArgumentException('Unknown repository type: ' . $repository['type']);
-            }
+        $loader = new RepositoryLoader($this->repositoryFactories);
+        $context = LoaderContext::create($loader);
 
-            /** @var SourceRepositoryFactoryInterface $factory */
-            $factory     = $this->repositoryFactories->get($repository['type']);
-            $source      = $factory->create($repository, $filterRegistry);
-            if ($source instanceof LoggerAwareInterface) {
-                $source->setLogger($this->logger);
-            }
-            return $source;
-        }, array_values($repositoryConfig));
+        $repositories = [];
+        foreach ($repositoryConfig as $repository) {
+            $repositories[] = $loader->load($repository, $context);
+        }
+
+        $compound = new CompoundRepository(...$repositories);
+        $compound->setLogger($this->logger);
+
+        return $compound;
     }
 }
