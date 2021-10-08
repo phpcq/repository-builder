@@ -14,7 +14,6 @@ use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInter
 use Phpcq\RepositoryBuilder\SourceProvider\RepositoryLoader;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use ReflectionProperty;
 use RuntimeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -46,12 +45,7 @@ class RepositoryFactoryTest extends TestCase
     /** @dataProvider invalidConfigurationProvider */
     public function testThrowsWithInvalidRepositoryConfiguration(array $config): void
     {
-        $client    = $this->getMockBuilder(HttpClientInterface::class)->disableOriginalConstructor()->getMock();
-        $github    = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
-        $factory   = new RepositoryFactory($client, $github);
-        $factories = $this->getMockForAbstractClass(ContainerInterface::class);
-        $loader    = new RepositoryLoader($factories);
-        $context   = LoaderContext::create($loader);
+        [$factory, $context] = $this->mockInstances();
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No source repositories configured');
@@ -61,11 +55,7 @@ class RepositoryFactoryTest extends TestCase
 
     public function testLoadsSourceRepositories(): void
     {
-        $client    = $this->getMockBuilder(HttpClientInterface::class)->disableOriginalConstructor()->getMock();
-        $github    = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
-        $factory   = new RepositoryFactory($client, $github);
-        $loader    = $this->getMockBuilder(RepositoryLoader::class)->disableOriginalConstructor()->getMock();
-        $context   = LoaderContext::create($loader);
+        [$factory, $context, $github, $loader] = $this->mockInstances();
         $config    = ['repositories' => ['vendor1/plugin1']];
         $github
             ->expects(self::once())
@@ -134,11 +124,7 @@ class RepositoryFactoryTest extends TestCase
 
     public function testIgnoresTagsWithoutJson(): void
     {
-        $client    = $this->getMockBuilder(HttpClientInterface::class)->disableOriginalConstructor()->getMock();
-        $github    = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
-        $factory   = new RepositoryFactory($client, $github);
-        $loader    = $this->getMockBuilder(RepositoryLoader::class)->disableOriginalConstructor()->getMock();
-        $context   = LoaderContext::create($loader);
+        [$factory, $context, $github, $loader] = $this->mockInstances();
         $config    = ['repositories' => ['vendor1/plugin1']];
         $github
             ->expects(self::once())
@@ -169,5 +155,18 @@ class RepositoryFactoryTest extends TestCase
         $reflection->setAccessible(true);
 
         return $reflection->getValue($repository);
+    }
+
+    private function mockInstances(): array
+    {
+        $client = $this->getMockBuilder(HttpClientInterface::class)->disableOriginalConstructor()->getMock();
+        $github = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
+        $loader = $this->getMockBuilder(RepositoryLoader::class)->disableOriginalConstructor()->getMock();
+        return [
+            new RepositoryFactory($client, $github),
+            LoaderContext::create($loader),
+            $github,
+            $loader,
+        ];
     }
 }
