@@ -59,3 +59,8 @@ jobs:
 
       - name: Run tests
         run: $GITHUB_WORKSPACE/vendor/bin/phpcq run -o github-action -o default
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: phpcq-builds
+          path: .phpcq/build/
