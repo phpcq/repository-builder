@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github;
 
 use Generator;
+use InvalidArgumentException;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
@@ -64,6 +65,10 @@ class Repository implements PluginVersionProvidingRepositoryInterface
             $name = $jsonEntry->getName();
 
             // FIXME: need to handle plugin type "phar" here.
+            if ('php-file' !== $jsonEntry->getType()) {
+                throw new InvalidArgumentException('Unsupported plugin type encountered:' . $jsonEntry->getType());
+            }
+
             $version = new PhpFilePluginVersion(
                 $name,
                 $jsonEntry->getVersion(),
