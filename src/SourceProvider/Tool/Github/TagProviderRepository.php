@@ -15,6 +15,7 @@ use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
 use UnexpectedValueException;
+
 use function preg_match;
 use function str_replace;
 use function substr;
