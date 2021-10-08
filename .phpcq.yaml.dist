@@ -31,9 +31,6 @@ phpcq:
     phpcs:
       version: ^1.0
       signed: false
-    phpcbf:
-      version: ^1.0
-      signed: false
     composer-normalize:
       version: ^1.0
       signed: false
@@ -77,19 +74,6 @@ phpcq:
       - phpunit
 
 tasks:
-  phpcpd:
-    plugin: phpcpd
-    config:
-    #  exclude:
-    #  names:
-    #  names_exclude:
-    #  regexps_exclude:
-    #  log:
-    #  min_lines:
-    #  min_tokens:
-    #  fuzzy: true
-    #  custom_flags:
-
   phpmd:
     plugin: phpmd
     config:
