@@ -19,6 +19,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class JsonRepositoryWriter
 {
+    private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+
     private string $baseDir;
 
     private Filesystem $filesystem;
@@ -32,6 +34,9 @@ class JsonRepositoryWriter
      * @var PluginInterface[]
      */
     private array $plugins = [];
+
+    /** @var list<string> */
+    private array $dumpedFileNames = [];
 
     /**
      * Create a new instance.
@@ -75,6 +80,7 @@ class JsonRepositoryWriter
      */
     public function save(): void
     {
+        $this->dumpedFileNames = [];
         $data = [
             'includes' => [],
         ];
@@ -93,10 +99,14 @@ class JsonRepositoryWriter
             $data['includes'][] = $content;
         }
 
-        $this->filesystem->dumpFile(
-            $this->baseDir . '/repository.json',
-            json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $this->dumpFile('repository.json', $data);
+
+        $flipped = array_flip($this->dumpedFileNames);
+        foreach (glob($this->baseDir . '/*') as $filename) {
+            if (!array_key_exists($filename, $flipped)) {
+                $this->filesystem->remove($filename);
+            }
+        }
     }
 
     private function processTool(ToolInterface $tool): ?array
@@ -104,7 +114,6 @@ class JsonRepositoryWriter
         $fileName         = $tool->getName() . '-tool.json';
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($tool->isEmpty()) {
-            $this->filesystem->remove($fileNameAbsolute);
             return null;
         }
         $data = [
@@ -136,10 +145,7 @@ class JsonRepositoryWriter
             return null;
         }
 
-        $this->filesystem->dumpFile(
-            $fileNameAbsolute,
-            json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $this->dumpFile($fileName, $data);
 
         return [
             'url' => $fileName,
@@ -172,7 +178,6 @@ class JsonRepositoryWriter
         $fileName         = $plugin->getName() . '-plugin.json';
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($plugin->isEmpty()) {
-            $this->filesystem->remove($fileNameAbsolute);
             return null;
         }
         $data = [];
@@ -181,7 +186,7 @@ class JsonRepositoryWriter
             $pluginFile    = $plugin->getName() . '-' . $version->getVersion() . '.php';
             $signatureFile = $pluginFile . '.asc';
             if ($version instanceof PhpFilePluginVersion) {
-                $this->filesystem->copy($version->getFilePath(), $this->baseDir . '/' . $pluginFile, true);
+                $this->copyFile($version->getFilePath(), $pluginFile);
             }
 
             $serialized = [
@@ -195,19 +200,14 @@ class JsonRepositoryWriter
 
             if ($version instanceof PhpFilePluginVersion) {
                 if (null !== $signature = $version->getSignaturePath()) {
-                    $this->filesystem->copy($signature, $this->baseDir . '/' . $signatureFile);
-                } else {
-                    $this->filesystem->remove($this->baseDir . '/' . $signatureFile);
+                    $this->copyFile($signature, $signatureFile);
                 }
             }
 
             $data[] = $serialized;
         }
 
-        $this->filesystem->dumpFile(
-            $fileNameAbsolute,
-            json_encode(['plugins' => [$plugin->getName() => $data]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $this->dumpFile($fileName, ['plugins' => [$plugin->getName() => $data]]);
 
         return [
             'url' => $fileName,
@@ -261,5 +261,17 @@ class JsonRepositoryWriter
             'type' => $hash->getType(),
             'value' => $hash->getValue(),
         ];
+    }
+
+    private function copyFile(string $fileNameAbsolute, string $targetFileName): void
+    {
+        $this->dumpedFileNames[] = $fullFileName = $this->baseDir . '/' . $targetFileName;
+        $this->filesystem->copy($fileNameAbsolute, $fullFileName, true);
+    }
+
+    private function dumpFile(string $fileName, array $contents): void
+    {
+        $this->dumpedFileNames[] = $fullFileName = $this->baseDir . '/' . $fileName;
+        $this->filesystem->dumpFile($fullFileName, json_encode($contents, self::JSON_FLAGS));
     }
 }

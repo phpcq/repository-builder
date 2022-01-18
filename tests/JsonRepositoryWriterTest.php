@@ -74,6 +74,7 @@ final class JsonRepositoryWriterTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/' . uniqid();
         $fileSystem = new Filesystem();
         $fileSystem->mkdir($tempDir);
+        $fileSystem->dumpFile($tempDir . '/file-to-remove.txt', 'This file shall get removed');
         try {
             $writer = new JsonRepositoryWriter($tempDir);
             $writer->writeTool($tool1);
@@ -83,6 +84,7 @@ final class JsonRepositoryWriterTest extends TestCase
             $this->assertFileExists($tempDir . '/repository.json');
             $this->assertFileExists($tempDir . '/tool1-tool.json');
             $this->assertFileExists($tempDir . '/tool2-tool.json');
+            self::assertFileDoesNotExist($tempDir . '/file-to-remove.txt');
 
             $this->assertRepositoryFileMatches([
                 'tools' => [
