@@ -49,31 +49,27 @@ phpcq:
     # Composer normalize
     - C00543248C87FB13
 
-  chains:
-    fix:
-      - composer-normalize
-      - phpcbf
-    verify:
-      - composer-require-checker
-      - composer-normalize
-    analyze:
-      - phploc
-      - phpcpd
-      - phpmd
-      - phpcs
-      - psalm
-      - phpunit
-    default:
-      - composer-require-checker
-      - composer-normalize
-      - phploc
-      - phpcpd
-      - phpmd
-      - phpcs
-      - psalm
-      - phpunit
-
 tasks:
+  fix:
+    - composer-normalize-fix
+    - phpcbf
+
+  verify:
+    - composer-require-checker
+    - composer-normalize
+
+  analyze:
+    - phploc
+    - phpcpd
+    - phpmd
+    - phpcs
+    - psalm
+    - phpunit
+
+  default:
+    - verify
+    - analyze
+
   phpmd:
     plugin: phpmd
     config:
@@ -98,3 +94,8 @@ tasks:
     config:
       <<: *phpcs-config
       fix: true
+
+  composer-normalize-fix:
+    plugin: composer-normalize
+    config:
+      dry_run: false
