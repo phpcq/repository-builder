@@ -69,7 +69,6 @@ final class Diff implements DiffInterface
      */
     public static function diff(array $oldPlugins, array $newPlugins, array $oldTools, array $newTools): ?self
     {
-        /** @psalm-var list<ObjectDiffInterface> $differences */
         $differences = array_merge(PluginDiff::diff($oldPlugins, $newPlugins), ToolDiff::diff($oldTools, $newTools));
         if (empty($differences)) {
             return null;

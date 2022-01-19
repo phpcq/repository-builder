@@ -44,24 +44,16 @@
     "symfony/process": "^5.0.7",
     "symfony/yaml": "^5.0.7"
   },
+  "require-dev": {
+    "phpcq/runner-bootstrap": "^1.0@dev",
+    "phpcq/schema": "^1.0@dev"
+  },
   "replace": {
     "symfony/polyfill-ctype": "*",
     "symfony/polyfill-intl-idn": "*",
     "symfony/polyfill-mbstring": "*",
     "symfony/polyfill-php72": "*",
     "symfony/polyfill-php73": "*"
-  },
-  "require-dev": {
-    "phpcq/runner-bootstrap": "^1.0@dev",
-    "phpcq/schema": "^1.0@dev"
-  },
-  "config": {
-    "sort-packages": true
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.x-dev"
-    }
   },
   "autoload": {
     "psr-4": {
@@ -71,6 +63,14 @@
   "autoload-dev": {
     "psr-4": {
       "Phpcq\\RepositoryBuilder\\Test\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.x-dev"
     }
   }
 }

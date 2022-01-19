@@ -43,7 +43,6 @@ class RepositoryBuilder
     private function collectTools(Repository $repository): void
     {
         foreach ($this->providers->getToolIterator() as $version) {
-            /** @var ToolVersionInterface $version */
             $toolName = $version->getName();
             if (!$repository->hasTool($toolName)) {
                 $repository->addTool(new Tool($toolName));
@@ -63,7 +62,6 @@ class RepositoryBuilder
     private function collectPlugins(Repository $repository): void
     {
         foreach ($this->providers->getPluginIterator() as $version) {
-            /** @var PluginVersionInterface $version */
             $pluginName = $version->getName();
             if (!$repository->hasPlugin($pluginName)) {
                 $repository->addPlugin(new Plugin($pluginName));
