@@ -91,6 +91,7 @@ class JsonRepositoryWriter
             }
             $data['includes'][] = $content;
         }
+        unset($tool, $content);
 
         foreach ($this->plugins as $plugin) {
             if (null === $content = $this->processPlugin($plugin)) {
@@ -98,12 +99,14 @@ class JsonRepositoryWriter
             }
             $data['includes'][] = $content;
         }
+        unset($plugin, $content);
 
         $this->dumpFile('repository.json', $data);
+        unset($data);
 
         $flipped = array_flip($this->dumpedFileNames);
         foreach (glob($this->baseDir . '/*') as $filename) {
-            if (!array_key_exists($filename, $flipped)) {
+            if (!is_dir($filename) && !array_key_exists($filename, $flipped)) {
                 $this->filesystem->remove($filename);
             }
         }
@@ -111,7 +114,7 @@ class JsonRepositoryWriter
 
     private function processTool(ToolInterface $tool): ?array
     {
-        $fileName         = $tool->getName() . '-tool.json';
+        $fileName         = sprintf('tool/%1$s/%1$s.json', $tool->getName());
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($tool->isEmpty()) {
             return null;
@@ -175,7 +178,7 @@ class JsonRepositoryWriter
 
     private function processPlugin(PluginInterface $plugin): ?array
     {
-        $fileName         = $plugin->getName() . '-plugin.json';
+        $fileName         = sprintf('plugin/%1$s/%1$s.json', $plugin->getName());
         $fileNameAbsolute = $this->baseDir . '/' . $fileName;
         if ($plugin->isEmpty()) {
             return null;
@@ -183,10 +186,10 @@ class JsonRepositoryWriter
         $data = [];
         foreach ($plugin as $version) {
             // if file plugin, copy file - dump it otherwise.
-            $pluginFile    = $plugin->getName() . '-' . $version->getVersion() . '.php';
+            $pluginFile    = sprintf('%1$s-%2$s.php', $plugin->getName(), $version->getVersion());
             $signatureFile = $pluginFile . '.asc';
             if ($version instanceof PhpFilePluginVersion) {
-                $this->copyFile($version->getFilePath(), $pluginFile);
+                $this->copyFile($version->getFilePath(), sprintf('plugin/%1$s/%2$s', $plugin->getName(), $pluginFile));
             }
 
             $serialized = [
