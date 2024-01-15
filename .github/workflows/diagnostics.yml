@@ -15,16 +15,17 @@ jobs:
 
     steps:
       - name: Pull source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          coverage: xdebug2
+          ini-values: zend.assertions=1, assert.exception=1
+          coverage: xdebug3
 
       - name: Cache composer cache directory
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: composer-cache-dir
         with:
@@ -35,7 +36,7 @@ jobs:
         run: composer install
 
       - name: Cache vendor directory
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: vendor
         with:
@@ -48,7 +49,7 @@ jobs:
         run: $GITHUB_WORKSPACE/vendor/bin/phpcq install -v
 
       - name: Cache phpcq directory
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: phpcq
         with:
@@ -61,7 +62,7 @@ jobs:
         run: $GITHUB_WORKSPACE/vendor/bin/phpcq run -o github-action -o default
 
       - name: Upload build directory to artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: ${{ success() }} || ${{ failure() }}
         with:
           name: phpcq-builds
