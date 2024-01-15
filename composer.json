@@ -24,6 +24,7 @@
     "ext-intl": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
+    "ext-random": "*",
     "ext-xml": "*",
     "composer/semver": "^3.4.0",
     "phpcq/repository-definition": "^1.0@dev",

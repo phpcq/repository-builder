@@ -138,7 +138,7 @@ final class CompoundRepository implements
         }
     }
 
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         foreach ($this->toolProviders as $toolProvider) {
             if ($toolProvider instanceof LoggerAwareInterface) {
