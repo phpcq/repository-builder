@@ -87,6 +87,9 @@ final class Diff implements DiffInterface
         $byType = $this->differencesByTypeAsString($prefix);
         $result = [];
         foreach ($byType as $typeName => $values) {
+            if (empty($values)) {
+                continue;
+            }
             $result[] = ['  Changed ' . $typeName . 's:' . "\n", ...$values];
         }
 

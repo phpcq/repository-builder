@@ -266,169 +266,261 @@ final class DiffTest extends TestCase
     }
 
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
-    public function summaryProvider(): array
+    public function asStringProvider(): \Generator
     {
-        return [
-            'New tool added' => [
-                'expected' => 'Add tool "tool-name"',
-                'changes' => Closure::fromCallable(function () {
-                    $tool = new Tool('tool-name');
+        yield 'New tool added' => [
+            'expected' => <<<EOF
+                Add tool "tool-name"
 
-                    return Diff::created([], ['tool-name' => $tool]);
-                })->__invoke(),
-            ],
-            'Old tool removed' => [
-                'expected' => 'Remove tool "tool-name"',
-                'changes' => Closure::fromCallable(function () {
-                    $tool = new Tool('tool-name');
+                Changes in repository:
+                  Changed tools:
+                    Added tool-name:
+                      Added version 1.0.0
 
-                    return Diff::removed([], ['tool-name' => $tool]);
-                })->__invoke(),
-            ],
-            'Only one version has been added' => [
-                'expected' => 'Add version 1.0.0 of tool "tool-name"',
-                'changes' => Closure::fromCallable(function () {
-                    $toolOld = new Tool('tool-name');
-                    $toolNew = new Tool('tool-name');
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $tool = new Tool('tool-name');
+                $tool->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
+                return Diff::created([], ['tool-name' => $tool]);
+            })->__invoke(),
+        ];
+        yield 'Old tool removed' => [
+            'expected' => <<<EOF
+                Remove tool "tool-name"
 
-                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-                })->__invoke(),
-            ],
-            'Only one version has been removed' => [
-                'expected' => 'Remove version 1.0.0 of tool "tool-name"',
-                'changes' => Closure::fromCallable(function () {
-                    $toolOld = new Tool('tool-name');
-                    $toolNew = new Tool('tool-name');
+                Changes in repository:
+                  Changed tools:
+                    Removed tool-name:
+                      Removed version 1.0.0
 
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $tool = new Tool('tool-name');
+                $tool->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-                })->__invoke(),
-            ],
-            'Only one version has been changed' => [
-                'expected' => 'Update version 1.0.0 of tool "tool-name"',
-                'changes' => Closure::fromCallable(function () {
-                    $toolOld = new Tool('tool-name');
-                    $toolNew = new Tool('tool-name');
+                return Diff::removed([], ['tool-name' => $tool]);
+            })->__invoke(),
+        ];
+        yield 'Only one version has been added' => [
+            'expected' => <<<EOF
+                Add version 1.0.0 of tool "tool-name"
 
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name:
+                      Added version 1.0.0
 
-                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-                })->__invoke(),
-            ],
-            'Multiple changes have happened for one tool' => [
-                'expected' => 'Update tool "tool-name": 3 new versions, 1 versions deleted, 2 versions changed',
-                'changes' => Closure::fromCallable(function () {
-                    $toolOld = new Tool('tool-name');
-                    $toolNew = new Tool('tool-name');
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $toolOld = new Tool('tool-name');
+                $toolNew = new Tool('tool-name');
 
-                    // 3 new versions:
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.1', 'changed', null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '1.0.2', 'changed', null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    // 1 version deleted:
-                    $toolOld->addVersion(new ToolVersion('tool-name', '1.0.3', null, null, null, null));
+                return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+            })->__invoke(),
+        ];
+        yield 'Only one version has been removed' => [
+            'expected' => <<<EOF
+                Remove version 1.0.0 of tool "tool-name"
 
-                    // 2 versions changed:
-                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.0', null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.0', 'changed', null, null, null));
-                    $toolOld->addVersion(new ToolVersion('tool-name', '2.0.1', null, null, null, null));
-                    $toolNew->addVersion(new ToolVersion('tool-name', '2.0.1', 'changed', null, null, null));
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name:
+                      Removed version 1.0.0
 
-                    return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-                })->__invoke(),
-            ],
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $toolOld = new Tool('tool-name');
+                $toolNew = new Tool('tool-name');
 
-            'Two tools changed' => [
-                'expected' => 'Update versions of "tool-name-1", "tool-name-2"',
-                'changes' => Closure::fromCallable(function () {
-                    $tool1Old = new Tool('tool-name-1');
-                    $tool1New = new Tool('tool-name-1');
-                    $tool2Old = new Tool('tool-name-2');
-                    $tool2New = new Tool('tool-name-2');
+                $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+                return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+            })->__invoke(),
+        ];
+        yield 'Only one version has been changed' => [
+            'expected' => <<<EOF
+                Update version 1.0.0 of tool "tool-name"
 
-                    return Diff::diff(
-                        [],
-                        [],
-                        ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old],
-                        ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New]
-                    );
-                })->__invoke(),
-            ],
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name:
+                      Changed version 1.0.0:
+                        url:
+                          + changed
 
-            'Up to 3 tools changed' => [
-                'expected' => 'Update versions of "tool-name-1", "tool-name-2", "tool-name-3"',
-                'changes' => Closure::fromCallable(function () {
-                    $tool1Old = new Tool('tool-name-1');
-                    $tool1New = new Tool('tool-name-1');
-                    $tool2Old = new Tool('tool-name-2');
-                    $tool2New = new Tool('tool-name-2');
-                    $tool3Old = new Tool('tool-name-3');
-                    $tool3New = new Tool('tool-name-3');
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $toolOld = new Tool('tool-name');
+                $toolNew = new Tool('tool-name');
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
-                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
+                $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
 
-                    return Diff::diff(
-                        [],
-                        [],
-                        ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old, 'tool-name-3' => $tool3Old],
-                        ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New, 'tool-name-3' => $tool3New]
-                    );
-                })->__invoke(),
-            ],
+                return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+            })->__invoke(),
+        ];
+        yield 'Multiple changes have happened for one tool' => [
+            'expected' => <<<EOF
+                Update tool "tool-name": 3 new versions, 1 versions deleted, 2 versions changed
 
-            'More than 3 tools changed' => [
-                'expected' => 'Update versions of "tool-name-1", "tool-name-2" and 2 more',
-                'changes' => Closure::fromCallable(function () {
-                    $tool1Old = new Tool('tool-name-1');
-                    $tool1New = new Tool('tool-name-1');
-                    $tool2Old = new Tool('tool-name-2');
-                    $tool2New = new Tool('tool-name-2');
-                    $tool3Old = new Tool('tool-name-3');
-                    $tool3New = new Tool('tool-name-3');
-                    $tool4Old = new Tool('tool-name-4');
-                    $tool4New = new Tool('tool-name-4');
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name:
+                      Added version 1.0.0
+                      Added version 1.0.1
+                      Added version 1.0.2
+                      Removed version 1.0.3
+                      Changed version 2.0.0:
+                        url:
+                          + changed
+                      Changed version 2.0.1:
+                        url:
+                          + changed
 
-                    $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
-                    $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
-                    $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
-                    $tool4New->addVersion(new ToolVersion('tool-name-4', '1.0.0', null, null, null, null));
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $toolOld = new Tool('tool-name');
+                $toolNew = new Tool('tool-name');
 
-                    return Diff::diff(
-                        [],
-                        [],
-                        [
-                            'tool-name-1' => $tool1Old,
-                            'tool-name-2' => $tool2Old,
-                            'tool-name-3' => $tool3Old,
-                            'tool-name-4' => $tool4Old
-                        ],
-                        [
-                            'tool-name-1' => $tool1New,
-                            'tool-name-2' => $tool2New,
-                            'tool-name-3' => $tool3New,
-                            'tool-name-4' => $tool4New
-                        ]
-                    );
-                })->__invoke(),
-            ],
+                // 3 new versions:
+                $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '1.0.1', 'changed', null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '1.0.2', 'changed', null, null, null));
+
+                // 1 version deleted:
+                $toolOld->addVersion(new ToolVersion('tool-name', '1.0.3', null, null, null, null));
+
+                // 2 versions changed:
+                $toolOld->addVersion(new ToolVersion('tool-name', '2.0.0', null, null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '2.0.0', 'changed', null, null, null));
+                $toolOld->addVersion(new ToolVersion('tool-name', '2.0.1', null, null, null, null));
+                $toolNew->addVersion(new ToolVersion('tool-name', '2.0.1', 'changed', null, null, null));
+
+                return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
+            })->__invoke(),
+        ];
+        yield 'Two tools changed' => [
+            'expected' => <<<EOF
+                Update versions of "tool-name-1", "tool-name-2"
+
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name-1:
+                      Added version 1.0.0
+                    Changes for tool-name-2:
+                      Added version 1.0.0
+
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $tool1Old = new Tool('tool-name-1');
+                $tool1New = new Tool('tool-name-1');
+                $tool2Old = new Tool('tool-name-2');
+                $tool2New = new Tool('tool-name-2');
+
+                $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+
+                return Diff::diff(
+                    [],
+                    [],
+                    ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old],
+                    ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New]
+                );
+            })->__invoke(),
+        ];
+        yield 'Up to 3 tools changed' => [
+            'expected' => <<<EOF
+                Update versions of "tool-name-1", "tool-name-2", "tool-name-3"
+
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name-1:
+                      Added version 1.0.0
+                    Changes for tool-name-2:
+                      Added version 1.0.0
+                    Changes for tool-name-3:
+                      Added version 1.0.0
+
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $tool1Old = new Tool('tool-name-1');
+                $tool1New = new Tool('tool-name-1');
+                $tool2Old = new Tool('tool-name-2');
+                $tool2New = new Tool('tool-name-2');
+                $tool3Old = new Tool('tool-name-3');
+                $tool3New = new Tool('tool-name-3');
+
+                $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+                $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
+
+                return Diff::diff(
+                    [],
+                    [],
+                    ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old, 'tool-name-3' => $tool3Old],
+                    ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New, 'tool-name-3' => $tool3New]
+                );
+            })->__invoke(),
+        ];
+        yield 'More than 3 tools changed' => [
+            'expected' => <<<EOF
+                Update versions of "tool-name-1", "tool-name-2" and 2 more
+
+                Changes in repository:
+                  Changed tools:
+                    Changes for tool-name-1:
+                      Added version 1.0.0
+                    Changes for tool-name-2:
+                      Added version 1.0.0
+                    Changes for tool-name-3:
+                      Added version 1.0.0
+                    Changes for tool-name-4:
+                      Added version 1.0.0
+
+                EOF,
+            'changes' => Closure::fromCallable(function () {
+                $tool1Old = new Tool('tool-name-1');
+                $tool1New = new Tool('tool-name-1');
+                $tool2Old = new Tool('tool-name-2');
+                $tool2New = new Tool('tool-name-2');
+                $tool3Old = new Tool('tool-name-3');
+                $tool3New = new Tool('tool-name-3');
+                $tool4Old = new Tool('tool-name-4');
+                $tool4New = new Tool('tool-name-4');
+
+                $tool1New->addVersion(new ToolVersion('tool-name-1', '1.0.0', null, null, null, null));
+                $tool2New->addVersion(new ToolVersion('tool-name-2', '1.0.0', null, null, null, null));
+                $tool3New->addVersion(new ToolVersion('tool-name-3', '1.0.0', null, null, null, null));
+                $tool4New->addVersion(new ToolVersion('tool-name-4', '1.0.0', null, null, null, null));
+
+                return Diff::diff(
+                    [],
+                    [],
+                    [
+                        'tool-name-1' => $tool1Old,
+                        'tool-name-2' => $tool2Old,
+                        'tool-name-3' => $tool3Old,
+                        'tool-name-4' => $tool4Old
+                    ],
+                    [
+                        'tool-name-1' => $tool1New,
+                        'tool-name-2' => $tool2New,
+                        'tool-name-3' => $tool3New,
+                        'tool-name-4' => $tool4New
+                    ]
+                );
+            })->__invoke(),
         ];
     }
 
     /**
-     * @dataProvider summaryProvider
+     * @dataProvider asStringProvider
      */
-    public function testSummary(string $expected, Diff $changes): void
+    public function testAsString(string $expected, Diff $changes): void
     {
-        $this->assertSame($expected, $changes->asSummary());
+        self::assertSame($expected, $changes->asString(''));
     }
 }

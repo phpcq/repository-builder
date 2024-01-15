@@ -82,8 +82,8 @@ final class JsonRepositoryWriterTest extends TestCase
             $writer->save();
 
             $this->assertFileExists($tempDir . '/repository.json');
-            $this->assertFileExists($tempDir . '/tool1-tool.json');
-            $this->assertFileExists($tempDir . '/tool2-tool.json');
+            $this->assertFileExists($tempDir . '/tool/tool1/tool1.json');
+            $this->assertFileExists($tempDir . '/tool/tool2/tool2.json');
             self::assertFileDoesNotExist($tempDir . '/file-to-remove.txt');
 
             $this->assertRepositoryFileMatches([
@@ -115,7 +115,7 @@ final class JsonRepositoryWriterTest extends TestCase
                         ],
                     ],
                 ],
-            ], $tempDir . '/tool1-tool.json');
+            ], $tempDir . '/tool/tool1/tool1.json');
             $this->assertRepositoryFileMatches([
                 'tools' => [
                     'tool2' => [
@@ -145,22 +145,22 @@ final class JsonRepositoryWriterTest extends TestCase
                         ],
                     ],
                 ],
-            ], $tempDir . '/tool2-tool.json');
+            ], $tempDir . '/tool/tool2/tool2.json');
 
             $this->assertSame([
                 'includes' => [
                     [
-                        'url'      => 'tool1-tool.json',
+                        'url'      => 'tool/tool1/tool1.json',
                         'checksum' => [
                             'type'  => 'sha-512',
-                            'value' => hash_file('sha512', $tempDir . '/tool1-tool.json'),
+                            'value' => hash_file('sha512', $tempDir . '/tool/tool1/tool1.json'),
                         ],
                     ],
                     [
-                        'url'      => 'tool2-tool.json',
+                        'url'      => 'tool/tool2/tool2.json',
                         'checksum' => [
                             'type'  => 'sha-512',
-                            'value' => hash_file('sha512', $tempDir . '/tool2-tool.json'),
+                            'value' => hash_file('sha512', $tempDir . '/tool/tool2/tool2.json'),
                         ],
                     ],
                 ],
