@@ -165,13 +165,13 @@ class GithubClient implements LoggerAwareInterface
 
             throw new DataNotAvailableException(
                 $exception->getResponse()->getContent(false),
-                (int) $exception->getCode(),
+                $exception->getCode(),
                 $exception
             );
         } catch (ClientException $exception) {
             throw new DataNotAvailableException(
                 $exception->getResponse()->getContent(false),
-                (int) $exception->getCode(),
+                $exception->getCode(),
                 $exception
             );
         }

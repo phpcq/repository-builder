@@ -21,7 +21,6 @@ class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container): void
     {
-        assert(is_string($this->environment));
         $container->parameters()->set('container.dumper.inline_class_loader', true);
         $container->import('../config/{packages}/*.yaml');
         $container->import('../config/{packages}/' . $this->environment . '/*.yaml');

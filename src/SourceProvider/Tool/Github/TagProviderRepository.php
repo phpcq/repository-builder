@@ -44,6 +44,7 @@ class TagProviderRepository implements
     /** @psalm-var TTagList */
     private array $tags = [];
 
+    /** @var non-empty-string */
     private string $fileNameRegex;
 
     public function __construct(
