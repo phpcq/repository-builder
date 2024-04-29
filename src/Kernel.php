@@ -22,9 +22,7 @@ class Kernel extends BaseKernel
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $container->parameters()->set('container.dumper.inline_class_loader', true);
-        $container->import('../config/{packages}/*.yaml');
-        $container->import('../config/{packages}/' . $this->environment . '/*.yaml');
-        $container->import('../config/{services}.yaml');
-        $container->import('../config/{services}_' . $this->environment . '.yaml');
+        $container->import('../config/{packages}/*.php');
+        $container->import('../config/{services}.php');
     }
 }
