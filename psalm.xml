@@ -4,11 +4,41 @@
     hideExternalErrors="true"
     errorLevel="1"
     resolveFromConfigFile="true"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
+        <directory name="config" />
         <directory name="src" />
+        <ignoreFiles>
+            <file name="config/bootstrap.php" />
+        </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <!-- Only called via dependency injection -->
+                <referencedMethod name="Phpcq\RepositoryBuilder\Api\GithubClient::__construct"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\Command\RebuildCommand::__construct"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\Kernel::configureContainer"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory::__construct"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\Tool\Github\TagProviderRepositoryFactory::__construct"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\Tool\PharIo\RepositoryFactory::__construct"/>
+
+                <!-- Only called via from tests for now - will be used when adding more loaders? -->
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\LoaderContext::getPluginConstraint"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\LoaderContext::getPluginName"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonEntry::getRepository"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonEntry::getTagName"/>
+
+                <!-- Writing of XML files currently not needed in this project. -->
+                <referencedMethod name="Phpcq\RepositoryBuilder\File\XmlFile::createElement"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\File\XmlFile::addElement"/>
+                <referencedMethod name="Phpcq\RepositoryBuilder\File\XmlFile::save"/>
+            </errorLevel>
+        </PossiblyUnusedMethod>
+    </issueHandlers>
 </psalm>

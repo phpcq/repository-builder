@@ -1,8 +1,0 @@
-framework:
-  router:
-    enabled: false
-    resource: ~
-  assets:
-    enabled: false
-  secrets:
-    enabled: false

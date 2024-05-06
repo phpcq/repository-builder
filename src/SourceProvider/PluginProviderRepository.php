@@ -100,7 +100,7 @@ class PluginProviderRepository implements PluginVersionProvidingRepositoryInterf
     private function loadPluginRequirements(?array $requirements): PluginRequirements
     {
         $result = new PluginRequirements();
-        if (empty($requirements)) {
+        if ([] === $requirements || null === $requirements) {
             return $result;
         }
 

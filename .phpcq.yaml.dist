@@ -11,19 +11,16 @@ phpcq:
       version: ^1.0
       signed: false
     psalm:
-      version: ^1.0
+      version: ^1.2
       signed: false
     composer-require-checker:
-      version: ^1.0
+      version: ^1.1.1
       signed: false
     phpmd:
       version: ^1.0
       signed: false
-      requirements:
-        phpmd:
-          signed: false
     phpcpd:
-      version: ^1.0
+      version: ^1.1
       signed: false
     phploc:
       version: ^1.0
@@ -32,7 +29,7 @@ phpcq:
       version: ^1.0
       signed: false
     composer-normalize:
-      version: ^1.0
+      version: ^1.1.1
       signed: false
   trusted-keys:
     # composer-require-checker
@@ -42,12 +39,12 @@ phpcq:
     # psalm
     - 8A03EA3B385DBAA1
     - 12CE0F1D262429A5
-    # magl@magll.net
-    - D2CCAC42F6295E7D
     # PHP_CodeSniffer
-    - 31C7E470E2138192
+    - 5E6DDE998AB73B8E
     # Composer normalize
     - C00543248C87FB13
+    # phpmd
+    - 9093F8B32E4815AA
 
 tasks:
   fix:

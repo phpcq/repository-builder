@@ -143,7 +143,8 @@ class JsonEntry
     private function makeAbsolute(string $uri): string
     {
         $scheme = parse_url($uri, PHP_URL_SCHEME);
-        if (empty($scheme)) {
+        assert((null === $scheme) || is_string($scheme));
+        if ((null === $scheme) || ('' === $scheme)) {
             // Must be relative to repository then.
             return $this->githubClient->fileUri($this->repository, $this->tagName, $uri);
         }

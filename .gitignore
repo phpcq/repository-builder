@@ -21,3 +21,5 @@ vendor/
 .phpcq
 .phpunit.result.cache
 .phpcq.yaml
+.pdepend
+.cache

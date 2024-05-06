@@ -95,7 +95,7 @@ class Repository implements PluginVersionProvidingRepositoryInterface
     private function loadPluginRequirements(?array $requirements): PluginRequirements
     {
         $result = new PluginRequirements();
-        if (empty($requirements)) {
+        if ([] === $requirements || null === $requirements) {
             return $result;
         }
 
@@ -129,7 +129,8 @@ class Repository implements PluginVersionProvidingRepositoryInterface
     private function createHash(string $absoluteUriPlugin): PluginHash
     {
         $scheme = parse_url($absoluteUriPlugin, PHP_URL_SCHEME);
-        if (!empty($scheme) && $scheme !== 'file') {
+        assert((null === $scheme) || is_string($scheme));
+        if (null !== $scheme && $scheme !== 'file') {
             try {
                 return PluginHash::createForString(
                     $this->httpClient->request('GET', $absoluteUriPlugin)->getContent()
