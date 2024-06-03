@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "187c4901b613bb97ec6b91bc7b78788e",
+    "content-hash": "5acfb676748ea94efd2dac74041c3bf3",
     "packages": [
         {
             "name": "composer/semver",
@@ -848,16 +848,16 @@
         },
         {
             "name": "symfony/dotenv",
-            "version": "v7.0.7",
+            "version": "v7.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dotenv.git",
-                "reference": "0fd573c141e1990848702d56329050efd5bf25cc"
+                "reference": "83026885fde02508235fc9dd175f227290542c99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dotenv/zipball/0fd573c141e1990848702d56329050efd5bf25cc",
-                "reference": "0fd573c141e1990848702d56329050efd5bf25cc",
+                "url": "https://api.github.com/repos/symfony/dotenv/zipball/83026885fde02508235fc9dd175f227290542c99",
+                "reference": "83026885fde02508235fc9dd175f227290542c99",
                 "shasum": ""
             },
             "require": {
@@ -902,7 +902,7 @@
                 "environment"
             ],
             "support": {
-                "source": "https://github.com/symfony/dotenv/tree/v7.0.7"
+                "source": "https://github.com/symfony/dotenv/tree/v7.1.0"
             },
             "funding": [
                 {
@@ -918,7 +918,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-18T09:29:19+00:00"
+            "time": "2024-05-02T08:41:59+00:00"
         },
         {
             "name": "symfony/error-handler",
