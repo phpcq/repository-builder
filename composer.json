@@ -37,7 +37,7 @@
     "symfony/dependency-injection": "^7.0",
     "symfony/dotenv": "^7.0",
     "symfony/filesystem": "^7.0",
-    "symfony/finder": "^7.0",
+    "symfony/finder": "^7.1",
     "symfony/framework-bundle": "^7.0",
     "symfony/http-client": "^7.0",
     "symfony/http-client-contracts": "^3.4",
