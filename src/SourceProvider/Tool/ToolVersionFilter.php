@@ -9,8 +9,8 @@ use UnexpectedValueException;
 
 final class ToolVersionFilter
 {
-    public const WILDCARD_CONSTRAINT = '*';
-    public const NEVER_MATCHING_CONSTRAINT = '>0 <0';
+    public const string WILDCARD_CONSTRAINT = '*';
+    public const string NEVER_MATCHING_CONSTRAINT = '>0 <0';
 
     private string $toolName;
     private string $allowedVersions;

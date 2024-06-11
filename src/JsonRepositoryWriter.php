@@ -19,7 +19,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class JsonRepositoryWriter
 {
-    private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+    private const int JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
 
     private string $baseDir;
 
@@ -144,7 +144,7 @@ class JsonRepositoryWriter
             }
             $data['tools'][$name][] = $serialized;
         }
-        if (empty($data['tools'])) {
+        if (!(bool) $data['tools']) {
             return null;
         }
 
