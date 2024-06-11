@@ -26,7 +26,7 @@ phpcq:
       version: ^1.0
       signed: false
     phpcs:
-      version: ^1.0
+      version: ^1.2
       signed: false
     composer-normalize:
       version: ^1.1.1
@@ -41,6 +41,7 @@ phpcq:
     - 12CE0F1D262429A5
     # PHP_CodeSniffer
     - 5E6DDE998AB73B8E
+    - A978220305CD5C32
     # Composer normalize
     - C00543248C87FB13
     # phpmd
