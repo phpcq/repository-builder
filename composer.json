@@ -43,7 +43,7 @@
     "symfony/http-client-contracts": "^3.4",
     "symfony/http-kernel": "^7.0",
     "symfony/process": "^7.0",
-    "symfony/yaml": "^7.0"
+    "symfony/yaml": "^7.1"
   },
   "require-dev": {
     "phpcq/runner-bootstrap": "^1.0@dev",
