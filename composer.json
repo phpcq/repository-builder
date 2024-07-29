@@ -26,7 +26,7 @@
     "ext-mbstring": "*",
     "ext-random": "*",
     "ext-xml": "*",
-    "composer/semver": "^3.4.0",
+    "composer/semver": "^3.4.2",
     "phpcq/repository-definition": "^1.0@dev",
     "psr/container": "^2.0",
     "psr/log": "^3.0",
