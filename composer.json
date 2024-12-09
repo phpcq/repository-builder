@@ -33,7 +33,7 @@
     "symfony/cache": "^7.1",
     "symfony/cache-contracts": "^3.4",
     "symfony/config": "^7.1",
-    "symfony/console": "^7.1",
+    "symfony/console": "^7.2",
     "symfony/dependency-injection": "^7.1",
     "symfony/dotenv": "^7.2",
     "symfony/filesystem": "^7.0",
