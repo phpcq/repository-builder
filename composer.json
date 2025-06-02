@@ -32,7 +32,7 @@
     "psr/log": "^3.0",
     "symfony/cache": "^7.2",
     "symfony/cache-contracts": "^3.4",
-    "symfony/config": "^7.2",
+    "symfony/config": "^7.3",
     "symfony/console": "^7.2",
     "symfony/dependency-injection": "^7.2",
     "symfony/dotenv": "^7.2",
