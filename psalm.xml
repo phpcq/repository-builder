@@ -18,6 +18,11 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <DeprecatedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository" />
+            </errorLevel>
+        </DeprecatedClass>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
                 <!-- Only called via dependency injection -->
@@ -40,10 +45,5 @@
                 <referencedMethod name="Phpcq\RepositoryBuilder\File\XmlFile::save"/>
             </errorLevel>
         </PossiblyUnusedMethod>
-        <DeprecatedClass>
-            <errorLevel type="suppress">
-                <referencedClass name="Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository" />
-            </errorLevel>
-        </DeprecatedClass>
     </issueHandlers>
 </psalm>
