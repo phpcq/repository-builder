@@ -18,9 +18,6 @@ use RuntimeException;
  */
 class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
-    /**
-     * @psalm-suppress DeprecatedClass
-     */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         if (!is_string($sourceDir = $configuration['source_dir'] ?? null)) {

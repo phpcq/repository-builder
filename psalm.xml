@@ -40,5 +40,10 @@
                 <referencedMethod name="Phpcq\RepositoryBuilder\File\XmlFile::save"/>
             </errorLevel>
         </PossiblyUnusedMethod>
+        <DeprecatedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository" />
+            </errorLevel>
+        </DeprecatedClass>
     </issueHandlers>
 </psalm>
