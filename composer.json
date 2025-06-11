@@ -2,6 +2,7 @@
   "name": "phpcq/repository-builder",
   "description": "Repository builder for phpcq.",
   "license": "MIT",
+  "type": "project",
   "authors": [
     {
       "name": "Christian Schiffler",

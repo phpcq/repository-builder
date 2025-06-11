@@ -7,6 +7,9 @@ namespace Phpcq\RepositoryBuilder\SourceProvider;
 use Phpcq\RepositoryBuilder\Util\StringUtil;
 use RuntimeException;
 
+use function getcwd;
+use function is_string;
+
 /**
  * @psalm-type TPluginProviderRepositoryFactoryConfiguration = array{
  *   source_dir: string
@@ -20,11 +23,12 @@ class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterfac
 {
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
-        if (!is_string($sourceDir = $configuration['source_dir'] ?? null)) {
+        $sourceDir = $configuration['source_dir'] ?? null;
+        if (!is_string($sourceDir)) {
             throw new RuntimeException('No source directory configured');
         }
 
-        $sourcePath = StringUtil::makeAbsolutePath($sourceDir, getcwd());
+        $sourcePath = StringUtil::makeAbsolutePath($sourceDir, (string) getcwd());
 
         return new PluginProviderRepository($sourcePath);
     }

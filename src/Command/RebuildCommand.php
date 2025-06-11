@@ -97,7 +97,7 @@ final class RebuildCommand extends Command
         chdir(dirname($configFile));
 
         /** @psalm-var TRepositoryBuilderConfiguration $config */
-        $config = Yaml::parse(file_get_contents($configFile));
+        $config = Yaml::parse((string) file_get_contents($configFile));
 
         $providers = $this->loadProviders($config['repositories'] ?? []);
 
@@ -144,6 +144,7 @@ final class RebuildCommand extends Command
             throw new InvalidArgumentException('Could not create directory: ' . $outDir);
         }
         $outDir = realpath($outDir);
+        assert(is_string($outDir));
 
         return $outDir;
     }

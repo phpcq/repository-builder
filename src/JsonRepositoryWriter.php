@@ -14,6 +14,19 @@ use Phpcq\RepositoryDefinition\VersionRequirementList;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
 
+use function array_flip;
+use function array_key_exists;
+use function glob;
+use function hash_file;
+use function is_array;
+use function is_dir;
+use function is_string;
+use function json_encode;
+use function sprintf;
+
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+
 /**
  * Dumps a repository as json.
  */
@@ -105,7 +118,11 @@ class JsonRepositoryWriter
         unset($data);
 
         $flipped = array_flip($this->dumpedFileNames);
-        foreach (glob($this->baseDir . '/*') as $filename) {
+        $globbed = glob($this->baseDir . '/*');
+        if (!is_array($globbed)) {
+            return;
+        }
+        foreach ($globbed as $filename) {
             if (!is_dir($filename) && !array_key_exists($filename, $flipped)) {
                 $this->filesystem->remove($filename);
             }
@@ -275,6 +292,8 @@ class JsonRepositoryWriter
     private function dumpFile(string $fileName, array $contents): void
     {
         $this->dumpedFileNames[] = $fullFileName = $this->baseDir . '/' . $fileName;
-        $this->filesystem->dumpFile($fullFileName, json_encode($contents, self::JSON_FLAGS));
+        $encoded = json_encode($contents, self::JSON_FLAGS);
+        assert(is_string($encoded));
+        $this->filesystem->dumpFile($fullFileName, $encoded);
     }
 }
