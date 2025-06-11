@@ -19,6 +19,8 @@ use RuntimeException;
  *   file-pattern?: string,
  * }
  * @SuppressWarnings(PHPMD.LongClassName)
+ *
+ * @implements SourceRepositoryFactoryInterface<TGithubTagProviderRepositoryFactoryConfiguration>
  */
 class TagProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
@@ -29,10 +31,6 @@ class TagProviderRepositoryFactory implements SourceRepositoryFactoryInterface
         $this->githubClient = $githubClient;
     }
 
-    /**
-     * @psalm-param TGithubTagProviderRepositoryFactoryConfiguration $configuration
-     * @psalm-suppress MoreSpecificImplementedParamType
-     */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         $toolName = $context->getToolName() ?? $configuration['tool-name'] ?? null;

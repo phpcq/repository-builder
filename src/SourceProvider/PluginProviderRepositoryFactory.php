@@ -13,12 +13,12 @@ use RuntimeException;
  * }
  *
  * @deprecated This is the legacy repository loader.
+ *
+ * @implements SourceRepositoryFactoryInterface<TPluginProviderRepositoryFactoryConfiguration>
  */
 class PluginProviderRepositoryFactory implements SourceRepositoryFactoryInterface
 {
     /**
-     * @psalm-param TPluginProviderRepositoryFactoryConfiguration $configuration
-     * @psalm-suppress MoreSpecificImplementedParamType
      * @psalm-suppress DeprecatedClass
      */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
