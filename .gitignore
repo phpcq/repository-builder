@@ -23,3 +23,5 @@ vendor/
 .phpcq.yaml
 .pdepend
 .cache
+.composer
+.bash_history
