@@ -280,7 +280,11 @@ final class Diff implements DiffInterface
 
         // Can never happen.
         // @codeCoverageIgnoreStart
-        throw new UnexpectedValueException('Unknown diff type: ' . implode(',', class_implements($difference)));
+        $implemented = class_implements($difference);
+        if (false === $implemented) {
+            $implemented = [];
+        }
+        throw new UnexpectedValueException('Unknown diff type: ' . implode(',', $implemented));
         // @codeCoverageIgnoreEnd
     }
 }

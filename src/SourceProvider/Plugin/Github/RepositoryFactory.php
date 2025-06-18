@@ -21,6 +21,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * @psalm-type TGithubProviderRepositoryFactoryConfiguration = array{
  *   repositories: list<string>
  * }
+ *
+ * @implements SourceRepositoryFactoryInterface<TGithubProviderRepositoryFactoryConfiguration>
  */
 class RepositoryFactory implements SourceRepositoryFactoryInterface
 {
@@ -34,10 +36,6 @@ class RepositoryFactory implements SourceRepositoryFactoryInterface
         $this->githubClient = $githubClient;
     }
 
-    /**
-     * @psalm-param TGithubProviderRepositoryFactoryConfiguration $configuration
-     * @psalm-suppress MoreSpecificImplementedParamType
-     */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         if (!is_array($sourceRepositories = $configuration['repositories'] ?? null)) {

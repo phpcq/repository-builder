@@ -16,6 +16,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *   url: string,
  *   allowed-versions?: string,
  * }
+ *
+ * @implements SourceRepositoryFactoryInterface<TPharIoRepositoryConfiguration>
  */
 class RepositoryFactory implements SourceRepositoryFactoryInterface
 {
@@ -29,10 +31,6 @@ class RepositoryFactory implements SourceRepositoryFactoryInterface
         $this->cacheDir   = $cacheDir;
     }
 
-    /**
-     * @param TPharIoRepositoryConfiguration $configuration
-     * @psalm-suppress MoreSpecificImplementedParamType
-     */
     public function create(array $configuration, LoaderContext $context): SourceRepositoryInterface
     {
         $toolName = $context->getToolName() ?? $configuration['tool-name'] ?? null;

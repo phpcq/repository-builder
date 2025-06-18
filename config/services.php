@@ -8,6 +8,7 @@ use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory as Gi
 use Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepositoryFactory;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\Github\TagProviderRepositoryFactory;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\PharIo\RepositoryFactory as PharIoRepositoryFactory;
+use Phpcq\RepositoryBuilder\SourceProvider\Tool\StaticValuesProviderRepositoryFactory;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpClient\CachingHttpClient;
@@ -48,6 +49,9 @@ return function(ContainerConfigurator $container): void {
     $services->set(PharIoRepositoryFactory::class)
         ->args([service('http.client'), '%kernel.project_dir%/var/repositories/phar.io'])
         ->tag('repository.factory', ['key' => 'tool-phar.io']);
+
+    $services->set(StaticValuesProviderRepositoryFactory::class)
+        ->tag('repository.factory', ['key' => 'tool-static']);
 
     $services->set(TagProviderRepositoryFactory::class)
         ->args([service(GithubClient::class)])

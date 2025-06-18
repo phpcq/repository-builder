@@ -1,0 +1,11 @@
+services:
+  php:
+    build:
+      context: .docker
+    user: '${UID:-1000}:${GID:-1000}'
+    environment:
+      PHP_IDE_CONFIG: 'serverName=docker'
+    volumes:
+      - .:/project
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'

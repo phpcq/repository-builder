@@ -12,6 +12,10 @@ use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirement;
 use RuntimeException;
 
+use function file_get_contents;
+use function is_string;
+use function json_decode;
+
 /**
  * @psalm-type TPluginCatalogEntry = array{
  *   constraint: string,
@@ -57,8 +61,10 @@ class PluginProviderRepository implements PluginVersionProvidingRepositoryInterf
 
     public function refresh(): void
     {
+        $contents = file_get_contents($this->sourceDir . '/catalog.json');
+        assert(is_string($contents));
         /** @psalm-var TPluginCatalog|null $decoded */
-        $decoded = json_decode(file_get_contents($this->sourceDir . '/catalog.json'), true);
+        $decoded = json_decode($contents, true);
         if (null === $decoded) {
             throw new RuntimeException('Failed to decode ' . $this->sourceDir . '/catalog.json');
         }

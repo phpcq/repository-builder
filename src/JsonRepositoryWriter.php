@@ -4,15 +4,32 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder;
 
+use Composer\Semver\Comparator;
 use Phpcq\RepositoryDefinition\AbstractHash;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\Plugin\PluginInterface;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\Tool\ToolInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
+use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirementList;
 use stdClass;
 use Symfony\Component\Filesystem\Filesystem;
+
+use function array_flip;
+use function array_key_exists;
+use function array_values;
+use function glob;
+use function hash_file;
+use function is_array;
+use function is_dir;
+use function is_string;
+use function json_encode;
+use function sprintf;
+use function usort;
+
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
 
 /**
  * Dumps a repository as json.
@@ -105,7 +122,11 @@ class JsonRepositoryWriter
         unset($data);
 
         $flipped = array_flip($this->dumpedFileNames);
-        foreach (glob($this->baseDir . '/*') as $filename) {
+        $globbed = glob($this->baseDir . '/*');
+        if (!is_array($globbed)) {
+            return;
+        }
+        foreach ($globbed as $filename) {
             if (!is_dir($filename) && !array_key_exists($filename, $flipped)) {
                 $this->filesystem->remove($filename);
             }
@@ -122,7 +143,8 @@ class JsonRepositoryWriter
         $data = [
             'tools' => [],
         ];
-        foreach ($tool as $version) {
+
+        foreach ($this->getToolVersions($tool) as $version) {
             if (!isset($data['tools'][$name = $tool->getName()])) {
                 $data['tools'][$name] = [];
             }
@@ -275,6 +297,25 @@ class JsonRepositoryWriter
     private function dumpFile(string $fileName, array $contents): void
     {
         $this->dumpedFileNames[] = $fullFileName = $this->baseDir . '/' . $fileName;
-        $this->filesystem->dumpFile($fullFileName, json_encode($contents, self::JSON_FLAGS));
+        $encoded = json_encode($contents, self::JSON_FLAGS);
+        assert(is_string($encoded));
+        $this->filesystem->dumpFile($fullFileName, $encoded);
+    }
+
+    /** @return list<ToolVersionInterface> */
+    private function getToolVersions(ToolInterface $tool): array
+    {
+        /** @var array<string, ToolVersionInterface> $versions */
+        $versions = [];
+        foreach ($tool as $version) {
+            $versions[] = $version;
+        }
+        usort(
+            $versions,
+            static fn(ToolVersionInterface $first, ToolVersionInterface $second): int
+                => Comparator::greaterThanOrEqualTo($first->getVersion(), $second->getVersion()) ? 1 : -1
+        );
+
+        return $versions;
     }
 }

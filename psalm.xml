@@ -18,6 +18,14 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <DeprecatedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository" />
+            </errorLevel>
+        </DeprecatedClass>
+        <!-- Disabled for the moment -->
+        <ClassMustBeFinal errorLevel="suppress"/>
+        <MissingOverrideAttribute errorLevel="suppress"/>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
                 <!-- Only called via dependency injection -->
