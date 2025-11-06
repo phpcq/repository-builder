@@ -62,7 +62,7 @@ jobs:
         run: $GITHUB_WORKSPACE/vendor/bin/phpcq run -o github-action -o default
 
       - name: Upload build directory to artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ success() }} || ${{ failure() }}
         with:
           name: phpcq-builds
