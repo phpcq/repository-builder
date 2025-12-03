@@ -13,12 +13,14 @@ use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\RepositoryLoader;
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use RuntimeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\RepositoryFactory */
+#[CoversClass(RepositoryFactory::class)]
 class RepositoryFactoryTest extends TestCase
 {
     public function testFunctionality(): void
@@ -30,7 +32,7 @@ class RepositoryFactoryTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    public function invalidConfigurationProvider(): array
+    public static function invalidConfigurationProvider(): array
     {
         return [
             'integer is invalid' => [[
@@ -42,7 +44,7 @@ class RepositoryFactoryTest extends TestCase
         ];
     }
 
-    /** @dataProvider invalidConfigurationProvider */
+    #[DataProvider('invalidConfigurationProvider')]
     public function testThrowsWithInvalidRepositoryConfiguration(array $config): void
     {
         [$factory, $context] = $this->mockInstances();
@@ -58,12 +60,12 @@ class RepositoryFactoryTest extends TestCase
         [$factory, $context, $github, $loader] = $this->mockInstances();
         $config    = ['repositories' => ['vendor1/plugin1']];
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchTags')
             ->with('vendor1/plugin1')
             ->willReturn([['ref' => 'refs/tags/1.0.0']]);
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('vendor1/plugin1', '1.0.0', 'phpcq-plugin.json')
             ->willReturn([
@@ -95,10 +97,10 @@ class RepositoryFactoryTest extends TestCase
                 ],
             ]);
 
-        $mock1 = $this->getMockForAbstractClass(PluginVersionProvidingRepositoryInterface::class);
-        $mock2 = $this->getMockForAbstractClass(PluginVersionProvidingRepositoryInterface::class);
+        $mock1 = $this->getMockBuilder(PluginVersionProvidingRepositoryInterface::class)->getMock();
+        $mock2 = $this->getMockBuilder(PluginVersionProvidingRepositoryInterface::class)->getMock();
         $loader
-            ->expects(self::exactly(2))
+            ->expects($this->exactly(2))
             ->method('load')
             ->willReturnCallback(
                 function (array $config, LoaderContext $context) use ($mock1, $mock2): SourceRepositoryInterface {
@@ -127,17 +129,17 @@ class RepositoryFactoryTest extends TestCase
         [$factory, $context, $github, $loader] = $this->mockInstances();
         $config    = ['repositories' => ['vendor1/plugin1']];
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchTags')
             ->with('vendor1/plugin1')
             ->willReturn([['ref' => 'refs/tags/1.0.0']]);
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('vendor1/plugin1', '1.0.0', 'phpcq-plugin.json')
             ->willThrowException(new DataNotAvailableException());
 
-        $loader->expects(self::never())->method('load');
+        $loader->expects($this->never())->method('load');
 
         $result = $factory->create($config, $context);
 
@@ -152,7 +154,6 @@ class RepositoryFactoryTest extends TestCase
     {
         // Yeah, I know, reflection is bad but hey...
         $reflection = new ReflectionProperty(CompoundRepository::class, 'pluginProviders');
-        $reflection->setAccessible(true);
 
         return $reflection->getValue($repository);
     }

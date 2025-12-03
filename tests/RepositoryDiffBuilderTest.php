@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test;
 
+use Phpcq\RepositoryBuilder\RepositoryBuilder;
 use Phpcq\RepositoryBuilder\RepositoryDiffBuilder;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\RepositoryBuilder
- */
+#[CoversClass(RepositoryBuilder::class)]
 final class RepositoryDiffBuilderTest extends TestCase
 {
-    public function generateProvider(): array
+    public static function generateProvider(): array
     {
         $tests = [];
         foreach (Finder::create()->in(__DIR__ . '/fixtures/repository-diff')->directories()->depth(0) as $directory) {
@@ -28,10 +29,10 @@ final class RepositoryDiffBuilderTest extends TestCase
         return $tests;
     }
 
-    /** @dataProvider generateProvider */
+    #[DataProvider('generateProvider')]
     public function testGeneratesDiffCorrectly(string $expected, string $before, string $after): void
     {
-        $tempDir = sys_get_temp_dir() . '/' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/' . uniqid(more_entropy: false);
         $fileSystem = new Filesystem();
         $fileSystem->mkdir($tempDir);
         try {

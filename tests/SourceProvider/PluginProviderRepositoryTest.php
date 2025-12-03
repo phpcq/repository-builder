@@ -7,9 +7,10 @@ namespace Phpcq\RepositoryBuilder\Test\SourceProvider;
 use Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\PluginProviderRepository */
+#[CoversClass(PluginProviderRepository::class)]
 class PluginProviderRepositoryTest extends TestCase
 {
     public function testProvidesVersions(): void

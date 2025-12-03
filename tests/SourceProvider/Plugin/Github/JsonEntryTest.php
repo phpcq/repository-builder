@@ -6,15 +6,16 @@ namespace Phpcq\RepositoryBuilder\Test\SourceProvider\Plugin\Github;
 
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonEntry;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonEntry */
+#[CoversClass(JsonEntry::class)]
 final class JsonEntryTest extends TestCase
 {
     public function testPlainGetters(): void
     {
         $client = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
-        $client->expects(self::never())->method('fetchFile');
+        $client->expects($this->never())->method('fetchFile');
 
         $entry = new JsonEntry('repository-name', 'tag-name', '1.0.0', $client);
 
@@ -36,7 +37,7 @@ final class JsonEntryTest extends TestCase
 
         $client = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
         $client
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('repository-name', 'tag-name', 'phpcq-plugin.json')
             ->willReturn($contents);
@@ -78,11 +79,11 @@ final class JsonEntryTest extends TestCase
 
         $client = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
         $client
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('repository-name', 'tag-name', 'phpcq-plugin.json')
             ->willReturn($contents);
-        $client->expects(self::never())->method('fileUri');
+        $client->expects($this->never())->method('fileUri');
 
         $entry = new JsonEntry('repository-name', 'tag-name', '1.0.0', $client);
         self::assertNull($entry->getSignatureUrl(false));
@@ -101,11 +102,11 @@ final class JsonEntryTest extends TestCase
 
         $client = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
         $client
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('repository-name', 'tag-name', 'phpcq-plugin.json')
             ->willReturn($contents);
-        $client->expects(self::never())->method('fileUri');
+        $client->expects($this->never())->method('fileUri');
 
         $entry = new JsonEntry('repository-name', 'tag-name', '1.0.0', $client);
         self::assertSame(

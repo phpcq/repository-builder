@@ -8,14 +8,18 @@ use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
 use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonLoader;
 use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\Repository;
+use Phpcq\RepositoryBuilder\Test\ConsecutiveAssertTrait;
 use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\VersionRequirementList;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\Repository */
+#[CoversClass(Repository::class)]
 class RepositoryTest extends TestCase
 {
+    use ConsecutiveAssertTrait;
+
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function testFunctionality(): void
     {
@@ -56,21 +60,28 @@ class RepositoryTest extends TestCase
         $github = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
         $loader = new JsonLoader($github, 'vendor1/plugin1');
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchTags')
             ->with('vendor1/plugin1')
             ->willReturn($tags);
         $github
-            ->expects(self::exactly(2))
+            ->expects($this->exactly(2))
             ->method('fetchFile')
-            ->withConsecutive(
-                ['vendor1/plugin1', '1.0.0', 'phpcq-plugin.json'],
-                ['vendor1/plugin1', '2.0.0', 'phpcq-plugin.json']
-            )
-            ->willReturnOnConsecutiveCalls($json100, $json200);
+            ->will(
+                $this->handleConsecutive(
+                    [
+                        'arguments' => ['vendor1/plugin1', '1.0.0', 'phpcq-plugin.json'],
+                        'return' => $json100,
+                    ],
+                    [
+                        'arguments' => ['vendor1/plugin1', '2.0.0', 'phpcq-plugin.json'],
+                        'return' => $json200,
+                    ],
+                )
+            );
         $github
             ->method('fileUri')
-            ->willReturnCallback(function (string $repository, string $refSpec, string $filePath): string {
+            ->willReturnCallback(static function (string $repository, string $refSpec, string $filePath): string {
                 return sprintf(
                     '%1$s/fixtures/github-plugin/%2$s/%3$s/%4$s',
                     dirname(__DIR__, 3),
@@ -155,12 +166,12 @@ class RepositoryTest extends TestCase
         $loader = new JsonLoader($github, 'vendor1/plugin1');
 
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchTags')
             ->with('vendor1/plugin1')
             ->willReturn([['ref' => 'refs/tags/1.0.0']]);
         $github
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchFile')
             ->with('vendor1/plugin1', '1.0.0', 'phpcq-plugin.json')
             ->willThrowException(new DataNotAvailableException());

@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Tool;
 
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolChangedDiff;
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use Phpcq\RepositoryDefinition\Tool\ToolHash;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolChangedDiff
- */
+#[CoversClass(ObjectChangedDiffTrait::class)]
+#[CoversClass(ObjectDiffTrait::class)]
+#[CoversClass(ToolChangedDiff::class)]
 final class ToolChangedDiffTest extends TestCase
 {
     use ToolDiffTrait;

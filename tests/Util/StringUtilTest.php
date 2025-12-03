@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\Util;
 
 use Phpcq\RepositoryBuilder\Util\StringUtil;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\Util\StringUtil
- */
+#[CoversClass(StringUtil::class)]
 class StringUtilTest extends TestCase
 {
-    public function makeFilenameProvider(): array
+    public static function makeFilenameProvider(): array
     {
         return [
             [
@@ -26,9 +26,7 @@ class StringUtilTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider makeFilenameProvider()
-     */
+    #[DataProvider('makeFilenameProvider')]
     public function testMakeFilename(string $expected, string $value): void
     {
         $this->assertSame($expected, StringUtil::makeFilename($value));

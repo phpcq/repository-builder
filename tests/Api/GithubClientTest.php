@@ -7,6 +7,9 @@ namespace Phpcq\RepositoryBuilder\Test\Api;
 use Closure;
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\Exception\DataNotAvailableException;
+use Phpcq\RepositoryBuilder\Test\ConsecutiveAssertTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -14,19 +17,21 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-/** @covers \Phpcq\RepositoryBuilder\Api\GithubClient */
+#[CoversClass(GithubClient::class)]
 class GithubClientTest extends TestCase
 {
+    use ConsecutiveAssertTrait;
+
     public function testFetchTagsSavesToCache(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $http  = $this->mockRequest(
             'https://api.github.com/repos/phpcq/repository-builder/git/matching-refs/tags/',
             'token',
             $resp
         );
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
         // Ensure result is expunged after some time.
         $item->expects($this->once())->method('expiresAfter');
 
@@ -41,12 +46,17 @@ class GithubClientTest extends TestCase
 
     public function testFetchTagsDoesNotSaveExceptionToCacheButThrowsIt(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $resp
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturnOnConsecutiveCalls(400, 'url', []);
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => ['http_code'], 'return' => 400],
+                    ['arguments' => ['url'], 'return' => 'url'],
+                    ['arguments' => ['response_headers'], 'return' => []],
+                )
+            );
         $resp->expects($this->atLeastOnce())->method('getContent')->willReturn('{"success": false}');
 
         $exc   = new ClientException($resp);
@@ -55,8 +65,8 @@ class GithubClientTest extends TestCase
             'token',
             $exc
         );
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
         // Ensure result is not cached.
         $item->expects($this->never())->method('expiresAfter');
 
@@ -72,14 +82,14 @@ class GithubClientTest extends TestCase
 
     public function testFetchTagSavesToCache(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $http  = $this->mockRequest(
             'https://api.github.com/repos/phpcq/repository-builder/releases/tags/1.0',
             'token',
             $resp
         );
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
         // Ensure result is expunged after some time.
         $item->expects($this->once())->method('expiresAfter');
 
@@ -94,13 +104,17 @@ class GithubClientTest extends TestCase
 
     public function testFetchTagDoesNotSaveExceptionToCacheButThrowsIt(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $resp
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturnOnConsecutiveCalls(400, 'url', []);
-
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => ['http_code'], 'return' => 400],
+                    ['arguments' => ['url'], 'return' => 'url'],
+                    ['arguments' => ['response_headers'], 'return' => []],
+                )
+            );
         $exc   = new ClientException($resp);
 
         $http  = $this->mockRequest(
@@ -109,8 +123,8 @@ class GithubClientTest extends TestCase
             $exc
         );
         $resp->expects($this->atLeastOnce())->method('getContent')->willReturn('{"success": false}');
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
         // Ensure result is not cached.
         $item->expects($this->never())->method('expiresAfter');
 
@@ -126,14 +140,14 @@ class GithubClientTest extends TestCase
 
     public function testFetchFileSavesToCache(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $http  = $this->mockRequest(
             'https://raw.githubusercontent.com/phpcq/repository-builder/1.0/some/file',
             'token',
             $resp
         );
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
 
         // Ensure result is expunged after some time.
         $item->expects($this->once())->method('expiresAfter');
@@ -162,13 +176,17 @@ class GithubClientTest extends TestCase
 
     public function testFetchFileSavesExceptionToCacheAndThrowsIt(): void
     {
-        $resp  = $this->getMockForAbstractClass(ResponseInterface::class);
+        $resp  = $this->getMockBuilder(ResponseInterface::class)->getMock();
         $resp
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturnOnConsecutiveCalls(400, 'url', []);
-
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => ['http_code'], 'return' => 400],
+                    ['arguments' => ['url'], 'return' => 'url'],
+                    ['arguments' => ['response_headers'], 'return' => []],
+                )
+            );
         $exc   = new ClientException($resp);
         $resp->expects($this->atLeastOnce())->method('getContent')->willReturn('{"success": false}');
 
@@ -177,8 +195,8 @@ class GithubClientTest extends TestCase
             'token',
             $exc
         );
-        $cache = $this->getMockForAbstractClass(CacheInterface::class);
-        $item  = $this->getMockForAbstractClass(ItemInterface::class);
+        $cache = $this->getMockBuilder(CacheInterface::class)->getMock();
+        $item  = $this->getMockBuilder(ItemInterface::class)->getMock();
 
         // Ensure exception is expunged after 3600 seconds.
         $item->expects($this->once())->method('expiresAfter')->with(3600);
@@ -224,14 +242,12 @@ class GithubClientTest extends TestCase
         };
     }
 
-    /**
-     * @param ResponseInterface|ClientException $result
-     *
-     * @psalm-return HttpClientInterface|MockObject
-     */
-    private function mockRequest(string $uri, string $token, $result): HttpClientInterface
-    {
-        $http = $this->getMockForAbstractClass(HttpClientInterface::class);
+    private function mockRequest(
+        string $uri,
+        string $token,
+        ResponseInterface|ClientException $result
+    ): HttpClientInterface&MockObject {
+        $http = $this->getMockBuilder(HttpClientInterface::class)->getMock();
 
         $invocation = $http
             ->expects($this->once())

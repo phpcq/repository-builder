@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginVersionChangedDiff;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
-use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginVersionChangedDiff
- */
+#[CoversClass(VersionChangedDiffTrait::class)]
+#[CoversClass(VersionDiffTrait::class)]
+#[CoversClass(PluginVersionChangedDiff::class)]
 final class VersionChangedDiffTest extends TestCase
 {
     use PluginDiffTrait;
@@ -36,7 +37,7 @@ final class VersionChangedDiffTest extends TestCase
     }
 
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
-    public function compareTestProvider(): array
+    public static function compareTestProvider(): array
     {
         $requirementsOld = new PluginRequirements();
         $requirementsOld->getPhpRequirements()->add(new VersionRequirement('php', '^7.3'));
@@ -52,14 +53,14 @@ final class VersionChangedDiffTest extends TestCase
                     + 1.1.0
 
                 EOF,
-                'old' => $this->mockPluginVersion(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     null,
                     null,
                     '1.0.0',
                 ),
-                'new' => $this->mockPluginVersion(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     null,
@@ -75,13 +76,13 @@ final class VersionChangedDiffTest extends TestCase
                     + url:https://example.org/new.phar
 
                 EOF,
-                'old' => $this->mockPhpFilePluginVersionInterface(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'https://example.org/old.phar',
                     new PluginRequirements(),
                 ),
-                'new' => $this->mockPhpFilePluginVersionInterface(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'https://example.org/new.phar',
@@ -96,12 +97,12 @@ final class VersionChangedDiffTest extends TestCase
                     + platform: php:^7.4
 
                 EOF,
-                'old' => $this->mockPluginVersion(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     $requirementsOld,
                 ),
-                'new' => $this->mockPluginVersion(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     $requirementsNew,
@@ -115,13 +116,13 @@ final class VersionChangedDiffTest extends TestCase
                     + sha-512:new-checksum
 
                 EOF,
-                'old' => $this->mockPluginVersion(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     null,
                     PluginHash::create('sha-1', 'old-checksum'),
                 ),
-                'new' => $this->mockPluginVersion(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPluginVersion(
                     'tool-name',
                     '1.0.0',
                     null,
@@ -135,7 +136,7 @@ final class VersionChangedDiffTest extends TestCase
                     + url:https://example.org/new.phar.asc
 
                 EOF,
-                'old' => $this->mockPhpFilePluginVersionInterface(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -143,7 +144,7 @@ final class VersionChangedDiffTest extends TestCase
                     null,
                     null,
                 ),
-                'new' => $this->mockPhpFilePluginVersionInterface(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -160,7 +161,7 @@ final class VersionChangedDiffTest extends TestCase
                     + url:https://example.org/new.phar.asc
 
                 EOF,
-                'old' => $this->mockPhpFilePluginVersionInterface(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -168,7 +169,7 @@ final class VersionChangedDiffTest extends TestCase
                     null,
                     'https://example.org/old.phar.asc',
                 ),
-                'new' => $this->mockPhpFilePluginVersionInterface(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -184,7 +185,7 @@ final class VersionChangedDiffTest extends TestCase
                     - url:https://example.org/old.phar.asc
 
                 EOF,
-                'old' => $this->mockPhpFilePluginVersionInterface(
+                'old' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -192,7 +193,7 @@ final class VersionChangedDiffTest extends TestCase
                     null,
                     'https://example.org/old.phar.asc',
                 ),
-                'new' => $this->mockPhpFilePluginVersionInterface(
+                'new' => fn(VersionChangedDiffTest $test) => $test->mockPhpFilePluginVersionInterface(
                     'tool-name',
                     '1.0.0',
                     'code',
@@ -204,18 +205,14 @@ final class VersionChangedDiffTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider compareTestProvider
-     */
+    #[DataProvider('compareTestProvider')]
     public function testProcessesCorrectly(
         string $expected,
-        PluginVersionInterface $oldVersion,
-        PluginVersionInterface $newVersion
+        callable $old,
+        callable $new
     ): void {
-        $this->assertInstanceOf(
-            PluginVersionChangedDiff::class,
-            $diff = PluginVersionChangedDiff::diff($oldVersion, $newVersion)
-        );
+        $diff = PluginVersionChangedDiff::diff($old($this), $new($this));
+        $this->assertInstanceOf(PluginVersionChangedDiff::class, $diff);
         $this->assertSame('tool-name', $diff->getName());
         $this->assertSame('1.0.0', $diff->getVersion());
 

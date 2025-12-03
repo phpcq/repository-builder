@@ -10,12 +10,11 @@ use Phpcq\RepositoryDefinition\Tool\ToolHash;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\JsonRepositoryWriter
- */
+#[CoversClass(JsonRepositoryWriter::class)]
 final class JsonRepositoryWriterTest extends TestCase
 {
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
@@ -71,7 +70,7 @@ final class JsonRepositoryWriterTest extends TestCase
             'https://example.org/another-2.0.0.phar.sig',
         ));
 
-        $tempDir = sys_get_temp_dir() . '/' . uniqid();
+        $tempDir = sys_get_temp_dir() . '/' . uniqid(more_entropy: false);
         $fileSystem = new Filesystem();
         $fileSystem->mkdir($tempDir);
         $fileSystem->dumpFile($tempDir . '/file-to-remove.txt', 'This file shall get removed');
@@ -164,7 +163,7 @@ final class JsonRepositoryWriterTest extends TestCase
                         ],
                     ],
                 ],
-            ], json_decode(file_get_contents($tempDir . '/repository.json'), true));
+            ], json_decode(file_get_contents($tempDir . '/repository.json'), true, 512, JSON_THROW_ON_ERROR));
         } finally {
             $fileSystem->remove($tempDir);
         }
@@ -172,6 +171,6 @@ final class JsonRepositoryWriterTest extends TestCase
 
     private function assertRepositoryFileMatches(array $data, string $filePath): void
     {
-        $this->assertSame($data, json_decode(file_get_contents($filePath), true));
+        $this->assertSame($data, json_decode(file_get_contents($filePath), true, 512, JSON_THROW_ON_ERROR));
     }
 }

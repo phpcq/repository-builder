@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait;
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginChangedDiff;
 use Phpcq\RepositoryDefinition\Plugin\Plugin;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectChangedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginChangedDiff
- */
+#[CoversClass(ObjectChangedDiffTrait::class)]
+#[CoversClass(ObjectDiffTrait::class)]
+#[CoversClass(PluginChangedDiff::class)]
 final class PluginChangedDiffTest extends TestCase
 {
     use PluginDiffTrait;

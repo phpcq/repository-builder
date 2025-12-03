@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Tool;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolVersionChangedDiff;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
 use Phpcq\RepositoryDefinition\Tool\ToolHash;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionChangedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolVersionChangedDiff
- */
+#[CoversClass(VersionChangedDiffTrait::class)]
+#[CoversClass(VersionDiffTrait::class)]
+#[CoversClass(ToolVersionChangedDiff::class)]
 final class VersionChangedDiffTest extends TestCase
 {
     public function testIgnoresEmptyDiff(): void
@@ -36,7 +38,7 @@ final class VersionChangedDiffTest extends TestCase
     }
 
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
-    public function compareTestProvider(): array
+    public static function compareTestProvider(): array
     {
         $requirementsOld = new ToolRequirements();
         $requirementsOld->getPhpRequirements()->add(new VersionRequirement('php', '^7.3'));
@@ -147,14 +149,12 @@ final class VersionChangedDiffTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider compareTestProvider
-     */
-    public function testProcessesCorrectly(string $expected, ToolVersion $oldVersion, ToolVersion $newVersion): void
+    #[DataProvider('compareTestProvider')]
+    public function testProcessesCorrectly(string $expected, ToolVersion $old, ToolVersion $new): void
     {
         $this->assertInstanceOf(
             ToolVersionChangedDiff::class,
-            $diff = ToolVersionChangedDiff::diff($oldVersion, $newVersion)
+            $diff = ToolVersionChangedDiff::diff($old, $new)
         );
         $this->assertSame('tool-name', $diff->getName());
         $this->assertSame('1.0.0', $diff->getVersion());

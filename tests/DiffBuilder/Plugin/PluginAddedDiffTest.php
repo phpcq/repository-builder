@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectAddedDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait;
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginAddedDiff;
 use Phpcq\RepositoryDefinition\Plugin\Plugin;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectAddedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginAddedDiff
- */
+#[CoversClass(ObjectAddedDiffTrait::class)]
+#[CoversClass(ObjectDiffTrait::class)]
+#[CoversClass(PluginAddedDiff::class)]
 final class PluginAddedDiffTest extends TestCase
 {
     use PluginDiffTrait;

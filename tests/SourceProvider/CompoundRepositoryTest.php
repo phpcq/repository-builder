@@ -11,25 +11,27 @@ use Phpcq\RepositoryBuilder\SourceProvider\PluginVersionProvidingRepositoryInter
 use Phpcq\RepositoryBuilder\SourceProvider\SourceRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionEnrichingRepositoryInterface;
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryInterface;
+use Phpcq\RepositoryBuilder\Test\ConsecutiveAssertTrait;
 use Phpcq\RepositoryBuilder\Test\SourceProvider\MockRepositoryInterface\PluginVersionProvidingInterface;
 use Phpcq\RepositoryBuilder\Test\SourceProvider\MockRepositoryInterface\ToolVersionEnrichingInterface;
 use Phpcq\RepositoryBuilder\Test\SourceProvider\MockRepositoryInterface\ToolVersionProvidingInterface;
 use Phpcq\RepositoryDefinition\Plugin\PluginVersionInterface;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Stub\ReturnCallback;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\SourceProvider\CompoundRepository
- *
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
- */
+/** @SuppressWarnings(PHPMD.TooManyPublicMethods) */
+#[CoversClass(CompoundRepository::class)]
 class CompoundRepositoryTest extends TestCase
 {
+    use ConsecutiveAssertTrait;
+
     public function testThrowsOnUnsupported(): void
     {
-        $mock = $this->getMockForAbstractClass(SourceRepositoryInterface::class);
+        $mock = $this->getMockBuilder(SourceRepositoryInterface::class)->getMock();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown provider type ' . get_class($mock));
@@ -39,41 +41,57 @@ class CompoundRepositoryTest extends TestCase
 
     public function testAcceptsPluginProvider(): void
     {
-        new CompoundRepository($this->getMockForAbstractClass(PluginVersionProvidingInterface::class));
+        new CompoundRepository($this->getMockBuilder(PluginVersionProvidingInterface::class)->getMock());
 
         $this->addToAssertionCount(1);
     }
 
     public function testAcceptsToolProvider(): void
     {
-        new CompoundRepository($this->getMockForAbstractClass(ToolVersionProvidingInterface::class));
+        new CompoundRepository($this->getMockBuilder(ToolVersionProvidingInterface::class)->getMock());
 
         $this->addToAssertionCount(1);
     }
 
     public function testAcceptsEnrichingProvider(): void
     {
-        new CompoundRepository($this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class));
+        new CompoundRepository($this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock());
 
         $this->addToAssertionCount(1);
     }
 
-    public function isFreshProvider(): array
+    public static function isFreshProvider(): array
     {
-        $pluginTrue = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-        $pluginTrue->method('isFresh')->willReturn(true);
-        $pluginFalse = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-        $pluginFalse->method('isFresh')->willReturn(false);
-
-        $toolTrue = $this->getMockForAbstractClass(ToolVersionProvidingInterface::class);
-        $toolTrue->method('isFresh')->willReturn(true);
-        $toolFalse = $this->getMockForAbstractClass(ToolVersionProvidingInterface::class);
-        $toolFalse->method('isFresh')->willReturn(false);
-
-        $enrichingTrue = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $enrichingTrue->method('isFresh')->willReturn(true);
-        $enrichingFalse = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $enrichingFalse->method('isFresh')->willReturn(false);
+        $pluginTrue = static function (TestCase $test) {
+            $pluginTrue = $test->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+            $pluginTrue->method('isFresh')->willReturn(true);
+            return $pluginTrue;
+        };
+        $pluginFalse = static function (TestCase $test) {
+            $pluginFalse = $test->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+            $pluginFalse->method('isFresh')->willReturn(false);
+            return $pluginFalse;
+        };
+        $toolTrue = static function (TestCase $test) {
+            $toolTrue = $test->getMockBuilder(ToolVersionProvidingInterface::class)->getMock();
+            $toolTrue->method('isFresh')->willReturn(true);
+            return $toolTrue;
+        };
+        $toolFalse = static function (TestCase $test) {
+            $toolFalse = $test->getMockBuilder(ToolVersionProvidingInterface::class)->getMock();
+            $toolFalse->method('isFresh')->willReturn(false);
+            return $toolFalse;
+        };
+        $enrichingTrue = static function (TestCase $test) {
+            $enrichingTrue = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+            $enrichingTrue->method('isFresh')->willReturn(true);
+            return $enrichingTrue;
+        };
+        $enrichingFalse = static function (TestCase $test) {
+            $enrichingFalse = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+            $enrichingFalse->method('isFresh')->willReturn(false);
+            return $enrichingFalse;
+        };
 
         return [
             'without children' => [
@@ -120,10 +138,10 @@ class CompoundRepositoryTest extends TestCase
         ];
     }
 
-    /** @dataProvider isFreshProvider */
+    #[DataProvider('isFreshProvider')]
     public function testIsFresh(bool $expected, array $repositories): void
     {
-        $compound = new CompoundRepository(...$repositories);
+        $compound = new CompoundRepository(...array_map(fn($callback) => $callback($this), $repositories));
 
         self::assertSame($expected, $compound->isFresh());
     }
@@ -132,22 +150,22 @@ class CompoundRepositoryTest extends TestCase
     {
         $repositories = [];
         for ($i = 0; $i < 2; $i++) {
-            $repository = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-            $repository->expects(self::once())->method('refresh');
+            $repository = $this->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+            $repository->expects($this->once())->method('refresh');
 
             $repositories[] = $repository;
         }
 
         for ($i = 0; $i < 2; $i++) {
-            $repository = $this->getMockForAbstractClass(ToolVersionProvidingInterface::class);
-            $repository->expects(self::once())->method('refresh');
+            $repository = $this->getMockBuilder(ToolVersionProvidingInterface::class)->getMock();
+            $repository->expects($this->once())->method('refresh');
 
             $repositories[] = $repository;
         }
 
         for ($i = 0; $i < 2; $i++) {
-            $repository = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-            $repository->expects(self::once())->method('refresh');
+            $repository = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+            $repository->expects($this->once())->method('refresh');
 
             $repositories[] = $repository;
         }
@@ -157,64 +175,63 @@ class CompoundRepositoryTest extends TestCase
         $compound->refresh();
     }
 
-    public function supportsProvider(): array
+    public static function supportsProvider(): array
     {
-        $version = $this->getMockForAbstractClass(ToolVersionInterface::class);
 
         return [
             'without children' => [
                 'expected' => false,
-                'version' => $version,
-                'repositories' => [],
+                'repositories' => function (TestCase $test): array {
+                    return [];
+                },
             ],
             'short circuit after first true' => [
                 'expected' => true,
-                'version' => $version,
-                'repositories' => Closure::fromCallable(function (): array {
-                    $true = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-                    $true->expects(self::once())->method('supports')->willReturn(true);
-                    $never = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-                    $never->expects(self::never())->method('supports');
+                'repositories' => function (TestCase $test): array {
+                    $true = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+                    $true->expects($test->once())->method('supports')->willReturn(true);
+                    $never = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+                    $never->expects($test->never())->method('supports');
 
                     return [$true, $never];
-                })->__invoke(),
+                },
             ],
             'false if none matches' => [
                 'expected' => false,
-                'version' => $version,
-                'repositories' => Closure::fromCallable(function (): array {
-                    $false1 = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-                    $false1->expects(self::once())->method('supports')->willReturn(false);
-                    $false2 = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-                    $false2->expects(self::once())->method('supports')->willReturn(false);
+                'repositories' => function (TestCase $test): array {
+                    $false1 = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+                    $false1->expects($test->once())->method('supports')->willReturn(false);
+                    $false2 = $test->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+                    $false2->expects($test->once())->method('supports')->willReturn(false);
 
                     return [$false1, $false2];
-                })->__invoke(),
+                },
             ],
         ];
     }
 
-    /** @dataProvider supportsProvider */
-    public function testSupports(bool $expected, ToolVersionInterface $version, array $repositories): void
+    #[DataProvider('supportsProvider')]
+    public function testSupports(bool $expected, callable $repositories): void
     {
-        $compound = new CompoundRepository(...$repositories);
+        $version = $this->getMockBuilder(ToolVersionInterface::class)->getMock();
+        $compound = new CompoundRepository(...$repositories($this));
 
         self::assertSame($expected, $compound->supports($version));
     }
 
     public function testEnrichCallsAllSupportingProviders(): void
     {
-        $version = $this->getMockForAbstractClass(ToolVersionInterface::class);
+        $version = $this->getMockBuilder(ToolVersionInterface::class)->getMock();
 
-        $supporting1 = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $supporting1->expects(self::once())->method('supports')->with($version)->willReturn(true);
-        $supporting1->expects(self::once())->method('enrich')->with($version);
-        $unsupporting = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $unsupporting->expects(self::once())->method('supports')->willReturn(false);
-        $unsupporting->expects(self::never())->method('enrich');
-        $supporting2 = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $supporting2->expects(self::once())->method('supports')->with($version)->willReturn(true);
-        $supporting2->expects(self::once())->method('enrich')->with($version);
+        $supporting1 = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+        $supporting1->expects($this->once())->method('supports')->with($version)->willReturn(true);
+        $supporting1->expects($this->once())->method('enrich')->with($version);
+        $unsupporting = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+        $unsupporting->expects($this->once())->method('supports')->willReturn(false);
+        $unsupporting->expects($this->never())->method('enrich');
+        $supporting2 = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+        $supporting2->expects($this->once())->method('supports')->with($version)->willReturn(true);
+        $supporting2->expects($this->once())->method('enrich')->with($version);
 
         $repositories = [$supporting1, $unsupporting, $supporting2];
 
@@ -225,23 +242,34 @@ class CompoundRepositoryTest extends TestCase
     public function testIterateTools(): void
     {
         $versions = [
-            $version1 = $this->getMockForAbstractClass(ToolVersionInterface::class),
-            $version2 = $this->getMockForAbstractClass(ToolVersionInterface::class),
-            $version3 = $this->getMockForAbstractClass(ToolVersionInterface::class),
-            $version4 = $this->getMockForAbstractClass(ToolVersionInterface::class),
+            $version1 = $this->getMockBuilder(ToolVersionInterface::class)->getMock(),
+            $version2 = $this->getMockBuilder(ToolVersionInterface::class)->getMock(),
+            $version3 = $this->getMockBuilder(ToolVersionInterface::class)->getMock(),
+            $version4 = $this->getMockBuilder(ToolVersionInterface::class)->getMock(),
         ];
 
-        $provider1 = $this->getMockForAbstractClass(ToolVersionProvidingRepositoryInterface::class);
-        $provider1->expects(self::once())->method('getToolIterator')->will($this->generate($version1, $version2));
-        $provider2 = $this->getMockForAbstractClass(ToolVersionProvidingRepositoryInterface::class);
-        $provider2->expects(self::once())->method('getToolIterator')->will($this->generate($version3, $version4));
+        $provider1 = $this->getMockBuilder(ToolVersionProvidingRepositoryInterface::class)->getMock();
+        $provider1->expects($this->once())->method('getToolIterator')->will($this->generate($version1, $version2));
+        $provider2 = $this->getMockBuilder(ToolVersionProvidingRepositoryInterface::class)->getMock();
+        $provider2->expects($this->once())->method('getToolIterator')->will($this->generate($version3, $version4));
 
-        $versionArgs = array_map(function (ToolVersionInterface $version): array {
-            return [$version];
-        }, $versions);
-        $enricher = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
-        $enricher->expects(self::exactly(4))->method('supports')->withConsecutive(...$versionArgs)->willReturn(true);
-        $enricher->expects(self::exactly(4))->method('enrich')->withConsecutive(...$versionArgs);
+        $versionArgs2 = array_map(
+            static fn (ToolVersionInterface $version): array => ['arguments' => [$version], 'return' => true],
+            $versions
+        );
+        $versionArgs3 = array_map(
+            static fn (ToolVersionInterface $version): array => ['arguments' => [$version]],
+            $versions
+        );
+        $enricher = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
+        $enricher
+            ->expects($this->exactly(4))
+            ->method('supports')
+            ->will($this->handleConsecutive(...$versionArgs2));
+        $enricher
+            ->expects($this->exactly(4))
+            ->method('enrich')
+            ->will($this->handleConsecutive(...$versionArgs3));
 
         $compound = new CompoundRepository($provider1, $provider2, $enricher);
 
@@ -251,16 +279,16 @@ class CompoundRepositoryTest extends TestCase
     public function testIteratePlugins(): void
     {
         $versions = [
-            $version1 = $this->getMockForAbstractClass(PluginVersionInterface::class),
-            $version2 = $this->getMockForAbstractClass(PluginVersionInterface::class),
-            $version3 = $this->getMockForAbstractClass(PluginVersionInterface::class),
-            $version4 = $this->getMockForAbstractClass(PluginVersionInterface::class),
+            $version1 = $this->getMockBuilder(PluginVersionInterface::class)->getMock(),
+            $version2 = $this->getMockBuilder(PluginVersionInterface::class)->getMock(),
+            $version3 = $this->getMockBuilder(PluginVersionInterface::class)->getMock(),
+            $version4 = $this->getMockBuilder(PluginVersionInterface::class)->getMock(),
         ];
 
-        $provider1 = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-        $provider1->expects(self::once())->method('getPluginIterator')->will($this->generate($version1, $version2));
-        $provider2 = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-        $provider2->expects(self::once())->method('getPluginIterator')->will($this->generate($version3, $version4));
+        $provider1 = $this->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+        $provider1->expects($this->once())->method('getPluginIterator')->will($this->generate($version1, $version2));
+        $provider2 = $this->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+        $provider2->expects($this->once())->method('getPluginIterator')->will($this->generate($version3, $version4));
 
         $compound = new CompoundRepository($provider1, $provider2);
 
@@ -269,15 +297,15 @@ class CompoundRepositoryTest extends TestCase
 
     public function testSetLogger(): void
     {
-        $logger = $this->getMockForAbstractClass(LoggerInterface::class);
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
 
         $repositories = [];
         for ($i = 0; $i < 3; $i++) {
             if ($i === 1) {
-                $repository = $this->getMockForAbstractClass(PluginVersionProvidingRepositoryInterface::class);
+                $repository = $this->getMockBuilder(PluginVersionProvidingRepositoryInterface::class)->getMock();
             } else {
-                $repository = $this->getMockForAbstractClass(PluginVersionProvidingInterface::class);
-                $repository->expects(self::once())->method('setLogger')->with($logger);
+                $repository = $this->getMockBuilder(PluginVersionProvidingInterface::class)->getMock();
+                $repository->expects($this->once())->method('setLogger')->with($logger);
             }
 
             $repositories[] = $repository;
@@ -285,10 +313,10 @@ class CompoundRepositoryTest extends TestCase
 
         for ($i = 0; $i < 3; $i++) {
             if ($i === 1) {
-                $repository = $this->getMockForAbstractClass(ToolVersionProvidingRepositoryInterface::class);
+                $repository = $this->getMockBuilder(ToolVersionProvidingRepositoryInterface::class)->getMock();
             } else {
-                $repository = $this->getMockForAbstractClass(ToolVersionProvidingInterface::class);
-                $repository->expects(self::once())->method('setLogger')->with($logger);
+                $repository = $this->getMockBuilder(ToolVersionProvidingInterface::class)->getMock();
+                $repository->expects($this->once())->method('setLogger')->with($logger);
             }
 
             $repositories[] = $repository;
@@ -296,10 +324,10 @@ class CompoundRepositoryTest extends TestCase
 
         for ($i = 0; $i < 3; $i++) {
             if ($i === 1) {
-                $repository = $this->getMockForAbstractClass(ToolVersionEnrichingRepositoryInterface::class);
+                $repository = $this->getMockBuilder(ToolVersionEnrichingRepositoryInterface::class)->getMock();
             } else {
-                $repository = $this->getMockForAbstractClass(ToolVersionEnrichingInterface::class);
-                $repository->expects(self::once())->method('setLogger')->with($logger);
+                $repository = $this->getMockBuilder(ToolVersionEnrichingInterface::class)->getMock();
+                $repository->expects($this->once())->method('setLogger')->with($logger);
             }
 
             $repositories[] = $repository;
@@ -312,7 +340,7 @@ class CompoundRepositoryTest extends TestCase
 
     protected function generate(...$values): ReturnCallback
     {
-        return $this->returnCallback(function () use ($values) {
+        return new ReturnCallback(static function () use ($values) {
             foreach ($values as $value) {
                 yield $value;
             }

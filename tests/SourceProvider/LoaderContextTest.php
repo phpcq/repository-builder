@@ -6,15 +6,16 @@ namespace Phpcq\RepositoryBuilder\Test\SourceProvider;
 
 use Phpcq\RepositoryBuilder\SourceProvider\LoaderContext;
 use Phpcq\RepositoryBuilder\SourceProvider\RepositoryLoader;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\LoaderContext */
+#[CoversClass(LoaderContext::class)]
 class LoaderContextTest extends TestCase
 {
     public function testCreate(): void
     {
-        $loader  = new RepositoryLoader($this->getMockForAbstractClass(ContainerInterface::class));
+        $loader  = new RepositoryLoader($this->getMockBuilder(ContainerInterface::class)->getMock());
         $context = LoaderContext::create($loader);
 
         self::assertSame($loader, $context->getLoader(), 'Should set loader');
@@ -26,7 +27,7 @@ class LoaderContextTest extends TestCase
 
     public function testWithTool(): void
     {
-        $loader      = new RepositoryLoader($this->getMockForAbstractClass(ContainerInterface::class));
+        $loader      = new RepositoryLoader($this->getMockBuilder(ContainerInterface::class)->getMock());
         $baseContext = LoaderContext::create($loader);
         $context     = $baseContext->withTool('super-tool', '^1.0');
 
@@ -40,7 +41,7 @@ class LoaderContextTest extends TestCase
 
     public function testWithOutTool(): void
     {
-        $loader      = new RepositoryLoader($this->getMockForAbstractClass(ContainerInterface::class));
+        $loader      = new RepositoryLoader($this->getMockBuilder(ContainerInterface::class)->getMock());
         $baseContext = LoaderContext::create($loader)->withTool('super-tool', '^1.0');
         $context     = $baseContext->withoutTool();
 
@@ -54,7 +55,7 @@ class LoaderContextTest extends TestCase
 
     public function testWithPlugin(): void
     {
-        $loader      = new RepositoryLoader($this->getMockForAbstractClass(ContainerInterface::class));
+        $loader      = new RepositoryLoader($this->getMockBuilder(ContainerInterface::class)->getMock());
         $baseContext = LoaderContext::create($loader);
         $context     = $baseContext->withPlugin('super-plugin', '^2.0');
 
@@ -68,7 +69,7 @@ class LoaderContextTest extends TestCase
 
     public function testWithOutPlugin(): void
     {
-        $loader      = new RepositoryLoader($this->getMockForAbstractClass(ContainerInterface::class));
+        $loader      = new RepositoryLoader($this->getMockBuilder(ContainerInterface::class)->getMock());
         $baseContext = LoaderContext::create($loader)->withPlugin('super-plugin', '^2.0');
         $context     = $baseContext->withoutPlugin();
 

@@ -6,9 +6,10 @@ namespace Phpcq\RepositoryBuilder\Test\SourceProvider\Plugin\Github;
 
 use Phpcq\RepositoryBuilder\Api\GithubClient;
 use Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonLoader;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Plugin\Github\JsonLoader */
+#[CoversClass(JsonLoader::class)]
 final class JsonLoaderTest extends TestCase
 {
     public function testLoadingSucceeds(): void
@@ -20,9 +21,9 @@ final class JsonLoaderTest extends TestCase
         ];
         $githubClient = $this->getMockBuilder(GithubClient::class)->disableOriginalConstructor()->getMock();
         $githubClient
-            ->expects(self::never())->method('fetchFile');
+            ->expects($this->never())->method('fetchFile');
         $githubClient
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('fetchTags')
             ->with('repository-name')
             ->willReturn($contents);
