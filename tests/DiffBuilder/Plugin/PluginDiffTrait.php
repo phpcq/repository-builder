@@ -34,7 +34,7 @@ trait PluginDiffTrait
         ?PluginHash $hash = null,
         string $apiVersion = '1.0.0'
     ): PluginVersionInterface {
-        $plugVersion = $this->getMockForAbstractClass(PluginVersionInterface::class);
+        $plugVersion = $this->getMockBuilder(PluginVersionInterface::class)->getMock();
         $plugVersion->method('getName')->willReturn($name);
         $plugVersion->method('getApiVersion')->willReturn($apiVersion);
         $plugVersion->method('getVersion')->willReturn($version);
@@ -56,7 +56,7 @@ trait PluginDiffTrait
         ?string $signaturePath = '/path/to/signature',
         string $apiVersion = '1.0.0'
     ): PhpFilePluginVersionInterface {
-        $plugVersion = $this->getMockForAbstractClass(PhpFilePluginVersionInterface::class);
+        $plugVersion = $this->getMockBuilder(PhpFilePluginVersionInterface::class)->getMock();
         $plugVersion->method('getName')->willReturn($name);
         $plugVersion->method('getApiVersion')->willReturn($apiVersion);
         $plugVersion->method('getVersion')->willReturn($version);

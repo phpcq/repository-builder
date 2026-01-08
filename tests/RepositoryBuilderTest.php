@@ -14,13 +14,15 @@ use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionProvidingRepositoryIn
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\Tool\ToolVersionInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\RepositoryBuilder
- */
+#[CoversClass(RepositoryBuilder::class)]
 final class RepositoryBuilderTest extends TestCase
 {
+    use ConsecutiveAssertTrait;
+
+    /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
     public function testBuild(): void
     {
         $versionProvider1 = $this->createMock(ToolVersionProvidingRepositoryInterface::class);
@@ -61,33 +63,45 @@ final class RepositoryBuilderTest extends TestCase
         $enrichingProvider2 = $this->createMock(ToolVersionEnrichingRepositoryInterface::class);
 
         $enrichingProvider1
-            ->expects(self::exactly(4))
+            ->expects($this->exactly(4))
             ->method('supports')
-            ->withConsecutive(
-                [$version11],
-                [$version12],
-                [$version21],
-                [$version22],
-            )
-            ->willReturnOnConsecutiveCalls(true, false, true, false);
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => [$version11], 'return' => true],
+                    ['arguments' => [$version12], 'return' => false],
+                    ['arguments' => [$version21], 'return' => true],
+                    ['arguments' => [$version22], 'return' => false],
+                )
+            );
         $enrichingProvider1
-            ->expects(self::exactly(2))
+            ->expects($this->exactly(2))
             ->method('enrich')
-            ->withConsecutive([$version11], [$version21]);
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => [$version11]],
+                    ['arguments' => [$version21]],
+                )
+            );
         $enrichingProvider2
-            ->expects(self::exactly(4))
+            ->expects($this->exactly(4))
             ->method('supports')
-            ->withConsecutive(
-                [$version11],
-                [$version12],
-                [$version21],
-                [$version22],
-            )
-            ->willReturnOnConsecutiveCalls(false, true, false, true);
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => [$version11], 'return' => false],
+                    ['arguments' => [$version12], 'return' => false],
+                    ['arguments' => [$version21], 'return' => true],
+                    ['arguments' => [$version22], 'return' => true],
+                )
+            );
         $enrichingProvider2
-            ->expects(self::exactly(2))
+            ->expects($this->exactly(2))
             ->method('enrich')
-            ->withConsecutive([$version21], [$version22]);
+            ->will(
+                $this->handleConsecutive(
+                    ['arguments' => [$version21]],
+                    ['arguments' => [$version22]],
+                )
+            );
 
         $writer  = $this->createMock(JsonRepositoryWriter::class);
         $builder = new RepositoryBuilder(
@@ -116,7 +130,7 @@ final class RepositoryBuilderTest extends TestCase
     public function testMultiPurposeProvider(): void
     {
         $writer  = $this->createMock(JsonRepositoryWriter::class);
-        $provider = $this->getMockForAbstractClass(ToolVersionProvidingAndEnrichingRepositoryInterface::class);
+        $provider = $this->getMockBuilder(ToolVersionProvidingAndEnrichingRepositoryInterface::class)->getMock();
         $builder = new RepositoryBuilder(new CompoundRepository($provider), $writer);
 
         $version = $this->createMock(ToolVersionInterface::class);
@@ -136,7 +150,7 @@ final class RepositoryBuilderTest extends TestCase
     public function testThrowForUnsupportedRepositoryProvider(): void
     {
         $writer  = $this->createMock(JsonRepositoryWriter::class);
-        $provider = $this->getMockForAbstractClass(SourceRepositoryInterface::class);
+        $provider = $this->getMockBuilder(SourceRepositoryInterface::class)->getMock();
 
         $this->expectException(InvalidArgumentException::class);
         new RepositoryBuilder(new CompoundRepository($provider), $writer);

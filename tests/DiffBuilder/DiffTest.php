@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder;
 
 use Closure;
+use Generator;
 use Phpcq\RepositoryBuilder\DiffBuilder\Diff;
 use Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin\PluginDiffTrait;
-use Phpcq\RepositoryDefinition\Plugin\PhpFilePluginVersion;
 use Phpcq\RepositoryDefinition\Plugin\Plugin;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
@@ -16,11 +16,11 @@ use Phpcq\RepositoryDefinition\Tool\ToolHash;
 use Phpcq\RepositoryDefinition\Tool\ToolRequirements;
 use Phpcq\RepositoryDefinition\Tool\ToolVersion;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Diff
- */
+#[CoversClass(Diff::class)]
 final class DiffTest extends TestCase
 {
     use PluginDiffTrait;
@@ -266,7 +266,7 @@ final class DiffTest extends TestCase
     }
 
     /** @SuppressWarnings(PHPMD.ExcessiveMethodLength) */
-    public function asStringProvider(): \Generator
+    public static function asStringProvider(): Generator
     {
         yield 'New tool added' => [
             'expected' => <<<EOF
@@ -278,12 +278,12 @@ final class DiffTest extends TestCase
                       Added version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $tool = new Tool('tool-name');
                 $tool->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
                 return Diff::created([], ['tool-name' => $tool]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Old tool removed' => [
             'expected' => <<<EOF
@@ -295,12 +295,12 @@ final class DiffTest extends TestCase
                       Removed version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $tool = new Tool('tool-name');
                 $tool->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
                 return Diff::removed([], ['tool-name' => $tool]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Only one version has been added' => [
             'expected' => <<<EOF
@@ -312,14 +312,14 @@ final class DiffTest extends TestCase
                       Added version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $toolOld = new Tool('tool-name');
                 $toolNew = new Tool('tool-name');
 
                 $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
                 return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Only one version has been removed' => [
             'expected' => <<<EOF
@@ -331,14 +331,14 @@ final class DiffTest extends TestCase
                       Removed version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $toolOld = new Tool('tool-name');
                 $toolNew = new Tool('tool-name');
 
                 $toolOld->addVersion(new ToolVersion('tool-name', '1.0.0', null, null, null, null));
 
                 return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Only one version has been changed' => [
             'expected' => <<<EOF
@@ -352,7 +352,7 @@ final class DiffTest extends TestCase
                           + changed
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $toolOld = new Tool('tool-name');
                 $toolNew = new Tool('tool-name');
 
@@ -360,7 +360,7 @@ final class DiffTest extends TestCase
                 $toolNew->addVersion(new ToolVersion('tool-name', '1.0.0', 'changed', null, null, null));
 
                 return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Multiple changes have happened for one tool' => [
             'expected' => <<<EOF
@@ -381,7 +381,7 @@ final class DiffTest extends TestCase
                           + changed
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $toolOld = new Tool('tool-name');
                 $toolNew = new Tool('tool-name');
 
@@ -400,7 +400,7 @@ final class DiffTest extends TestCase
                 $toolNew->addVersion(new ToolVersion('tool-name', '2.0.1', 'changed', null, null, null));
 
                 return Diff::diff([], [], ['tool-name' => $toolOld], ['tool-name' => $toolNew]);
-            })->__invoke(),
+            })(),
         ];
         yield 'Two tools changed' => [
             'expected' => <<<EOF
@@ -414,7 +414,7 @@ final class DiffTest extends TestCase
                       Added version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $tool1Old = new Tool('tool-name-1');
                 $tool1New = new Tool('tool-name-1');
                 $tool2Old = new Tool('tool-name-2');
@@ -429,7 +429,7 @@ final class DiffTest extends TestCase
                     ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old],
                     ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New]
                 );
-            })->__invoke(),
+            })(),
         ];
         yield 'Up to 3 tools changed' => [
             'expected' => <<<EOF
@@ -445,7 +445,7 @@ final class DiffTest extends TestCase
                       Added version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $tool1Old = new Tool('tool-name-1');
                 $tool1New = new Tool('tool-name-1');
                 $tool2Old = new Tool('tool-name-2');
@@ -463,7 +463,7 @@ final class DiffTest extends TestCase
                     ['tool-name-1' => $tool1Old, 'tool-name-2' => $tool2Old, 'tool-name-3' => $tool3Old],
                     ['tool-name-1' => $tool1New, 'tool-name-2' => $tool2New, 'tool-name-3' => $tool3New]
                 );
-            })->__invoke(),
+            })(),
         ];
         yield 'More than 3 tools changed' => [
             'expected' => <<<EOF
@@ -481,7 +481,7 @@ final class DiffTest extends TestCase
                       Added version 1.0.0
 
                 EOF,
-            'changes' => Closure::fromCallable(function () {
+            'changes' => (static function () {
                 $tool1Old = new Tool('tool-name-1');
                 $tool1New = new Tool('tool-name-1');
                 $tool2Old = new Tool('tool-name-2');
@@ -512,13 +512,11 @@ final class DiffTest extends TestCase
                         'tool-name-4' => $tool4New
                     ]
                 );
-            })->__invoke(),
+            })(),
         ];
     }
 
-    /**
-     * @dataProvider asStringProvider
-     */
+    #[DataProvider('asStringProvider')]
     public function testAsString(string $expected, Diff $changes): void
     {
         self::assertSame($expected, $changes->asString(''));

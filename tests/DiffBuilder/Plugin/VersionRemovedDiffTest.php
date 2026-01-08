@@ -6,16 +6,17 @@ namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Plugin;
 
 use Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginVersionRemovedDiff;
 use Phpcq\RepositoryBuilder\DiffBuilder\PropertyDifference;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\VersionRemovedDiffTrait;
 use Phpcq\RepositoryDefinition\Plugin\PluginHash;
 use Phpcq\RepositoryDefinition\Plugin\PluginRequirements;
 use Phpcq\RepositoryDefinition\VersionRequirement;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\VersionRemovedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Plugin\PluginVersionRemovedDiff
- */
+#[CoversClass(VersionDiffTrait::class)]
+#[CoversClass(VersionRemovedDiffTrait::class)]
+#[CoversClass(PluginVersionRemovedDiff::class)]
 final class VersionRemovedDiffTest extends TestCase
 {
     use PluginDiffTrait;

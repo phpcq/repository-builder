@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Phpcq\RepositoryBuilder\Test\DiffBuilder\Tool;
 
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait;
+use Phpcq\RepositoryBuilder\DiffBuilder\ObjectRemovedDiffTrait;
 use Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolRemovedDiff;
 use Phpcq\RepositoryDefinition\Tool\Tool;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\ObjectRemovedDiffTrait
- * @covers \Phpcq\RepositoryBuilder\DiffBuilder\Tool\ToolRemovedDiff
- */
+#[CoversClass(ObjectDiffTrait::class)]
+#[CoversClass(ObjectRemovedDiffTrait::class)]
+#[CoversClass(ToolRemovedDiff::class)]
 final class ToolRemovedDiffTest extends TestCase
 {
     use ToolDiffTrait;

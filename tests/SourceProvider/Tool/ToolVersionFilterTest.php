@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Phpcq\RepositoryBuilder\Test\SourceProvider\Tool;
 
 use Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-/** @covers \Phpcq\RepositoryBuilder\SourceProvider\Tool\ToolVersionFilter */
+#[CoversClass(ToolVersionFilter::class)]
 final class ToolVersionFilterTest extends TestCase
 {
     public function testToolNameGetterReturnsToolName(): void
@@ -16,7 +18,7 @@ final class ToolVersionFilterTest extends TestCase
         $this->assertSame('tool', $filter->getToolName());
     }
 
-    public function versionProvider(): array
+    public static function versionProvider(): array
     {
         return [
             [
@@ -42,7 +44,7 @@ final class ToolVersionFilterTest extends TestCase
         ];
     }
 
-    /** @dataProvider versionProvider */
+    #[DataProvider('versionProvider')]
     public function testFiltersVersion(bool $expected, string $constraint, string $version): void
     {
         $filter = new ToolVersionFilter('tool', $constraint);
