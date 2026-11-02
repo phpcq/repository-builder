@@ -43,7 +43,7 @@
     "symfony/http-client": "^7.3",
     "symfony/http-client-contracts": "^3.7",
     "symfony/http-kernel": "^7.3",
-    "symfony/process": "^7.3",
+    "symfony/process": "^8.1",
     "symfony/yaml": "^7.4"
   },
   "require-dev": {
